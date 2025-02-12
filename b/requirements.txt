@@ -1,0 +1,11 @@
+azure-core==1.26.4
+azure-identity==1.17.1
+azure-keyvault-secrets==4.7.0
+azure-storage-blob==12.16.0
+Flask
+Flask-Cors
+Flask-SQLAlchemy
+gunicorn
+PyJWT
+python-dotenv
+requests
