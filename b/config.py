@@ -4,7 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import project_config
-import bespoke_funcs as bf
+import plannerPackage as pp
 from itsdangerous import URLSafeTimedSerializer
 
 #cwd
@@ -33,7 +33,7 @@ serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 params = sys.argv[1:]
 print("sys.argv: ", params)
 default_config_dict= {"--env":"dev", "--rdbms":"sqlite"}
-config_dict = bf.generate_config_dict(params, default_config_dict)
+config_dict = pp.generate_config_dict(params, default_config_dict)
 
 #instantiate database 
 db = SQLAlchemy(app)
