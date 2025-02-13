@@ -1,0 +1,1 @@
+from .bespoke_funcs import generate_config_dict
