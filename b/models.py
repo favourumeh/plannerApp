@@ -1,7 +1,10 @@
-from config import db
 from flask_login import UserMixin
 from typing import Dict
 from sqlalchemy.sql import func
+from flask_sqlalchemy import SQLAlchemy
+
+#instantiate the database instance 
+db = SQLAlchemy()
 
 class User(db.Model, UserMixin):
     "Defines the properties of the User entity such as id, username, password, email, date_added, last_updated, is_admin"

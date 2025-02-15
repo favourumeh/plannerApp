@@ -4,6 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import project_config
+from models import db
 import plannerPackage as pp
 from itsdangerous import URLSafeTimedSerializer
 
@@ -35,8 +36,8 @@ print("sys.argv: ", params)
 default_config_dict= {"--env":"dev", "--rdbms":"sqlite"}
 config_dict = pp.generate_config_dict(params, default_config_dict)
 
-#instantiate database 
-db = SQLAlchemy(app)
+#bind the database instance to flask app instance 
+db.init_app(app=app)
 
 #configure databse sqlite or az_mysql
 db_name = "planner_app_db"
