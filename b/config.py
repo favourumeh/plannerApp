@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-import project_config
 from models import db
 import plannerPackage as pp
 from itsdangerous import URLSafeTimedSerializer
@@ -15,12 +14,12 @@ cwd = os.getcwd().replace("\\", "/")
 load_dotenv()
 
 #draw secrets from key vault secret
-flask_app_secret_key = os.environ["flask_app_secret_key"]
+flask_app_secret_key = os.environ["flask_app_secret_key"] 
 
 #Create Flask app instance
 app = Flask(__name__)
 CORS(app, 
-     resources={"r/*":{"origins":project_config.allowed_origins}},
+     resources={"r/*":{"origins":pp.allowed_origins}},
      methods=["GET","POST","PATCH", "DELETE"],
      supports_credentials=True
 )
