@@ -6,6 +6,7 @@ from flask_cors import CORS
 from models import db
 import plannerPackage as pp
 from itsdangerous import URLSafeTimedSerializer
+from dotenv import load_dotenv
 
 #cwd
 cwd = os.getcwd().replace("\\", "/")
