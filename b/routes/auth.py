@@ -201,3 +201,31 @@ def refresh() -> Tuple[Response, int]:
     print("serialized access token",serialized_access_token)
     return resp, 200
 
+
+@auth.route("/delete/<int:user_id>", methods = ["DELETE"])
+@token_required(app=app, serializer=serializer)
+@login_required(serializer=serializer)
+def delete_user(user_id: int):
+    resp_dict = {"message": "boo", "userID": f"{session["userID"]}"}
+
+    if user_id != session["userID"]:
+        resp_dict["message"] = "Failure: Account chosen for deletion does not match the account logged in."
+        return jsonify(resp_dict), 401
+    
+    user: User = User.query.filter_by(id=session["userID"]).first()
+    refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userID"]).first()
+    
+    if not user:
+        resp_dict["message"] = "The account you are attempting to delete does not exist"
+        return jsonify(resp_dict), 404
+
+    try:
+        db.session.delete(user)
+        db.session.delete(refresh_token_obj)
+        db.session.commit()
+        resp_dict["message"] = f"Deleted account ({user.username}) associated refresh token."
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Could not delete the chosen user. Reason {e}"
+        return jsonify(resp_dict), 404
+
