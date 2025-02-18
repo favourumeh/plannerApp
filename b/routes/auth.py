@@ -2,14 +2,14 @@ import os
 from dotenv import load_dotenv
 import json
 from config import db, app, serializer
-from flask import Blueprint, request, jsonify, Response
+from flask import Blueprint, request, jsonify, Response, session
 from models import User, Refresh_Token
 from werkzeug.security import generate_password_hash, check_password_hash
 from typing import Tuple
 import jwt
 from datetime import datetime, timezone, timedelta
 from uuid import uuid4
-from plannerPackage import login_required, update_refresh_token_table, access_token_dur
+from plannerPackage import login_required, token_required, update_refresh_token_table, access_token_dur
 from cryptography.fernet import Fernet
 
 #import env vars from b/.env file
@@ -25,7 +25,7 @@ def signup() -> Tuple[Response, int]:
     resp_dict = {"message":""}
     creds = request.json
     username = creds["username"]
-    email = creds.get("email", "")
+    email = creds.get("email", None)
     password1 = creds["password1"]
     password2 = creds["password2"]
     
@@ -35,11 +35,15 @@ def signup() -> Tuple[Response, int]:
         resp_dict["message"] = "Failure: Username is taken. Please choose another one."
         return jsonify(resp_dict), 400
     if len(username) > 15:
-        resp_dict["message"] = "Failure: Username is too long. Must be less than 15 characters."
+        resp_dict["message"] = "Failure: Username is too long. Must be <= 15 characters."
         return jsonify(resp_dict), 400
     if email:
+        user_e = User.query.filter_by(email=email).first()
+        if user_e:
+            resp_dict["message"] = "Failure: Email is taken. Please choose another one."
+            return jsonify(resp_dict), 400
         if len(email) > 120:
-            resp_dict["message"] = "Failure: Email is too long. Must be less than 120 characters. "
+            resp_dict["message"] = "Failure: Email is too long. Must be <= 120 characters. "
             return jsonify(resp_dict), 400
     if password1 != password2:
         resp_dict["message"] = "Failure: Passwords do not match"
@@ -59,7 +63,7 @@ def signup() -> Tuple[Response, int]:
 
 @auth.route("/login", methods = ["POST"])
 def login():
-    resp_dict = {"message":"", "user": "", "accessToken":""}
+    resp_dict = {"message":"", "user": ""}
     creds = request.json
     username, password = creds.get("username", ""), creds.get("password", "")
     user: User = User.query.filter_by(username=username).first()
@@ -69,21 +73,13 @@ def login():
         resp_dict["message"] = "Failure: User not found"
         return jsonify(resp_dict), 401
     #check if password is valid
-    if not check_password_hash(password, user.password):
+    if not check_password_hash(user.password, password):
+        print(check_password_hash(password, user.password))
+        print("password", password)
+        print("password_hash", user.password)
+        print("user", user.username)
         resp_dict["message"] = "Failure: Incorrect password"
         return jsonify(resp_dict), 401
-
-    #create JWT(access token)
-    access_token = jwt.encode(
-        payload = {"sub": "access token", # identifies the subject of the jwt
-                   "iat": f"{datetime.now(tz=timezone.utc)}", #time jwt was issued
-                   "exp": datetime.now(tz=timezone.utc) + timedelta(minutes=access_token_dur), #token expiration date
-                   "userID": user.id,
-                   "username": user.username},
-        key = app.config["SECRET_KEY"],
-        algorithm = "HS256"
-    )
-    resp_dict["accessToken"] = access_token
     
     #create session dict (soon to be http-only cookie)
     session_data: dict = {"logged_in": "True",
@@ -114,22 +110,38 @@ def login():
     #successfull login 
     resp_dict["message"] = f"Success: Login Successfull. Welcome {user.username}"
     resp = jsonify(resp_dict)
-    
+
+    #create JWT(access token)
+    now: datetime = datetime.now(tz=timezone.utc)
+    access_token = jwt.encode(
+        payload = {"sub": "access token", # identifies the subject of the jwt
+                   "iat":  int(now.timestamp()), #time jwt was issued (as timestamp integer). To convert back to datetime.datetime:  datetime.fromtimestamp(<timestamp>, tz=timezone.utc)
+                   "exp": now + timedelta(minutes=access_token_dur), #token expiration date
+                   "userID": user.id,
+                   "username": user.username},
+        key = app.config["SECRET_KEY"],
+        algorithm = "HS256"
+    )
+    #resp_dict["accessToken"] = access_token
+    serialized_access_token: str = serializer.dumps(access_token)
+    resp.set_cookie(key="session_AT", value=serialized_access_token, httponly=True, samesite="None", secure=True)
+
     #encode session data dict and set it as an http-only cookie
     session_data_json: str = json.dumps(session_data) # json.dumps serializes dict to json fromatted string
     cipher = Fernet(os.environ["session_key"].encode())
     encrypted_session_data: bytes = cipher.encrypt(session_data_json.encode())
-    serialized_session_data: str = serializer.dumps(encrypted_session_data)
-    resp.set_cookie(key="bespoke_session", value=serialized_session_data, httponly="True", samesite="None", secure=True)
-    
+    serialized_session_data: str = serializer.dumps(encrypted_session_data.decode())
+    resp.set_cookie(key="bespoke_session", value=serialized_session_data, httponly=True, samesite="None", secure=True)
+
     return resp, 200
 
-@auth.route("/logout", methods=["POST"])
+@auth.route("/logout", methods=["GET"])
 @login_required(serializer=serializer)
 def logout():
     resp = jsonify({"message": "Logout Successfull"})    
     #clear bespoke_session cookie
-    resp.set_cookies(key="bespoke_session", value="", httponly=True, samesite="None", secure=True)
+    resp.set_cookie(key="bespoke_session", value="", httponly=True, samesite="None", secure=True)
+    resp.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True)
     return resp, 200
 
 #refresh route
@@ -137,7 +149,7 @@ def logout():
 @login_required(serializer=serializer)
 def refresh() -> Tuple[Response, int]:
     "refreshes the access token"
-    resp_dict = {"message":"", "access_token":""}
+    resp_dict = {"message":""}
     #decrypt bespoke cookies
     try:
         # bespoke_session contains {"logged_in":, "username":, "user_id":, "refresh_token": }. 
@@ -154,7 +166,12 @@ def refresh() -> Tuple[Response, int]:
         
     refresh_token_obj: Refresh_Token = Refresh_Token.query.filter(Refresh_Token.user_id == user_id).first() #refresh token from db
     refresh_token: str = session_data["refresh_token"] #refesh token (uuid4) from client's http-only cookies
-
+    
+    #check if refresh token entry exist in Refresh_Token table
+    if not refresh_token_obj:
+        resp_dict["message"] = "The user does not have a refresh token in the db. Please login to generate one"
+        return jsonify(resp_dict), 404
+    
     #check if refresh token has expired 
     if refresh_token_obj.exp.replace(tzinfo = timezone.utc) < datetime.now(tz=timezone.utc):
         resp_dict["message"] = "Please login. Refresh token has expired."
@@ -165,15 +182,22 @@ def refresh() -> Tuple[Response, int]:
         resp_dict["message"]  = "Please Login. Refresh token is invalid."
     
     #generate access token (JWT)
+    now: datetime = datetime.now(tz=timezone.utc)
     access_token = jwt.encode(
         payload = {"sub": "access token", # identifies the subject of the jwt
-                   "iat": f"{datetime.now(tz=timezone.utc)}", #time jwt was issued
-                   "exp": datetime.now(tz=timezone.utc) + timedelta(minutes=access_token_dur), #token expiration date
+                   "iat": int(now.timestamp()), #time jwt was issued as a timestamp integer
+                   "exp": now + timedelta(minutes=access_token_dur), #token expiration date
                    "userID": user.id,
                    "username": user.username},
         key = app.config["SECRET_KEY"],
         algorithm = "HS256"
     )
     resp_dict["message"] = "Successfully refreshed access_token"
-    resp_dict["access_token"] = access_token
-    return jsonify(resp_dict), 200
+    resp: Response = jsonify(resp_dict)
+
+    #Add http-only cookie containing access token to server response
+    serialized_access_token: str = serializer.dumps(access_token)
+    resp.set_cookie(key="session_AT", value=serialized_access_token, httponly=True, samesite="None", secure=True)
+    print("serialized access token",serialized_access_token)
+    return resp, 200
+
