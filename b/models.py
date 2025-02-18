@@ -9,12 +9,12 @@ db = SQLAlchemy()
 class User(db.Model, UserMixin):
     "Defines the properties of the User entity such as id, username, password, email, date_added, last_updated, is_admin"
     id = db.Column(db.Integer, primary_key=True)
-    username= db.Column(db.String(15), nullable=False, unique=False)
+    username= db.Column(db.String(15), nullable=False, unique=True)
     password = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120))
-    date_added = db.Column(db.DateTime(timezone=True), default= func.now())
-    last_updated = db.Column(db.DateTime(timezone=True), default = func.now())
-    is_admin = db.Column(db.Boolean, nullable=False)
+    email = db.Column(db.String(120), nullable=True , unique=True)
+    date_added = db.Column(db.DateTime(timezone=True), default=func.now())
+    last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
+    is_admin = db.Column(db.Boolean, default=False)
     token = db.relationship("Refresh_Token")
     projects = db.relationship("Project")
     
@@ -24,16 +24,13 @@ class User(db.Model, UserMixin):
     def to_dict(cls) -> Dict:
         return {"id": cls.id,
                 "username": cls.username,
-                "password": cls.password,
-                "email": cls.email,
                 "dateAdded": cls.date_added,
-                "lastUpdated": cls.last_updated,
-                "isAdmin": cls.is_admin}
+                "lastUpdated": cls.last_updated}
 
 class Refresh_Token(db.Model):
     """Defines the properites of the Refresh_Token entity: id, token,exp, user_id"""
     id = db.Column(db.Integer, primary_key = True)
-    token = db.Column(db.String(120), nullable =False)
+    token = db.Column(db.String(250), nullable =False)
     exp = db.Column(db.DateTime(timezone=True), nullable = False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable = False)
     
@@ -80,8 +77,8 @@ class Objective(db.Model):
     title = db.Column(db.String(80), default = f"Project {id}")
     description = db.Column(db.Text)
     duration = db.Column(db.Integer)  #hours
-    sheduled_start = db.Column(db.Datetime(timezone = True))
-    sheduled_finish = db.Column(db.Datetime(timezone = True))
+    sheduled_start = db.Column(db.DateTime(timezone = True))
+    sheduled_finish = db.Column(db.DateTime(timezone = True))
     is_completed = db.Column(db.Boolean, default = False)
     date_added = db.Column(db.DateTime(timezone =True), default = func.now())
     last_updated = db.Column(db.DateTime(timezone = True), default = func.now())
@@ -112,9 +109,9 @@ class Task(db.Model):
     description = db.Column(db.String(100))
     duration = db.Column(db.Integer, nullable = False) # minutes
     first_task = db.Column(db.Boolean, default = False) 
-    precedence_score = db.Colunm(db.Integer, default = 1)
-    sheduled_start = db.Column(db.Datetime(timezone = True))
-    sheduled_finish = db.Column(db.Datetime(timezone = True))
+    precedence_score = db.Column(db.Integer, default = 1)
+    sheduled_start = db.Column(db.DateTime(timezone = True))
+    sheduled_finish = db.Column(db.DateTime(timezone = True))
     is_completed = db.Column(db.Boolean, default = False)
     date_added = db.Column(db.DateTime(timezone =True), default = func.now())
     last_updated = db.Column(db.DateTime(timezone = True), default = func.now())
