@@ -43,7 +43,7 @@ def signup() -> Tuple[Response, int]:
             resp_dict["message"] = "Failure: Email is taken. Please choose another one."
             return jsonify(resp_dict), 400
         if len(email) > 120:
-            resp_dict["message"] = "Failure: Email is too long. Must be <= 120 characters. "
+            resp_dict["message"] = "Failure: Email is too long. Must be <= 120 characters."
             return jsonify(resp_dict), 400
     if password1 != password2:
         resp_dict["message"] = "Failure: Passwords do not match"
@@ -178,8 +178,9 @@ def refresh() -> Tuple[Response, int]:
         return jsonify(resp_dict), 401
 
     #check if refresh token is invalid
-    if check_password_hash(refresh_token_obj.token, refresh_token):
-        resp_dict["message"]  = "Please Login. Refresh token is invalid."
+    if not check_password_hash(refresh_token_obj.token, refresh_token):
+        resp_dict["message"]  = "Failure: Refresh token is invalid. Please login"
+        return jsonify(resp_dict), 401
     
     #generate access token (JWT)
     now: datetime = datetime.now(tz=timezone.utc)
@@ -228,4 +229,56 @@ def delete_user(user_id: int):
     except Exception as e:
         resp_dict["message"] = f"Could not delete the chosen user. Reason {e}"
         return jsonify(resp_dict), 404
+
+@auth.route("/edit_user/<int:user_id>", methods = ["PATCH"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def edit_user(user_id: int):
+    resp_dict = {"message":""}
+
+    if user_id != session["userID"]:
+        resp_dict["message"] = "Failure: The account you are attempting to edit does not match the account that is logged in"
+        return jsonify(resp_dict), 400
+
+    user = User.query.filter_by(id=user_id).first()
+
+    if not user:
+        resp_dict["message"] = "Failure: The user you are attempting to edit does not exist."
+        return jsonify(resp_dict), 404
+
+    creds = request.json
+
+    username = creds.get("username", user.username)
+    old_password = creds.get("password", user.password)
+    password1 = creds.get("password1", user.password)
+    password2 = creds.get("password2", user.password)
+    
+    if not check_password_hash(user.password, old_password):
+        resp_dict["message"] = "Failure: The existing password entered is invalid"
+        return jsonify(resp_dict), 401
+        
+    if password1 != password2:
+        resp_dict["message"] = "Failure: Passwords do not match"
+        return jsonify(resp_dict), 400
+
+    #update the user_object's username and password classs variables 
+    user.username = username
+    if creds.get("password1", None):
+        user.password = generate_password_hash(password1, method = "pbkdf2")
+
+    try:
+        db.session.commit()
+        resp_dict["message"] = "Success: User was successfully edited"
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: User changes could not be committed to db. Reason: {e}"
+        return jsonify(resp_dict), 404
+        
+    
+    
+
+    
+
+
+
 
