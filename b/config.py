@@ -36,12 +36,12 @@ print("sys.argv: ", params)
 default_config_dict= {"--env":"dev", "--rdbms":"sqlite"}
 config_dict = pp.generate_config_dict(params, default_config_dict)
 
-#bind the database instance to flask app instance 
-db.init_app(app=app)
-
 #configure databse sqlite or az_mysql
 db_name = "planner_app_db"
-if config_dict["--rdbms": "sqlite"]:
+if config_dict["--rdbms"] == "sqlite":
     app.config["SQLALCHEMY_DATABASE_URI"]= f"sqlite:///{cwd}/{db_name}.db"
 
 app.config["SQLACHEMY_TACK_MODIFICATIONS"] = False
+
+#bind the database instance to flask app instance 
+db.init_app(app=app)
