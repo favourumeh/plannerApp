@@ -10,3 +10,5 @@ gunicorn
 PyJWT
 python-dotenv
 requests
+coverage
+pymysql
