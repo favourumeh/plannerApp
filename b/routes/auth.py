@@ -9,7 +9,7 @@ from typing import Tuple
 import jwt
 from datetime import datetime, timezone, timedelta
 from uuid import uuid4
-from plannerPackage import login_required, token_required, update_refresh_token_table, access_token_dur
+from plannerPackage import login_required, token_required, update_refresh_token_table, access_token_dur, filter_dict
 from cryptography.fernet import Fernet
 
 #import env vars from b/.env file
@@ -74,10 +74,6 @@ def login():
         return jsonify(resp_dict), 401
     #check if password is valid
     if not check_password_hash(user.password, password):
-        print(check_password_hash(password, user.password))
-        print("password", password)
-        print("password_hash", user.password)
-        print("user", user.username)
         resp_dict["message"] = "Failure: Incorrect password"
         return jsonify(resp_dict), 401
     
@@ -108,7 +104,10 @@ def login():
             return jsonify(resp_dict), 404
 
     #successfull login 
+    user_dict = user.to_dict()
     resp_dict["message"] = f"Success: Login Successfull. Welcome {user.username}"
+    resp_dict["user"] = filter_dict(user_dict, ["id","username"]) #dict(filter(lambda i: i[0] in ["username", "id"] , user_dict.items()))
+    
     resp = jsonify(resp_dict)
 
     #create JWT(access token)

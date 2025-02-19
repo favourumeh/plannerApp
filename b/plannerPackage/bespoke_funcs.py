@@ -20,3 +20,10 @@ def generate_config_dict(params: List[str], default_config_dict: Dict[str, str])
         print("config_dict:", config_dict)
     
     return config_dict
+
+def filter_dict(dict_obj: Dict[str, str], keys: List[str]) -> Dict:
+    """Filters a dictionary by the keys provided
+    Args:
+        dict_obj: the dictionary being filtered
+        keys: the keys to keep from the dict"""
+    return dict(filter(lambda i: i[0] in keys, dict_obj.items()))
