@@ -1,7 +1,6 @@
 import os, sys
 from dotenv import load_dotenv
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from models import db
 import plannerPackage as pp
@@ -43,5 +42,10 @@ if config_dict["--rdbms"] == "sqlite":
 
 app.config["SQLACHEMY_TACK_MODIFICATIONS"] = False
 
-#bind the database instance to flask app instance 
-db.init_app(app=app)
+if 'test' not in ",".join(sys.argv): #1 
+    #bind the database instance to flask app instance 
+    db.init_app(app=app)
+
+#notes: 
+    #1: Don't want to bind databse instance to flask instance if we are running tests as this points test client app to the local sqlite database which is the intent of testing. 
+        #In testing the goal is to create an in-memory sqlite database and test the API's routes against that NOT the local sqlite database (or any other db). 
