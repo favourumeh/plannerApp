@@ -24,7 +24,10 @@ class User(db.Model, UserMixin):
     def to_dict(cls) -> Dict:
         return {"id": cls.id,
                 "username": cls.username,
+                "password": cls.password,
+                "email": cls.email,
                 "dateAdded": cls.date_added,
+                "isAdmin": cls.is_admin,
                 "lastUpdated": cls.last_updated}
 
 class Refresh_Token(db.Model):
@@ -62,11 +65,14 @@ class Project(db.Model):
     
     def to_dict(cls) -> Dict:
         return {"id": cls.id,
+                "type": cls.type,
                 "title": cls.title,
                 "description": cls.description,
+                "isComplete": cls.is_completed,
                 "deadline": cls.deadline,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
+                "tag": cls.tag,
                 "userID": cls.user_id}
 
 class Objective(db.Model):
@@ -91,13 +97,17 @@ class Objective(db.Model):
     
     def to_dict(cls) -> Dict:
         return {"id": cls.id,
+                "objectiveNumber": cls.objective_number,
+                "type": cls.type,
                 "title": cls.title,
                 "description": cls.description,
+                "duration": cls.duration,
                 "scheduledStart": cls.sheduled_start,
                 "scheduledFinish": cls.sheduled_finish,
                 "isCompleted": cls.is_completed,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
+                "tag": cls.tag,
                 "projectID": cls.project_id}
 
 
@@ -123,7 +133,10 @@ class Task(db.Model):
     
     def to_dict(cls) -> Dict:
         return {"id": cls.id,
+                "taskNumber": cls.task_number,
+                "type": cls.type,
                 "description": cls.description,
+                "duration": cls.duration,
                 "firstTask": cls.first_task,
                 "precedenceScore": cls.precedence_score,
                 "scheduledStart": cls.sheduled_start,
