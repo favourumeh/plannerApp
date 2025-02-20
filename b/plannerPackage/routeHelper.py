@@ -44,7 +44,7 @@ def token_required(app: Flask, serializer: URLSafeTimedSerializer):
 
             #Validate access token
             try:
-                payload = jwt.decode(
+                payload: dict = jwt.decode(
                     jwt = access_token,
                     key = app.config["SECRET_KEY"],
                     algorithms = "HS256"
@@ -66,16 +66,11 @@ def login_required(serializer: URLSafeTimedSerializer):
             cookie = request.cookies.get("bespoke_session")
             
             if not cookie:
-                resp_dict["message"] = "Currently logged out. Please login"
+                resp_dict["message"] = "Failure: User session cookie is empty. Please login!"
                 return jsonify(resp_dict), 400
             encrypted_session_data: str = serializer.loads(cookie) 
             cipher = Fernet(os.environ["session_key"].encode())
             decrypted_session_data: dict = json.loads(cipher.decrypt(encrypted_session_data.encode()).decode())
-            logged_in = decrypted_session_data["logged_in"]
-            
-            if logged_in != "True":
-                resp_dict["message"] = "Please login!"
-                return jsonify(resp_dict), 401
             
             #Extract user id from the session data for use in downstream function
             session["userID"] = decrypted_session_data["userID"]
