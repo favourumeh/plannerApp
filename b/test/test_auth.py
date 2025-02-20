@@ -1,4 +1,5 @@
 import unittest 
+import os
 from routes import auth
 from config import app
 from models import db, User, Refresh_Token
@@ -27,7 +28,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
             db.session.remove()
             db.drop_all()
         
-    def test_signup(self):
+    def test1_signup(self):
         print("     1)Testing test_signup")
         #Add a user entry to the user table of the in-memory db
         user = User(username="test", password="ttt", email="test@test.com")
@@ -78,7 +79,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.assertEqual(response.json, {"message": "Failure: Passwords do not match"})
         self.assertEqual(response.status_code, 400)
 
-    def test_login(self):
+    def test2_login(self):
         print("     2)Testing login")
         #Add a user entry to the user table of the in-memory db
         user = User(username="test", password=generate_password_hash("ttt", "pbkdf2"), email="test@test.com")
@@ -112,7 +113,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         response = self.client.post("/login", json = data)
         self.assertEqual(response.status_code, 401)
     
-    def test_logout(self):
+    def test3_logout(self):
         print("     3)Testing logout ")
         #create account
         username, pwd = "test","ttt"
@@ -122,9 +123,9 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
             db.session.commit()
         
         #Test Cases 
-        print("         Test logging out whilst not logged in fails")
+        print("         Test accessing the route whilst not logged in fails - (c: no bespoke session cookie)")
         response = self.client.get("/logout")
-        self.assertEqual(response.json["message"], "Failure: User session cookie is empty. Please login!")
+        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
         self.assertEqual(response.status_code, 400)
 
             #login 
@@ -133,12 +134,49 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         response = self.client.get("/logout")
         self.assertEqual(response.status_code, 200)
         
-    def test_delete_user(self):
+        print("         Test accessing the route whilst not logged in fails - (c: no refresh token)")
+        bsc = os.environ["bespoke_session_cookie_example"]
+        self.client.set_cookie(key="bespoke_session", value=bsc,httponly=True, samesite="None", secure=True)
+        response = self.client.get("/logout")
+        self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please log in.")
+        self.assertEqual(response.status_code, 404)
+    
+    def test4_refresh(self):
+        print("     4)Testing refresh ")
+        #create account
+        username, pwd = "test","ttt"
+        user: User = User(username=username, password=generate_password_hash(pwd))
+        with app.app_context():
+            db.session.add(user)
+            db.session.commit()
+            
+        #Test Cases 
+        print("         Test accessing the route whilst not logged in fails - (c: no bespoke_session cookie)")
+        response = self.client.get("/refresh")
+        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
+        self.assertEqual(response.status_code, 400)
+        
+        
+        print("         Test accessing the route whilst not logged in fails - (c: no refresh token)")
+        bsc = os.environ["bespoke_session_cookie_example"]
+        self.client.set_cookie(key="bespoke_session", value=bsc,httponly=True, samesite="None", secure=True)
+        response = self.client.get("/refresh")
+        self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please log in.")
+        self.assertEqual(response.status_code, 404)
+        
+            #login
+        self.client.post("/login", json={"username":username, "password":pwd})
+        
+        print("         Test successful request")
+        response = self.client.get("/refresh")
+        self.assertEqual(response.status_code, 200)
+        
+    def test5_delete_user(self):
         print("     5)Testing delete_user")
         #Test Case: not logged in user
         print("         Test invalid input - account delete fails without session cookies (i.e. without login)")
         response = self.client.delete("/delete_user/1")
-        self.assertEqual(response.json["message"], "Failure: User session cookie is empty. Please login!")
+        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
         self.assertEqual(response.status_code, 400)
         
         #Add a user entry to the user table of the in-memory db
@@ -163,7 +201,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.assertEqual(response.json["message"], "Deleted account (test) and associated access and refresh token.")
         self.assertEqual(response.status_code, 200)
 
-    def test_edit_user(self):
+    def test6_edit_user(self):
         print("     6)Testing edit_user")
         username, password, email = "test", "ttt" , "test@example.com"
         new_username, new_password, new_email = "test1", "ttt1", "new_email@example.com"
@@ -171,7 +209,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         #Test Case: not logged in user
         print("         Test invalid input - account edit fails without session cookies (i.e. without login)")
         response = self.client.patch("/edit_user/1")
-        self.assertEqual(response.json["message"], "Failure: User session cookie is empty. Please login!")
+        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
         self.assertEqual(response.status_code, 400)
         
         #Add a user entry to the user table of the in-memory db
@@ -205,14 +243,14 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.assertEqual(filter_dict(user_changes, ["username", "email"]),  {"username":new_username, "email":new_email})
         self.assertTrue(check_password_hash(user_changes["password"], new_password))
 
-    def test_get_user(self):
+    def test7_get_user(self):
         print("     7)Testing get_user")
         
         #Test Cases:
         print("         Test accessing the route without session cokies fails")
         response_get_user = self.client.get("/get-user/1")
         self.assertEqual(response_get_user.status_code, 400)
-        self.assertEqual(response_get_user.json["message"],"Failure: User session cookie is empty. Please login!")
+        self.assertEqual(response_get_user.json["message"],"Failure: User is not logged in (no b_sc). Please login!")
         
         #creating test user entries
         admin_username, reg_username = "admin", "reg"
