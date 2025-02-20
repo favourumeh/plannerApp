@@ -39,6 +39,9 @@ config_dict = pp.generate_config_dict(params, default_config_dict)
 db_name = "planner_app_db"
 if config_dict["--rdbms"] == "sqlite":
     app.config["SQLALCHEMY_DATABASE_URI"]= f"sqlite:///{cwd}/{db_name}.db"
+    
+if config_dict["--rdbms"] == "mysql":
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{os.environ["mySQLUser"]}:{os.environ["mySQLPassword"]}@{os.environ["mySQLHost"]}/{db_name}"
 
 app.config["SQLACHEMY_TACK_MODIFICATIONS"] = False
 
