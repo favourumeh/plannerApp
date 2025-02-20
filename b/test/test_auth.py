@@ -112,6 +112,27 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         response = self.client.post("/login", json = data)
         self.assertEqual(response.status_code, 401)
     
+    def test_logout(self):
+        print("     3)Testing logout ")
+        #create account
+        username, pwd = "test","ttt"
+        user: User = User(username=username, password=generate_password_hash(pwd))
+        with app.app_context():
+            db.session.add(user)
+            db.session.commit()
+        
+        #Test Cases 
+        print("         Test logging out whilst not logged in fails")
+        response = self.client.get("/logout")
+        self.assertEqual(response.json["message"], "Failure: User session cookie is empty. Please login!")
+        self.assertEqual(response.status_code, 400)
+
+            #login 
+        self.client.post("/login", json={"username":username, "password":pwd})
+        print("         Test successful logout")
+        response = self.client.get("/logout")
+        self.assertEqual(response.status_code, 200)
+        
     def test_delete_user(self):
         print("     5)Testing delete_user")
         #Test Case: not logged in user
