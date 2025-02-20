@@ -266,7 +266,26 @@ def edit_user(user_id: int):
         return jsonify(resp_dict), 404
         
 
+@auth.route("/get-user/<int:user_id>", methods = ["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def get_user(user_id: int):
+    """Allows the admin to gets all fields in of a User's account"""
+    resp_dict = {"message":"", "user": ""}
 
+    admin_user: User = User.query.filter_by(id=session["userID"]).first()    
+    if not admin_user.is_admin:
+        resp_dict["message"] = "Failure: User is not permitted to access this route"
+        return jsonify(resp_dict), 403
+    
+    user_queried: User = User.query.filter_by(id=user_id).first()
+    if not user_queried:
+        resp_dict["message"] = "Failure: the user you are trying to get does not exist"
+        return jsonify(resp_dict), 404
+    
+    resp_dict["message"] = "Success: retrieved user data"
+    resp_dict["user"] = user_queried.to_dict()
+    return jsonify(resp_dict), 200
 
         
     
