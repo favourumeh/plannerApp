@@ -202,28 +202,24 @@ def refresh() -> Tuple[Response, int]:
     return resp, 200
 
 
-@auth.route("/delete/<int:user_id>", methods = ["DELETE"])
-@token_required(app=app, serializer=serializer)
+@auth.route("/delete_user/<int:user_id>", methods = ["DELETE"])
 @login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
 def delete_user(user_id: int):
     resp_dict = {"message": "boo", "userID": f"{session["userID"]}"}
 
     if user_id != session["userID"]:
         resp_dict["message"] = "Failure: Account chosen for deletion does not match the account logged in."
-        return jsonify(resp_dict), 401
+        return jsonify(resp_dict), 403
     
     user: User = User.query.filter_by(id=session["userID"]).first()
     refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userID"]).first()
-    
-    if not user:
-        resp_dict["message"] = "The account you are attempting to delete does not exist"
-        return jsonify(resp_dict), 404
 
     try:
         db.session.delete(user)
         db.session.delete(refresh_token_obj)
         db.session.commit()
-        resp_dict["message"] = f"Deleted account ({user.username}) associated refresh token."
+        resp_dict["message"] = f"Deleted account ({user.username}) and associated access and refresh token."
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Could not delete the chosen user. Reason {e}"
@@ -237,23 +233,18 @@ def edit_user(user_id: int):
 
     if user_id != session["userID"]:
         resp_dict["message"] = "Failure: The account you are attempting to edit does not match the account that is logged in"
-        return jsonify(resp_dict), 400
+        return jsonify(resp_dict), 403
 
-    user = User.query.filter_by(id=user_id).first()
-
-    if not user:
-        resp_dict["message"] = "Failure: The user you are attempting to edit does not exist."
-        return jsonify(resp_dict), 404
-
-    creds = request.json
-
-    username = creds.get("username", user.username)
-    old_password = creds.get("password", user.password)
-    password1 = creds.get("password1", user.password)
-    password2 = creds.get("password2", user.password)
+    user: User = User.query.filter_by(id=user_id).first()
+    creds: dict = request.json
+    username: str = creds.get("username", user.username)
+    current_password: str|None = creds.get("password", None)
+    password1: str = creds.get("password1", user.password)
+    password2: str = creds.get("password2", user.password)
+    email: str = creds.get("email", user.email)
     
-    if not check_password_hash(user.password, old_password):
-        resp_dict["message"] = "Failure: The existing password entered is invalid"
+    if not current_password:
+        resp_dict["message"] = "Failure: Please enter your current password"
         return jsonify(resp_dict), 401
         
     if password1 != password2:
@@ -262,6 +253,7 @@ def edit_user(user_id: int):
 
     #update the user_object's username and password classs variables 
     user.username = username
+    user.email = email
     if creds.get("password1", None):
         user.password = generate_password_hash(password1, method = "pbkdf2")
 
@@ -273,7 +265,10 @@ def edit_user(user_id: int):
         resp_dict["message"] = f"Failure: User changes could not be committed to db. Reason: {e}"
         return jsonify(resp_dict), 404
         
-    
+
+
+
+        
     
 
     
