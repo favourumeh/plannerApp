@@ -137,11 +137,22 @@ def login():
 @auth.route("/logout", methods=["GET"])
 @login_required(serializer=serializer)
 def logout():
-    resp = jsonify({"message": "Logout Successfull"})    
-    #clear bespoke_session cookie
-    resp.set_cookie(key="bespoke_session", value="", httponly=True, samesite="None", secure=True)
-    resp.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True)
-    return resp, 200
+    resp_dict = {"message": ""}
+    #delete refresh token
+    try:
+        refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id = session["userID"]).first()
+        db.session.delete(refresh_token_obj)
+        db.session.commit()
+        resp_dict["message"] = "Success: Logout completed"
+        resp =  jsonify(resp_dict)
+        #clear bespoke_session cookie
+        resp.set_cookie(key="bespoke_session", value="", httponly=True, samesite="None", secure=True)
+        resp.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True)
+        return resp, 200
+    except Exception as e:
+        resp_dict["message"] = f"Could not logout due to db issues. Reason: {e}."
+        return jsonify(resp_dict), 400
+        
 
 #refresh route
 @auth.route("/refresh", methods = ["GET"])
@@ -156,13 +167,13 @@ def refresh() -> Tuple[Response, int]:
         cipher = Fernet(os.environ["session_key"].encode())
         session_data: dict = json.loads(cipher.decrypt(encrypted_session_data).decode())
     except Exception as e:
-        resp_dict["message"] = f"Could not decode the bespoke cookies. Reason: {e}"
+        resp_dict["message"] = f"Could not decode the bespoke_session cookies. Reason: {e}"
         return jsonify(resp_dict), 400
 
     #Use userID from bespoke cookies dict to extract user entry
     user_id: int = session_data["userID"] 
     user: User = User.query.filter(User.id == user_id).first()
-        
+
     refresh_token_obj: Refresh_Token = Refresh_Token.query.filter(Refresh_Token.user_id == user_id).first() #refresh token from db
     refresh_token: str = session_data["refresh_token"] #refesh token (uuid4) from client's http-only cookies
     
@@ -198,7 +209,6 @@ def refresh() -> Tuple[Response, int]:
     #Add http-only cookie containing access token to server response
     serialized_access_token: str = serializer.dumps(access_token)
     resp.set_cookie(key="session_AT", value=serialized_access_token, httponly=True, samesite="None", secure=True)
-    print("serialized access token",serialized_access_token)
     return resp, 200
 
 
