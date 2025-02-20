@@ -66,14 +66,21 @@ def login_required(serializer: URLSafeTimedSerializer):
             cookie = request.cookies.get("bespoke_session")
             
             if not cookie:
-                resp_dict["message"] = "Failure: User session cookie is empty. Please login!"
+                resp_dict["message"] = "Failure: User is not logged in (no b_sc). Please login!"
                 return jsonify(resp_dict), 400
             encrypted_session_data: str = serializer.loads(cookie) 
             cipher = Fernet(os.environ["session_key"].encode())
             decrypted_session_data: dict = json.loads(cipher.decrypt(encrypted_session_data.encode()).decode())
             
-            #Extract user id from the session data for use in downstream function
+            #Extract user id from the session data and store it in session object for use in downstream function
             session["userID"] = decrypted_session_data["userID"]
+            
+            #Check if the user has a refresh_token. If they don't then they are not logged in
+            refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userID"]).first()
+            if not refresh_token_obj:
+                resp_dict["message"] = "Failure: User is not logged in (no rt). Please log in."
+                return jsonify(resp_dict) , 404
+                
             return func(*args, **kwargs)
         return wrapper
     return decorated
