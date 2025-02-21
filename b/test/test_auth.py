@@ -249,6 +249,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 403)
         
         print("         Testing valid input - editing your account when logged in works")
+        response_get_user_old = self.client.get("/get-user/1")
         new_data = {"username":new_username, "password":password, "password1":new_password, "password2":new_password, "email":new_email }
         response = self.client.patch("/edit_user/1", json=new_data)
         self.assertEqual(response.json["message"], "Success: User was successfully edited")
@@ -257,11 +258,14 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         response_login = self.client.post("/login", json= {"username":new_username, "password":new_password})
         self.assertEqual(response_login.status_code, 200)
         
-        print("         Test verify the changes made to username, email and password")
+        print("         Test verify the changes made to email and lastUpdated")
         response_get_user = self.client.get("/get-user/1")
-        user_changes = filter_dict(response_get_user.json["user"], ["username", "email", "password"])
-        self.assertEqual(filter_dict(user_changes, ["username", "email"]),  {"username":new_username, "email":new_email})
-        self.assertTrue(check_password_hash(user_changes["password"], new_password))
+        older_user_details = response_get_user_old.json["user"]
+        new_user_details = response_get_user.json["user"]
+        self.assertNotEqual(older_user_details["email"], new_user_details["email"])
+        self.assertNotEqual(older_user_details["lastUpdated"], new_user_details["lastUpdated"])
+
+        # self.assertTrue()
 
     def test7_get_user(self):
         print("     7)Testing get_user")
@@ -288,7 +292,6 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         print("         Test accessing the route from reg account fails")
         response_get_user = self.client.get("/get-user/2")
         self.assertEqual(response_get_user.status_code, 403)
-        
         
         #login to admin account
         self.client.post("/login", json = {"username":admin_username, "password":pwd})

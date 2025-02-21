@@ -238,6 +238,7 @@ def edit_user(user_id: int) -> Tuple[Response, int]:
     password1: str = creds.get("password1", user.password)
     password2: str = creds.get("password2", user.password)
     email: str = creds.get("email", user.email)
+    last_updated: datetime =  datetime.now(tz=timezone.utc)
     
     if not current_password:
         resp_dict["message"] = "Failure: Please enter your current password"
@@ -250,6 +251,7 @@ def edit_user(user_id: int) -> Tuple[Response, int]:
     #update the user_object's username and password classs variables 
     user.username = username
     user.email = email
+    user.last_updated = last_updated
     if creds.get("password1", None):
         user.password = generate_password_hash(password1, method = "pbkdf2")
 
