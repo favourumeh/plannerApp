@@ -7,25 +7,25 @@ from datetime import datetime, timezone, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from plannerPackage import filter_dict, decrypt_bespoke_session_cookie
 
-
+#Generate the time test execution
 now = datetime.now()
 print(f"\nTest time: {str(now.time()).split(".")[0]}. (date = {now.date()}) ------------------------")
+
 class FlaskAPIAuthTestCase(unittest.TestCase):
+    app.config["TESTING"] = True # set to true so Exceptions can propagate to the test client (i.e. so we get HTTP status codes other than 500 when something goes wrong with client request)
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///:memory:" #use an in-memory database for tests
     app.register_blueprint(auth)
     db.init_app(app=app)
-    
+
     def setUp(self):
-        #This is setUp class is executed before the 
-        app.config["TESTING"] = True
-        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///:memory:" #use an in-memory database for tests
-        
-        self.client = app.test_client(use_cookies=True)
-        
-        with app.app_context():
+        """This is a hook method that is executed before each test method. Function: An app client is created for each test method to make request to the backend api. 
+        All the entity tables for the db are also create as they are wipped by the other hook method,'tearDown', after each test method is executed. """
+        self.client = app.test_client(use_cookies=True) # this client makes requests to the backend app's api.
+        with app.app_context(): 
             db.create_all()
 
     def tearDown(self):
-        # clean up the database after each test
+        """This is a hook method that is executed after each test method. Function: The database table for each entity is wipped after each test method"""
         with app.app_context():
             db.session.remove()
             db.drop_all()
