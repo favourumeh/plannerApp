@@ -37,18 +37,20 @@ config_dict = pp.generate_config_dict(params, default_config_dict)
 
 #configure databse sqlite or az_mysql
 db_name = "planner_app_db"
-if config_dict["--rdbms"] == "sqlite":
-    app.config["SQLALCHEMY_DATABASE_URI"]= f"sqlite:///{cwd}/{db_name}.db"
-    
-if config_dict["--rdbms"] == "mysql":
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{os.environ["mySQLUser"]}:{os.environ["mySQLPassword"]}@{os.environ["mySQLHost"]}/{db_name}"
-
-app.config["SQLACHEMY_TACK_MODIFICATIONS"] = False
 
 if 'test' not in ",".join(sys.argv): #1 
+    
+    if config_dict["--rdbms"] == "sqlite":
+        app.config["SQLALCHEMY_DATABASE_URI"]= f"sqlite:///{cwd}/{db_name}.db"
+        
+    if config_dict["--rdbms"] == "mysql":
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{os.environ["mySQLUser"]}:{os.environ["mySQLPassword"]}@{os.environ["mySQLHost"]}/{db_name}"
+
+    app.config["SQLACHEMY_TACK_MODIFICATIONS"] = False
+
     #bind the database instance to flask app instance 
     db.init_app(app=app)
 
 #notes: 
-    #1: Don't want to bind databse instance to flask instance if we are running tests as this points test client app to the local sqlite database which is the intent of testing. 
-        #In testing the goal is to create an in-memory sqlite database and test the API's routes against that NOT the local sqlite database (or any other db). 
+    #1: Don't want configure the sqlalchemy database OR bind databse instance to flask instance if we are running test scripts as this points test client app to the local sqlite database which is NOT the intent of testing. 
+        #In testing the goal is to create an in-memory sqlite database and test the API's routes against that NOT the local sqlite database (or any other db). Hence the sqlalchemy database uri is defined in the test scripts. 
