@@ -83,7 +83,7 @@ def login():
                           "userID": user.id}
 
     token_UUID = str(uuid4)
-    session_data["refresh_token"] = token_UUID
+    session_data["refreshToken"] = token_UUID
 
     #create/updated refresh token
     refresh_token_obj = Refresh_Token.query.filter_by(user_id=user.id).first()
@@ -160,38 +160,24 @@ def logout():
 def refresh() -> Tuple[Response, int]:
     "refreshes the access token"
     resp_dict = {"message":""}
-    #decrypt bespoke cookies
-    try:
-        # bespoke_session contains {"logged_in":, "username":, "user_id":, "refresh_token": }. 
-        encrypted_session_data: bytes = serializer.loads(request.cookies.get("bespoke_session")) 
-        cipher = Fernet(os.environ["session_key"].encode())
-        session_data: dict = json.loads(cipher.decrypt(encrypted_session_data).decode())
-    except Exception as e:
-        resp_dict["message"] = f"Could not decode the bespoke_session cookies. Reason: {e}"
-        return jsonify(resp_dict), 400
-
+    
     #Use userID from bespoke cookies dict to extract user entry
-    user_id: int = session_data["userID"] 
+    user_id: int = session["userID"] 
     user: User = User.query.filter(User.id == user_id).first()
 
     refresh_token_obj: Refresh_Token = Refresh_Token.query.filter(Refresh_Token.user_id == user_id).first() #refresh token from db
-    refresh_token: str = session_data["refresh_token"] #refesh token (uuid4) from client's http-only cookies
-    
-    #check if refresh token entry exist in Refresh_Token table
-    if not refresh_token_obj:
-        resp_dict["message"] = "The user does not have a refresh token in the db. Please login to generate one"
-        return jsonify(resp_dict), 404
-    
-    #check if refresh token has expired 
-    if refresh_token_obj.exp.replace(tzinfo = timezone.utc) < datetime.now(tz=timezone.utc):
-        resp_dict["message"] = "Please login. Refresh token has expired."
-        return jsonify(resp_dict), 401
+    refresh_token: str = session["refreshToken"] #refesh token (uuid4) from client's http-only cookies
 
     #check if refresh token is invalid
     if not check_password_hash(refresh_token_obj.token, refresh_token):
         resp_dict["message"]  = "Failure: Refresh token is invalid. Please login"
         return jsonify(resp_dict), 401
-    
+
+    #check if refresh token has expired 
+    if refresh_token_obj.exp.replace(tzinfo = timezone.utc) < datetime.now(tz=timezone.utc):
+        resp_dict["message"] = "Failure: Please login. Refresh token has expired."
+        return jsonify(resp_dict), 401
+
     #generate access token (JWT)
     now: datetime = datetime.now(tz=timezone.utc)
     access_token = jwt.encode(
