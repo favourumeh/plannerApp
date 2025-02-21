@@ -1,4 +1,5 @@
 from plannerPackage.bespoke_funcs import generate_config_dict
+from .bespoke_funcs import  decrypt_bespoke_session_cookie
 from .bespoke_funcs import filter_dict
 from .project_config import access_token_dur
 from .project_config import refresh_token_dur

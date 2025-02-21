@@ -6,7 +6,7 @@ from itsdangerous import URLSafeTimedSerializer
 from models import Refresh_Token
 from functools import wraps
 from datetime import datetime, timedelta, timezone
-from . import refresh_token_dur #alternative: from plannerPackage import refre...
+from . import refresh_token_dur, decrypt_bespoke_session_cookie #alternative: from plannerPackage import refre...
 from uuid import uuid4
 from werkzeug.security import generate_password_hash
 from cryptography.fernet import Fernet
@@ -39,7 +39,7 @@ def token_required(app: Flask, serializer: URLSafeTimedSerializer):
             try:
                 access_token = serializer.loads(access_token_cookie)
             except Exception as e:
-                resp_dict["message"] = f"Deserialisation or Signiture verificaiton of access token cookie has failed. Err Message: {e}"
+                resp_dict["message"] = f"Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}"
                 return jsonify(resp_dict), 400
 
             #Validate access token
@@ -68,12 +68,18 @@ def login_required(serializer: URLSafeTimedSerializer):
             if not cookie:
                 resp_dict["message"] = "Failure: User is not logged in (no b_sc). Please login!"
                 return jsonify(resp_dict), 400
-            encrypted_session_data: str = serializer.loads(cookie) 
-            cipher = Fernet(os.environ["session_key"].encode())
-            decrypted_session_data: dict = json.loads(cipher.decrypt(encrypted_session_data.encode()).decode())
-            
-            #Extract user id from the session data and store it in session object for use in downstream function
+
+            #Decrypt bespoke session cookie
+            try:
+                decrypted_session_data = decrypt_bespoke_session_cookie(cookie=cookie, serializer=serializer)
+            except Exception as e:
+                resp_dict["message"] = f"Could not decode the bespoke_session cookies. Reason: {e}"
+                return jsonify(resp_dict), 400
+    
+            #Extract user id,username and refreshToken  from the session data and store it in session object for use in downstream function
             session["userID"] = decrypted_session_data["userID"]
+            session["username"] = decrypted_session_data["username"]
+            session["refreshToken"] = decrypted_session_data["refreshToken"]
             
             #Check if the user has a refresh_token. If they don't then they are not logged in
             refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userID"]).first()
