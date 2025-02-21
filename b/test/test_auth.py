@@ -1,11 +1,13 @@
 import unittest 
 import os
 from routes import auth
-from config import app
+from config import app, serializer
 from models import db, User, Refresh_Token
 from datetime import datetime, timezone, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
-from plannerPackage import filter_dict
+from plannerPackage import filter_dict, decrypt_bespoke_session_cookie
+
+
 now = datetime.now()
 print(f"\nTest time: {str(now.time()).split(".")[0]}. (date = {now.date()}) ------------------------")
 class FlaskAPIAuthTestCase(unittest.TestCase):
@@ -36,7 +38,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
             db.session.add(user)
             db.session.commit()
 
-        #Edge cases:
+        #Test cases:
         print("         Test Valid Input")
         data = {"username":"test1", "password1": "ttt", "password2": "ttt"} 
         response = self.client.post("/sign-up", json = data )
@@ -135,7 +137,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         
         print("         Test accessing the route whilst not logged in fails - (c: no refresh token)")
-        bsc = os.environ["bespoke_session_cookie_example"]
+        bsc = os.environ["expired_bespoke_session_cookie"]
         self.client.set_cookie(key="bespoke_session", value=bsc,httponly=True, samesite="None", secure=True)
         response = self.client.get("/logout")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please log in.")
@@ -149,20 +151,33 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         with app.app_context():
             db.session.add(user)
             db.session.commit()
-            
+        
+        #import an expired bespoke session cookie
+        bsc = os.environ["expired_bespoke_session_cookie"]
+
         #Test Cases 
         print("         Test accessing the route whilst not logged in fails - (c: no bespoke_session cookie)")
         response = self.client.get("/refresh")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
         self.assertEqual(response.status_code, 400)
         
-        
         print("         Test accessing the route whilst not logged in fails - (c: no refresh token)")
-        bsc = os.environ["bespoke_session_cookie_example"]
-        self.client.set_cookie(key="bespoke_session", value=bsc,httponly=True, samesite="None", secure=True)
+        self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
         response = self.client.get("/refresh")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please log in.")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)       
+
+        print("         Test accessing the route with an expired refresh token fails")
+        exp: datetime = datetime.now(tz=timezone.utc) - timedelta(days =1)
+        token_hash = generate_password_hash(decrypt_bespoke_session_cookie(bsc, serializer)["refreshToken"], method = "pbkdf2")
+        refresh_token_obj: Refresh_Token = Refresh_Token(token=token_hash, exp=exp, user_id=1)  
+        with app.app_context():
+            db.session.add(refresh_token_obj)
+            db.session.commit()
+            
+        self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
+        response = self.client.get("/refresh")
+        self.assertEqual(response.json["message"], "Failure: Please login. Refresh token has expired.")
         
             #login
         self.client.post("/login", json={"username":username, "password":pwd})
@@ -170,6 +185,11 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         print("         Test successful request")
         response = self.client.get("/refresh")
         self.assertEqual(response.status_code, 200)
+
+        print("         Test accessing the route with an invalid refresh token fails")
+        self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
+        response = self.client.get("/refresh")
+        self.assertEqual(response.json["message"], "Failure: Refresh token is invalid. Please login")
         
     def test5_delete_user(self):
         print("     5)Testing delete_user")
@@ -289,9 +309,17 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.assertEqual(response_get_user.status_code, 400)
         
         print("         Test accessing the route with an invalid access token cookie fails")
-        self.client.set_cookie(key="session_AT", value="dsfsfas",httponly=True, samesite="None", secure=True)
+        self.client.set_cookie(key="session_AT", value="sdfasdf",httponly=True, samesite="None", secure=True)
         response_get_user = self.client.get("/get-user/1")
+        self.assertEqual(response_get_user.json["message"].split("! Reason:")[0], "Deserialisation or Signiture verificaiton of access token cookie has failed" )
         self.assertEqual(response_get_user.status_code, 400)
+        
+        print("         Test accessing the route with an expired access token cookie fails")
+        self.client.set_cookie(key="session_AT", value= os.environ["expired_access_token_cookie"],httponly=True, samesite="None", secure=True)
+        response_get_user = self.client.get("/get-user/1")
+        self.assertEqual(response_get_user.json["message"], "Invalid Access Token! Reason: Signature has expired" )
+        self.assertEqual(response_get_user.status_code, 401)
+        
 
 if __name__ == "__main__":
     unittest.main()
