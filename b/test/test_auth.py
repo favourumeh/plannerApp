@@ -1,5 +1,6 @@
 import unittest 
 import os
+import time
 from routes import auth
 from config import app, serializer
 from models import db, User, Refresh_Token
@@ -250,6 +251,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         
         print("         Testing valid input - editing your account when logged in works")
         response_get_user_old = self.client.get("/get-user/1")
+        time.sleep(0.5)
         new_data = {"username":new_username, "password":password, "password1":new_password, "password2":new_password, "email":new_email }
         response = self.client.patch("/edit_user/1", json=new_data)
         self.assertEqual(response.json["message"], "Success: User was successfully edited")
