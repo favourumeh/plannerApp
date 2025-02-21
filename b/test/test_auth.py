@@ -1,9 +1,8 @@
 import unittest 
 import os
 import time
-from routes import auth
-from config import app, serializer
-from models import db, User, Refresh_Token
+from . import app, serializer
+from . import db, User, Refresh_Token
 from datetime import datetime, timezone, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from plannerPackage import filter_dict, decrypt_bespoke_session_cookie
@@ -13,10 +12,6 @@ now = datetime.now()
 print(f"\nTest time: {str(now.time()).split(".")[0]}. (date = {now.date()}) ------------------------")
 
 class FlaskAPIAuthTestCase(unittest.TestCase):
-    app.config["TESTING"] = True # set to true so Exceptions can propagate to the test client (i.e. so we get HTTP status codes other than 500 when something goes wrong with client request)
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///:memory:" #use an in-memory database for tests
-    app.register_blueprint(auth)
-    db.init_app(app=app)
 
     def setUp(self):
         """This is a hook method that is executed before each test method. Function: An app client is created for each test method to make request to the backend api. 
