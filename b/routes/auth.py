@@ -62,7 +62,7 @@ def signup() -> Tuple[Response, int]:
         return jsonify(resp_dict), 404
 
 @auth.route("/login", methods = ["POST"])
-def login():
+def login() -> Tuple[Response, int]:
     resp_dict = {"message":"", "user": ""}
     creds = request.json
     username, password = creds.get("username", ""), creds.get("password", "")
@@ -136,7 +136,7 @@ def login():
 
 @auth.route("/logout", methods=["GET"])
 @login_required(serializer=serializer)
-def logout():
+def logout() -> Tuple[Response, int]:
     resp_dict = {"message": ""}
     #delete refresh token
     try:
@@ -201,7 +201,7 @@ def refresh() -> Tuple[Response, int]:
 @auth.route("/delete_user/<int:user_id>", methods = ["DELETE"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
-def delete_user(user_id: int):
+def delete_user(user_id: int) -> Tuple[Response, int]:
     resp_dict = {"message": "boo", "userID": f"{session["userID"]}"}
 
     if user_id != session["userID"]:
@@ -224,7 +224,7 @@ def delete_user(user_id: int):
 @auth.route("/edit_user/<int:user_id>", methods = ["PATCH"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
-def edit_user(user_id: int):
+def edit_user(user_id: int) -> Tuple[Response, int]:
     resp_dict = {"message":""}
 
     if user_id != session["userID"]:
@@ -265,7 +265,7 @@ def edit_user(user_id: int):
 @auth.route("/get-user/<int:user_id>", methods = ["GET"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
-def get_user(user_id: int):
+def get_user(user_id: int) -> Tuple[Response, int]:
     """Allows the admin to gets all fields in of a User's account"""
     resp_dict = {"message":"", "user": ""}
 
