@@ -7,9 +7,8 @@ from datetime import datetime, timezone, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from plannerPackage import filter_dict, decrypt_bespoke_session_cookie
 
-#Generate the time test execution
-now = datetime.now()
-print(f"\nTest time: {str(now.time()).split(".")[0]}. (date = {now.date()}) ------------------------")
+#Record test execution time
+now = datetime.now(tz=timezone.utc)
 
 class FlaskAPIAuthTestCase(unittest.TestCase):
 
@@ -27,6 +26,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
             db.drop_all()
         
     def test1_signup(self):
+        print(f"\nTest time: {str(now.time()).split(".")[0]}. (date = {now.date()}) ------------------------")
         print("     1)Testing test_signup")
         #Add a user entry to the user table of the in-memory db
         user = User(username="test", password="ttt", email="test@test.com")
