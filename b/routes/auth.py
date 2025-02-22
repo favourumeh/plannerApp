@@ -165,19 +165,6 @@ def refresh() -> Tuple[Response, int]:
     user_id: int = session["userID"] 
     user: User = User.query.filter(User.id == user_id).first()
 
-    refresh_token_obj: Refresh_Token = Refresh_Token.query.filter(Refresh_Token.user_id == user_id).first() #refresh token from db
-    refresh_token: str = session["refreshToken"] #refesh token (uuid4) from client's http-only cookies
-
-    #check if refresh token is invalid
-    if not check_password_hash(refresh_token_obj.token, refresh_token):
-        resp_dict["message"]  = "Failure: Refresh token is invalid. Please login"
-        return jsonify(resp_dict), 401
-
-    #check if refresh token has expired 
-    if refresh_token_obj.exp.replace(tzinfo = timezone.utc) < datetime.now(tz=timezone.utc):
-        resp_dict["message"] = "Failure: Please login. Refresh token has expired."
-        return jsonify(resp_dict), 401
-
     #generate access token (JWT)
     now: datetime = datetime.now(tz=timezone.utc)
     access_token = jwt.encode(

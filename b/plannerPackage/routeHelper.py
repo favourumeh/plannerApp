@@ -8,7 +8,7 @@ from functools import wraps
 from datetime import datetime, timedelta, timezone
 from . import refresh_token_dur, decrypt_bespoke_session_cookie #alternative: from plannerPackage import refre...
 from uuid import uuid4
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
 import json
 import os
@@ -84,8 +84,18 @@ def login_required(serializer: URLSafeTimedSerializer):
             #Check if the user has a refresh_token. If they don't then they are not logged in
             refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userID"]).first()
             if not refresh_token_obj:
-                resp_dict["message"] = "Failure: User is not logged in (no rt). Please log in."
+                resp_dict["message"] = "Failure: User is not logged in (no rt). Please login!"
                 return jsonify(resp_dict) , 404
+            
+            #Check if the user is using an invalid refresh token in the cookies
+            if not check_password_hash(refresh_token_obj.token, session["refreshToken"]):
+                resp_dict["message"] = "Failure: Refresh token is invalid. Please login"
+                return jsonify(resp_dict), 401
+            
+            #check if user's token has expired 
+            if refresh_token_obj.exp.replace(tzinfo = timezone.utc) < datetime.now(tz=timezone.utc):
+                resp_dict["message"] = "Failure: Please login. Refresh token has expired."
+                return jsonify(resp_dict), 401
                 
             return func(*args, **kwargs)
         return wrapper
