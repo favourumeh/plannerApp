@@ -148,8 +148,9 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
             db.session.add(user)
             db.session.commit()
         
-        #import an expired bespoke session cookie
+        #import an expired bespoke session cookie and decryption key
         bsc = os.environ["expired_bespoke_session_cookie"]
+        sk = os.environ["session_key"]
 
         #Test Cases 
         print("         Test accessing the route whilst not logged in fails - (c: no bespoke_session cookie)")
@@ -165,7 +166,8 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
 
         print("         Test accessing the route with an expired refresh token fails")
         exp: datetime = datetime.now(tz=timezone.utc) - timedelta(days =1)
-        token_hash = generate_password_hash(decrypt_bespoke_session_cookie(bsc, serializer)["refreshToken"], method = "pbkdf2")
+        token = decrypt_bespoke_session_cookie(cookie=bsc, serializer=serializer, decryption_key=sk)["refreshToken"]
+        token_hash = generate_password_hash(token, method = "pbkdf2")
         refresh_token_obj: Refresh_Token = Refresh_Token(token=token_hash, exp=exp, user_id=1)  
         with app.app_context():
             db.session.add(refresh_token_obj)

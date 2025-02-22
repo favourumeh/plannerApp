@@ -71,9 +71,9 @@ def login_required(serializer: URLSafeTimedSerializer):
 
             #Decrypt bespoke session cookie
             try:
-                decrypted_session_data = decrypt_bespoke_session_cookie(cookie=cookie, serializer=serializer)
+                decrypted_session_data = decrypt_bespoke_session_cookie(cookie=cookie, serializer=serializer, decryption_key=os.environ["session_key"])
             except Exception as e:
-                resp_dict["message"] = f"Could not decode the bespoke_session cookies. Reason: {e}"
+                resp_dict["message"] = f"Failure: Could not decrypt the bespoke_session cookies. Reason: {e}"
                 return jsonify(resp_dict), 400
     
             #Extract user id,username and refreshToken  from the session data and store it in session object for use in downstream function
