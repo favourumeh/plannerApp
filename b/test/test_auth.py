@@ -24,9 +24,97 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         with app.app_context():
             db.session.remove()
             db.drop_all()
+            
+    def test0_A_test_login_required(self):
+        print(f"\nTest time: {str(now.time()).split(".")[0]}. (date = {now.date()}) ------------------------")
+        print("     0A)Test login_required decorator")
+        print("         notes: bsc = bespoke_session cookie")
+        username, pwd = "test", "ttt"
+        expired_bsc = os.environ["expired_bespoke_session_cookie"]
+
+        #Test Cases:
+        print("         Test accessing route without bsc fails")
+        response = self.client.get("/test-login-required")
+        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
+        
+        print("         Test accessing route with an invalid bsc (i.e., bsc could not be decrypted, signed or deserialised)")
+        self.client.set_cookie(key="bespoke_session", value="fasdfsad", httponly=True, samesite="None", secure=True)
+        response = self.client.get("/test-login-required")
+        self.assertEqual(response.json["message"].split(". Reason")[0], "Failure: Could not decrypt the bespoke_session cookies")      
+
+        print("         Test accessing route whilst logged in succeeds")
+        user = User(username=username, password=generate_password_hash(pwd, "pbkdf2"))
+        with app.app_context():
+            db.session.add(user)
+            db.session.commit()
+        self.client.post("/login", json = {"username":username, "password":pwd})
+        bsc = self.client.get_cookie("bespoke_session").value
+        response = self.client.get("/test-login-required")
+        self.assertEqual(response.status_code, 200)
+
+        print("         Test accessing route after user has logged out with the previous bsc fails (i.e., user has no refresh_token entry in db but has a bsc)")        
+        self.client.get("/logout")
+        self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
+        response = self.client.get("/test-login-required")
+        self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please login!")
+
+        print("         Test accessing route with an mismatched rt in bsc fails (i.e., user's rt in bsc is different to db rt)")
+        self.client.post("/login", json={"username":username, "password":pwd})
+        login_bsc = self.client.get_cookie("bespoke_session").value
+        self.client.set_cookie(key="bespoke_session", value=expired_bsc, httponly=True, samesite="None", secure=True)
+        response = self.client.get("/test-login-required")
+        self.assertEqual(response.json["message"], "Failure: Refresh token is invalid. Please login")
+            #logout - must logout with the bsc used to login (i.e. login_bsc) otherwise logout fails
+        self.client.set_cookie(key="bespoke_session", value=login_bsc, httponly=True, samesite="None", secure=True)
+        self.client.get("/logout")
+        
+        print("         Test accessing route with expired with bsc containing expired rt fails (i.e. bsc rt == db rt but db's exp field in the past)")
+        expired_rt = decrypt_bespoke_session_cookie(expired_bsc, serializer, os.environ["session_key"])["refreshToken"]
+        expired_rt_hash = generate_password_hash(expired_rt, "pbkdf2")
+        refresh_token_obj = Refresh_Token(token=expired_rt_hash, exp=now-timedelta(days=1), user_id=1)
+        with app.app_context():
+            db.session.add(refresh_token_obj)
+            db.session.commit()
+        self.client.set_cookie(key="bespoke_session", value=expired_bsc, httponly=True, samesite="None", secure=True)
+        response = self.client.get("/test-login-required")
+        self.assertEqual(response.json["message"], "Failure: Please login. Refresh token has expired.")
+        
+    def test0_B_test_token_required(self):
+        print("     0B)Test token_required decorator")
+        print("         note1: satc = session_AT cookie.\n         note2: All tests are made with after user login is verified.")
+        expired_satc = os.environ["expired_access_token_cookie"]
+        username, pwd = "test", "ttt"
+        user = User(username=username, password=generate_password_hash(pwd, "pbkdf2"))
+        with app.app_context():
+            db.session.add(user)
+            db.session.commit()
+            
+        self.client.post("/login", json={"username":username, "password": pwd})
+        satc = self.client.get_cookie("session_AT").value
+        
+        #Test cases 
+        print("         Test that access the route with a satc works")
+        response = self.client.get("/test-token-required")
+        self.assertEqual(response.status_code, 200)
+        
+        print("         Test access route without satc fails")
+        self.client.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True)
+        response = self.client.get("/test-token-required")
+        self.assertEqual(response.json["message"], "Request is missing access token. Please login to refresh access token")
+        
+        print("         Test access route with an invalid access_token fails (i.e., Deserialisation/signature fails)")
+        self.client.set_cookie(key="session_AT", value="fasdfs", httponly=True, samesite="None", secure=True)
+        response = self.client.get("/test-token-required")
+        self.assertEqual(response.json["message"].split("! Reason: ")[0], "Deserialisation or Signiture verificaiton of access token cookie has failed")
+
+        print("         Test access route with an expired access_token fails")
+        self.client.set_cookie(key="session_AT", value=expired_satc, httponly=True, samesite="None", secure=True)
+        response = self.client.get("/test-token-required")
+        self.assertEqual(response.json["message"].split("! Reason: ")[0], "Invalid Access Token")
+        self.assertEqual(response.json["message"].split("! Reason: ")[-1], "Signature has expired")
+        
         
     def test1_signup(self):
-        print(f"\nTest time: {str(now.time()).split(".")[0]}. (date = {now.date()}) ------------------------")
         print("     1)Testing test_signup")
         #Add a user entry to the user table of the in-memory db
         user = User(username="test", password="ttt", email="test@test.com")
