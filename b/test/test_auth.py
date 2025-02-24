@@ -352,8 +352,6 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.assertNotEqual(older_user_details["email"], new_user_details["email"])
         self.assertNotEqual(older_user_details["lastUpdated"], new_user_details["lastUpdated"])
 
-        # self.assertTrue()
-
     def test7_get_user(self):
         print("     7)Testing get_user")
         
@@ -409,6 +407,35 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         response_get_user = self.client.get("/get-user/1")
         self.assertEqual(response_get_user.json["message"], "Invalid Access Token! Reason: Signature has expired" )
         self.assertEqual(response_get_user.status_code, 401)
+
+    def test8_get_user_rts(self):
+        print("     8)Test get_user_rts")
+        #created user
+        admin_username, reg_username = "admin", "reg"
+        pwd = "ttt"
+        admin_user: User = User(username=admin_username, password=generate_password_hash(pwd), is_admin=True) 
+        reg_user: User = User(username=reg_username, password=generate_password_hash(pwd), is_admin=False) 
+        with app.app_context():
+            db.session.add(admin_user)
+            db.session.add(reg_user)
+            db.session.commit()
+
+        print("         Test accessing route without admin rights fails")
+        self.client.post("/login", json={"username":reg_username, "password":pwd})
+        response = self.client.get("/get-user-rts/2")
+        self.assertEqual(response.json["message"], "Failure: User is not permitted to access this route")
+        
+        print("         Test accessing route with admin rights succeeds")
+        self.client.post("/login", json={"username":admin_username, "password":pwd})
+        response = self.client.get("/get-user-rts/2")
+        self.assertEqual(response.json["message"], "Success: retrieved user rt")
+
+        print("         Test getting the rts of a user that does not exit fails")
+        self.client.post("/login", json={"username":admin_username, "password":pwd})
+        response = self.client.get("/get-user-rts/3")
+        self.assertEqual(response.json["message"], "Failure: the user you are trying to get does not exist")
+        
+        
         
 
 if __name__ == "__main__":
