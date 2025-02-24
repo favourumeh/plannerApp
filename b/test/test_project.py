@@ -37,27 +37,26 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
     def test1_create_project(self):
         project_title_limit = int(os.environ['project_title_limit'])
         username, pwd = "test", "ttt"
-        print("Testing Project Blueprint")
+        print("\nTesting routes of Project Blueprint")
         print("     1)Testing create_project")
 
         #Test cases 
-        print("         Test accessing route without login(no bsc)")
+        print("         Test accessing route without login(no bsc) fails")
         response = self.client.post("/create-project", json={"description":"fgsa"})
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
 
         #signup and login #
-        session_key = os.environ["session_key"]
         self.client.post("/sign-up", json={"username":username, "password1":pwd, "password2":pwd})
         self.client.post("/login", json={"username":username, "password":pwd})
         satc = self.client.get_cookie("session_AT").value #session_AT cookie(satc)
 
-        print("         Test accessing route without login(no satc)")
+        print("         Test accessing route without login(no satc) fails")
         self.client.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True) #remove satc
         response = self.client.post("/create-project", json={"description":"fgsa"})
         self.assertEqual(response.json["message"], "Request is missing access token. Please login to refresh access token")
         self.client.set_cookie(key="session_AT", value=satc, httponly=True, samesite="None", secure=True) # add satc
 
-        print("         Test creating a project is successfull")
+        print("         Test creating a project after login is successfull")
         data = {"title":"Test User Project", "description":"test description", "isCompleted":True, "tag":"test", "deadline":now_str}
         response = self.client.post("/create-project", json=data)
         response_get_project = self.client.get("/read-projects")
@@ -76,6 +75,30 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
         data = {"title":"12"*project_title_limit, "description":"blah", "isCompleted":False, "tag":"test"}
         response = self.client.post("/create-project", json=data)
         self.assertEqual(response.json["message"], f"Failure: The title has over {project_title_limit} chars")
-    
+
+    def test2_read_projects(self):
+        username, pwd = "test", "ttt"
+        print("     2)Testing read_project")
+        
+        #Test cases 
+        print("         Test accessing route without login(no bsc) fails")
+        response = self.client.get("/read-projects")
+        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
+
+        #signup and login #
+        self.client.post("/sign-up", json={"username":username, "password1":pwd, "password2":pwd})
+        self.client.post("/login", json={"username":username, "password":pwd})
+        satc = self.client.get_cookie("session_AT").value #session_AT cookie(satc)
+
+        print("         Test accessing route without login(no satc) fails")
+        self.client.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True) #remove satc
+        response = self.client.get("/read-projects")
+        self.assertEqual(response.json["message"], "Request is missing access token. Please login to refresh access token")
+        self.client.set_cookie(key="session_AT", value=satc, httponly=True, samesite="None", secure=True) # add satc
+        
+        print("         Test accessing the route whilst logged succeeds")
+        response = self.client.get("/read-projects")
+        self.assertEqual(response.status_code, 200)
+        
 if __name__ == "__main__":
     unittest.main()
