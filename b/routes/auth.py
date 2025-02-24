@@ -82,7 +82,7 @@ def login() -> Tuple[Response, int]:
                           "username": user.username,
                           "userID": user.id}
 
-    token_UUID = str(uuid4)
+    token_UUID = str(uuid4())
     session_data["refreshToken"] = token_UUID
 
     #create/updated refresh token
