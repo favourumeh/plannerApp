@@ -89,13 +89,11 @@ def login() -> Tuple[Response, int]:
     refresh_token_obj = Refresh_Token.query.filter_by(user_id=user.id).first()
 
     if refresh_token_obj:
-        token_expired =  refresh_token_obj.exp.replace(tzinfo=timezone.utc) < datetime.now(tz = timezone.utc)
-        if token_expired:
-            try:
-                refresh_token_obj = update_refresh_token_table(action="update", refresh_token_obj=refresh_token_obj, db=db, token_UUID=token_UUID, user_id=user.id)
-            except Exception as e:
-                resp_dict["message"] = f"Failure: Could not update the user's refresh token entry. Reason: {e}"
-                return jsonify(resp_dict), 404
+        try: #regardless of whether the refresh token in expired or not, it should be updated on login
+            refresh_token_obj = update_refresh_token_table(action="update", refresh_token_obj=refresh_token_obj, db=db, token_UUID=token_UUID, user_id=user.id)
+        except Exception as e:
+            resp_dict["message"] = f"Failure: Could not update the user's refresh token entry. Reason: {e}"
+            return jsonify(resp_dict), 404
     else:
         try:
             refresh_token_obj = update_refresh_token_table(action="create", refresh_token_obj=refresh_token_obj, db=db, token_UUID=token_UUID, user_id=user.id)
@@ -271,12 +269,4 @@ def get_user(user_id: int) -> Tuple[Response, int]:
     resp_dict["message"] = "Success: retrieved user data"
     resp_dict["user"] = user_queried.to_dict()
     return jsonify(resp_dict), 200
-
-        
-    
-
-    
-
-
-
 
