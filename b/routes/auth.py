@@ -270,3 +270,25 @@ def get_user(user_id: int) -> Tuple[Response, int]:
     resp_dict["user"] = user_queried.to_dict()
     return jsonify(resp_dict), 200
 
+@auth.route("/get-user-rts/<int:user_id>", methods = ["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def get_user_refresh_token(user_id: int) -> Tuple[Response, int]:
+    """Allows the admin to gets all fields in of a User's refresh token entry/entries"""
+    resp_dict = {"message":"", "user": ""}
+
+    admin_user: User = User.query.filter_by(id=session["userID"]).first()    
+    if not admin_user.is_admin:
+        resp_dict["message"] = "Failure: User is not permitted to access this route"
+        return jsonify(resp_dict), 403
+
+    user_queried: User = User.query.filter_by(id=user_id).first()
+    if not user_queried:
+        resp_dict["message"] = "Failure: the user you are trying to get does not exist"
+        return jsonify(resp_dict), 404
+    
+    resp_dict["message"] = "Success: retrieved user rt"
+    user_rts: Refresh_Token = Refresh_Token.query.filter_by(user_id=user_id).all()
+    rts = [{f"{rt.id}":rt.to_dict()} for rt in user_rts] 
+    resp_dict["refresh_tokens"] = rts  #user_queried.to_dict()
+    return jsonify(resp_dict), 200
