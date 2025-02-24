@@ -9,6 +9,7 @@ from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash
 from plannerPackage import decrypt_bespoke_session_cookie, filter_dict
 from http.cookies import SimpleCookie
+from werkzeug.test import TestResponse
 
 #Record test execution time
 now: datetime = datetime.now(tz=timezone.utc)
@@ -33,16 +34,34 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
         with app.app_context():
             db.session.remove()
             db.drop_all()
-    
-    def test1_create_project(self):
-        project_title_limit = int(os.environ['project_title_limit'])
-        username, pwd = "test", "ttt"
-        print("\nTesting routes of Project Blueprint")
-        print("     1)Testing create_project")
-
+            
+    def client_test_request(self, httpmethod:str, endpoint: str, json_data: dict|None) -> TestResponse:
+        """Makes a test request to the API via FlaskClient (self.cleint = app.test_client(use_cookies=True)). 
+        Args:
+            httpmethod: the http method being used (i.e., get, post, patch, delete)
+            endpoint: the endpoint of the route where test request are sent. Must begin with '/'
+            json_data: the json body being passed with test request"""
+        if httpmethod=="get":
+            return self.client.get(endpoint)
+        if httpmethod=="post":
+            return self.client.post(endpoint, json=json_data)
+        if httpmethod=="patch":
+            return self.client.patch(endpoint, json=json_data)
+        if httpmethod=="delete":
+            return self.client.delete(endpoint)
+            
+    def standard_login_and_auth_test(self, httpmethod:str, endpoint:str, json_data:dict|None, username:str, pwd:str) -> None:
+        """These test 2 things: 1) Can the user access a protected route without a bespoke_session cookie(bsc)
+        2) can the user access a protected route without session_AT cookie(satc)
+        Args:
+            httpmethod: the http method being used (i.e., get, post, patch, delete)
+            endpoint: the (relative) endpoint of the protected route. Must being with "/".
+            json_data: the json body of the request. If http method does not need a json body (e.g., get) then set to None. 
+            username: username used to sign-up and login user
+            pwd: password used to signup and login user"""
         #Test cases 
         print("         Test accessing route without login(no bsc) fails")
-        response = self.client.post("/create-project", json={"description":"fgsa"})
+        response = self.client_test_request(httpmethod=httpmethod, endpoint=endpoint,json_data=json_data)
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
 
         #signup and login #
@@ -52,9 +71,19 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
 
         print("         Test accessing route without login(no satc) fails")
         self.client.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True) #remove satc
-        response = self.client.post("/create-project", json={"description":"fgsa"})
+        response = self.client_test_request(httpmethod=httpmethod, endpoint=endpoint,json_data=json_data)
         self.assertEqual(response.json["message"], "Request is missing access token. Please login to refresh access token")
         self.client.set_cookie(key="session_AT", value=satc, httponly=True, samesite="None", secure=True) # add satc
+        
+    
+    def test1_create_project(self):
+        project_title_limit = int(os.environ['project_title_limit'])
+        username, pwd = "test", "ttt"
+        print("\nTesting routes of Project Blueprint")
+        print("     1)Testing create_project")
+
+        #Test cases 
+        self.standard_login_and_auth_test(httpmethod="post", endpoint="/create-project", json_data={"description":"blah"} , username=username, pwd=pwd)
 
         print("         Test creating a project after login is successfull")
         data = {"title":"Test User Project", "description":"test description", "isCompleted":True, "tag":"test", "deadline":now_str}
@@ -81,24 +110,44 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
         print("     2)Testing read_project")
         
         #Test cases 
-        print("         Test accessing route without login(no bsc) fails")
-        response = self.client.get("/read-projects")
-        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
+        self.standard_login_and_auth_test(httpmethod="get", endpoint="/read-projects", json_data=None , username=username, pwd=pwd)
 
-        #signup and login #
-        self.client.post("/sign-up", json={"username":username, "password1":pwd, "password2":pwd})
-        self.client.post("/login", json={"username":username, "password":pwd})
-        satc = self.client.get_cookie("session_AT").value #session_AT cookie(satc)
-
-        print("         Test accessing route without login(no satc) fails")
-        self.client.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True) #remove satc
-        response = self.client.get("/read-projects")
-        self.assertEqual(response.json["message"], "Request is missing access token. Please login to refresh access token")
-        self.client.set_cookie(key="session_AT", value=satc, httponly=True, samesite="None", secure=True) # add satc
-        
         print("         Test accessing the route whilst logged succeeds")
         response = self.client.get("/read-projects")
         self.assertEqual(response.status_code, 200)
+              
+        
+    # def test3_update_projects(self):
+    #     username, pwd = "test", "ttt"
+    #     print("     2)Testing update_project")
+        
+    #     #Test cases 
+    #     print("         Test accessing route without login(no bsc) fails")
+    #     response = self.client.get("/read-projects")
+    #     self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
+
+    #     #signup and login #
+    #     self.client.post("/sign-up", json={"username":username, "password1":pwd, "password2":pwd})
+    #     self.client.post("/login", json={"username":username, "password":pwd})
+    #     satc = self.client.get_cookie("session_AT").value #session_AT cookie(satc)
+        
+    #     #create a user project
+    #     self.client.post("/create-project", json = {"description":"blah"})
+    #     resp_read_projects = self.client.get("/read-projects")
+    #     projects = resp_read_projects.json
+        
+    #     print("         Test accessing route without login(no satc) fails")
+    #     self.client.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True) #remove satc
+    #     response = self.client.get("/update-projects")
+    #     self.assertEqual(response.json["message"], "Request is missing access token. Please login to refresh access token")
+    #     self.client.set_cookie(key="session_AT", value=satc, httponly=True, samesite="None", secure=True) # add satc
+        
+    #     print("         Test accessing route without providing a project id fails")
+    #     response = self.client.patch("/update-project/1")
+    #     self.assertEqual()
+        
+        
+        
         
 if __name__ == "__main__":
     unittest.main()
