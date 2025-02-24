@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import json
 from config import db, app, serializer
 from flask import Blueprint, request, jsonify, Response, session
-from models import User, Refresh_Token
+from models import User, Refresh_Token, Project
 from werkzeug.security import generate_password_hash, check_password_hash
 from typing import Tuple
 import jwt
@@ -54,6 +54,9 @@ def signup() -> Tuple[Response, int]:
         password_hash = generate_password_hash(password=password1, method="pbkdf2")
         user = User(username=username, email=email, password=password_hash)
         db.session.add(user)
+        user_id = User.query.filter_by(username=username).first().id
+        default_project = Project(type="default project", title="Default", description="Refrences all non-user created objectives and tasks", tag="default", user_id=user_id)
+        db.session.add(default_project)
         db.session.commit()
         resp_dict["message"] = f"Success: Account Created! Login to start planning"
         return jsonify(resp_dict), 201
