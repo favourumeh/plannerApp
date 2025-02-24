@@ -27,6 +27,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
             
     def test0_A_test_login_required(self):
         print(f"\nTest time: {str(now.time()).split(".")[0]}. (date = {now.date()}) ------------------------")
+        print("Testing Auth Blueprint")
         print("     0A)Test login_required decorator")
         print("         notes: bsc = bespoke_session cookie")
         username, pwd = "test", "ttt"
@@ -123,12 +124,19 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
             db.session.commit()
 
         #Test cases:
-        print("         Test Valid Input")
+        print("         Test valid signup input")
         data = {"username":"test1", "password1": "ttt", "password2": "ttt"} 
         response = self.client.post("/sign-up", json = data )
         self.assertEqual(response.json, {"message": "Success: Account Created! Login to start planning"})
         self.assertEqual(response.status_code, 201)
 
+        print("         Test that a default project is created on signup")
+        self.client.post("/login", json={"username":"test1", "password":"ttt"})
+        response = self.client.get("/read-projects")
+        default_project = list(filter(lambda project: project["type"]=="default project", response.json["projects"]))[0]
+        filter_project = filter_dict(default_project, ["title", "tag"])
+        self.assertEqual(filter_project, {"title":"Default", "tag":"default"})
+        
         print("         Test Valid Input w/email")
         data = {"username":"test2", "password1": "ttt", "password2": "ttt", "email": "example@exmaple.com"} 
         response = self.client.post("/sign-up", json = data )
