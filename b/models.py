@@ -32,10 +32,10 @@ class User(db.Model, UserMixin):
 
 class Refresh_Token(db.Model):
     """Defines the properites of the Refresh_Token entity: id, token,exp, user_id"""
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     token = db.Column(db.String(250), nullable =False)
-    exp = db.Column(db.DateTime(timezone=True), nullable = False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable = False)
+    exp = db.Column(db.DateTime(timezone=True), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     
     def __repr__(cls) -> str:
         return f'<Refresh_Token "user = {cls.user_id}">'
@@ -49,15 +49,15 @@ class Refresh_Token(db.Model):
 class Project(db.Model):
     """Defines the properties of the 'Project' entity: id, type, title, description, is_completed, deadline, tag, user_id"""
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(20), default = "user project") # 2 types: "default project" and "user project" 
-    title = db.Column(db.String(80), default = f"Project {id}")
-    description = db.Column(db.Text)
-    is_completed = db.Column(db.Boolean, default = False)
-    deadline = db.Column(db.DateTime(timezone = True))
-    date_added = db.Column(db.DateTime(timezone =True), default = func.now())
-    last_updated = db.Column(db.DateTime(timezone = True), default = func.now())
-    tag = db.Column(db.String(40))
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable = False)
+    type = db.Column(db.String(20), default="user project") # 2 types: "default project" and "user project" 
+    title = db.Column(db.String(80), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    is_completed = db.Column(db.Boolean, default=False)
+    deadline = db.Column(db.DateTime(timezone=True))
+    date_added = db.Column(db.DateTime(timezone=True), default=func.now())
+    last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
+    tag = db.Column(db.Text)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     db.relationship("Objective")
     
     def __repr__(cls) -> str:
@@ -68,7 +68,7 @@ class Project(db.Model):
                 "type": cls.type,
                 "title": cls.title,
                 "description": cls.description,
-                "isComplete": cls.is_completed,
+                "isCompleted": cls.is_completed,
                 "deadline": cls.deadline,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
@@ -78,18 +78,18 @@ class Project(db.Model):
 class Objective(db.Model):
     """Defines the properties of the 'Objective' entity: id, objective_number, type, title, description, duration, scheduled_start/finish, is_completed, tag, project_id"""
     id = db.Column(db.Integer, primary_key=True)
-    objective_number = db.Column(db.Integer, nullable = False)
-    type = db.Column(db.String(20), default = "project objective") # 2 types: "free objective" and "project objective"
-    title = db.Column(db.String(80), default = f"Project {id}")
+    objective_number = db.Column(db.Integer, nullable=False)
+    type = db.Column(db.String(20), default="project objective") # 2 types: "free objective" and "project objective"
+    title = db.Column(db.String(80), default=f"Project {id}")
     description = db.Column(db.Text)
     duration = db.Column(db.Integer)  #hours
-    sheduled_start = db.Column(db.DateTime(timezone = True))
-    sheduled_finish = db.Column(db.DateTime(timezone = True))
-    is_completed = db.Column(db.Boolean, default = False)
-    date_added = db.Column(db.DateTime(timezone =True), default = func.now())
-    last_updated = db.Column(db.DateTime(timezone = True), default = func.now())
+    sheduled_start = db.Column(db.DateTime(timezone=True))
+    sheduled_finish = db.Column(db.DateTime(timezone=True))
+    is_completed = db.Column(db.Boolean, default=False)
+    date_added = db.Column(db.DateTime(timezone=True), default=func.now())
+    last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
     tag = db.Column(db.String(40))
-    project_id = db.Column(db.Integer, db.ForeignKey("project.id"), nullable = False)
+    project_id = db.Column(db.Integer, db.ForeignKey("project.id"), nullable=False)
     db.relationship("Task")
 
     def __repr__(cls) -> str:
@@ -114,19 +114,19 @@ class Objective(db.Model):
 class Task(db.Model):
     """Defines the properties of the 'Task' entity: id, task_number, type, description, duration, first_task, precedence_score, scheduled_start/finish, is_completed, tag, objective_id"""
     id = db.Column(db.Integer, primary_key=True)
-    task_number = db.Column(db.Integer, nullable = False)
-    type = db.Column(db.String(12), default = "project task") # 2 types: "free task" and "project task"
+    task_number = db.Column(db.Integer, nullable=False)
+    type = db.Column(db.String(12), default="project task") # 2 types: "free task" and "project task"
     description = db.Column(db.String(100))
-    duration = db.Column(db.Integer, nullable = False) # minutes
-    first_task = db.Column(db.Boolean, default = False) 
-    precedence_score = db.Column(db.Integer, default = 1)
-    sheduled_start = db.Column(db.DateTime(timezone = True))
-    sheduled_finish = db.Column(db.DateTime(timezone = True))
-    is_completed = db.Column(db.Boolean, default = False)
-    date_added = db.Column(db.DateTime(timezone =True), default = func.now())
-    last_updated = db.Column(db.DateTime(timezone = True), default = func.now())
+    duration = db.Column(db.Integer, nullable=False) # minutes
+    first_task = db.Column(db.Boolean, default=False) 
+    precedence_score = db.Column(db.Integer, default=1)
+    sheduled_start = db.Column(db.DateTime(timezone=True))
+    sheduled_finish = db.Column(db.DateTime(timezone=True))
+    is_completed = db.Column(db.Boolean, default=False)
+    date_added = db.Column(db.DateTime(timezone=True), default=func.now())
+    last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
     tag = db.Column(db.String(40))
-    objective_id = db.Column(db.Integer, db.ForeignKey("objective.id"), nullable = False)
+    objective_id = db.Column(db.Integer, db.ForeignKey("objective.id"), nullable=False)
 
     def __repr__(cls) -> str:
         return f'<Task {cls.id}: {cls.description[:20]}...>'
