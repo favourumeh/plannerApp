@@ -11,7 +11,12 @@ from werkzeug.test import TestResponse
 now: datetime = datetime.now(tz=timezone.utc)
 now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M:%S.%fZ')
 now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:%S %Z")
+
+#load env vars
 load_dotenv()
+
+#key params
+project_title_limit = int(os.environ["project_title_limit"])
 
 class FlaskAPIProjectTestCase(unittest.TestCase):
 
@@ -42,7 +47,8 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
             
     def standard_login_and_auth_test(self, httpmethod:str, endpoint:str, json_data:dict|None, username:str, pwd:str) -> None:
         """These test 2 things: 1) Can the user access a protected route without a bespoke_session cookie(bsc)
-        2) can the user access a protected route without session_AT cookie(satc)
+        2) can the user access a protected route without session_AT cookie(satc).
+        note: In this method a user account is created and the user is login (hence username an password).
         Args:
             httpmethod: the http method being used (i.e., get, post, patch, delete)
             endpoint: the (relative) endpoint of the protected route. Must being with "/".
@@ -67,7 +73,6 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
         
     
     def test1_create_project(self):
-        project_title_limit = int(os.environ['project_title_limit'])
         username, pwd = "test", "ttt"
         print("\nTesting routes of Project Blueprint")
         print("     1)Testing create_project")
@@ -90,8 +95,8 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
         response = self.client.post("/create-project", json=data)
         self.assertEqual(response.json["message"], "Failure: Project is missing a description. Please add one.")
         
-        print(f"         Test making a request with title is > {os.environ['project_title_limit']} chars fails")
-        data = {"title":"12"*project_title_limit, "description":"blah", "isCompleted":False, "tag":"test"}
+        print(f"         Test making a request with title is > {project_title_limit} chars fails")
+        data = {"title":"1"*(project_title_limit+1), "description":"blah", "isCompleted":False, "tag":"test"}
         response = self.client.post("/create-project", json=data)
         self.assertEqual(response.json["message"], f"Failure: The title has over {project_title_limit} chars")
 
@@ -140,6 +145,10 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
         data["deadline"] = now_str_long.replace("UTC", "GMT")
         self.assertDictEqual(data, filtered_updated_project)
 
+        print(f"         Test request with project title>{project_title_limit} chars")
+        response = self.client.patch(f"/update-project/{user_project_id}", json={"title":"1"*(project_title_limit+1), "description":"blah"})
+        self.assertEqual(response.json["message"], f"Failure: The title has over {project_title_limit} chars")
+        
     def test4_delete_project(self):
         username, pwd = "test", "pwd"
         print("     4)Test delete_project")

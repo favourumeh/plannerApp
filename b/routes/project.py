@@ -14,6 +14,10 @@ project = Blueprint("project", __name__)
 #import env vars from b/.env
 load_dotenv()
 
+#key params
+project_title_limit = int(os.environ["project_title_limit"])
+
+
 #projects routes 
 
 #create
@@ -30,7 +34,6 @@ def create_project() -> Tuple[Response, int]:
     tag: str = content.get("tag", None)
     user_id: int = session["userID"] 
     
-    project_title_limit = int(os.environ["project_title_limit"])
     if not description:
         resp_dict["message"] = "Failure: Project is missing a description. Please add one."
         return jsonify(resp_dict), 400
@@ -90,6 +93,10 @@ def update_project(project_id: int) -> Tuple[Response, int]:
     deadline = content.get("deadline", project.deadline)
     project.last_updated = datetime.now(tz=timezone.utc)
     project.tag = content.get("tag", project.tag)
+
+    if len(project.title) > project_title_limit:
+        resp_dict["message"] = f"Failure: The title has over {project_title_limit} chars"
+        return jsonify(resp_dict), 400
     
     if isinstance(deadline, str):
         project.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S.%fZ')
