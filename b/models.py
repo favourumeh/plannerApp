@@ -83,8 +83,8 @@ class Objective(db.Model):
     title = db.Column(db.String(80), default=f"Project {id}")
     description = db.Column(db.Text)
     duration = db.Column(db.Integer)  #hours
-    sheduled_start = db.Column(db.DateTime(timezone=True))
-    sheduled_finish = db.Column(db.DateTime(timezone=True))
+    scheduled_start = db.Column(db.DateTime(timezone=True))
+    scheduled_finish = db.Column(db.DateTime(timezone=True))
     is_completed = db.Column(db.Boolean, default=False)
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
     last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
@@ -102,8 +102,8 @@ class Objective(db.Model):
                 "title": cls.title,
                 "description": cls.description,
                 "duration": cls.duration,
-                "scheduledStart": cls.sheduled_start,
-                "scheduledFinish": cls.sheduled_finish,
+                "scheduledStart": cls.scheduled_start,
+                "scheduledFinish": cls.scheduled_finish,
                 "isCompleted": cls.is_completed,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
