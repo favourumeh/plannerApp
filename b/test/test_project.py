@@ -1,14 +1,10 @@
 import os
 from dotenv import load_dotenv
 import unittest 
-from . import app, serializer
+from . import app
 from . import db
-from . import User, Project, Refresh_Token
-from datetime import datetime, timedelta, timezone
-from itsdangerous import URLSafeTimedSerializer
-from werkzeug.security import generate_password_hash
-from plannerPackage import decrypt_bespoke_session_cookie, filter_dict
-from http.cookies import SimpleCookie
+from datetime import datetime, timezone
+from plannerPackage import filter_dict
 from werkzeug.test import TestResponse
 
 #Record test execution time
@@ -16,12 +12,6 @@ now: datetime = datetime.now(tz=timezone.utc)
 now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M:%S.%fZ')
 now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:%S %Z")
 load_dotenv()
-
-
-def parse_cookie(cookie_string):
-    cookie = SimpleCookie()
-    cookie.load(cookie_string)
-    return {key: morsel.value for key, morsel in cookie.items()}
 
 class FlaskAPIProjectTestCase(unittest.TestCase):
 
