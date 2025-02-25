@@ -117,35 +117,40 @@ class FlaskAPIProjectTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
               
         
-    # def test3_update_projects(self):
-    #     username, pwd = "test", "ttt"
-    #     print("     2)Testing update_project")
+    def test3_update_projects(self):
+        username, pwd = "test", "ttt"
+        print("     3)Testing update_project")
+        print("         note: bsc=bespoke_session cookie and satc=session_AT(access token) cookie.")
         
-    #     #Test cases 
-    #     print("         Test accessing route without login(no bsc) fails")
-    #     response = self.client.get("/read-projects")
-    #     self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
+        #Test cases 
+        self.standard_login_and_auth_test(httpmethod="patch", endpoint="/update-project/1", json_data={"description":"blah"}, username=username, pwd=pwd)
+        
+        print("         Test request to update the default project fails")
+        response = self.client.patch("/update-project/1", json={"description":"blah"})
+        self.assertEqual(response.json["message"], "Failure: User is attempting to edit the default project which is not allowed.")
+        
+        print("         Test request to update a non-existant project fails")
+        response = self.client.patch("/update-project/2", json={"description":"blah"})
+        self.assertEqual(response.json["message"], "Failure: Could not find the selected project in the db. Please choose another project id.")
+        
+        #create a user project then edit it
+        print("         Test request to update a user project succeeds")
+        data = {"title":"title1", "description":"blah1"}
+        self.client.post("/create-project", json=data)
+        response_read_projects = self.client.get("/read-projects")
+        user_project_id = list(filter(lambda project: project["type"]=="user project", response_read_projects.json["projects"]))[0]["id"]
+        data = {"title":"Test User Project", "description":"test description", "isCompleted":True, "tag":"test", "deadline":now_str}
+        response = self.client.patch(f"/update-project/{user_project_id}", json=data)
+        self.assertEqual(response.json["message"], "Success: Project has been updated.")
+        response_read_projects = self.client.get("/read-projects")
+        updated_project: dict = list(filter(lambda project: project["type"]=="user project", response_read_projects.json["projects"]))[0]
+        filtered_updated_project = filter_dict(updated_project, list(data.keys()))
+        data["deadline"] = now_str_long.replace("UTC", "GMT")
+        self.assertDictEqual(data, filtered_updated_project)
 
-    #     #signup and login #
-    #     self.client.post("/sign-up", json={"username":username, "password1":pwd, "password2":pwd})
-    #     self.client.post("/login", json={"username":username, "password":pwd})
-    #     satc = self.client.get_cookie("session_AT").value #session_AT cookie(satc)
-        
-    #     #create a user project
-    #     self.client.post("/create-project", json = {"description":"blah"})
-    #     resp_read_projects = self.client.get("/read-projects")
-    #     projects = resp_read_projects.json
-        
-    #     print("         Test accessing route without login(no satc) fails")
-    #     self.client.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True) #remove satc
-    #     response = self.client.get("/update-projects")
-    #     self.assertEqual(response.json["message"], "Request is missing access token. Please login to refresh access token")
-    #     self.client.set_cookie(key="session_AT", value=satc, httponly=True, samesite="None", secure=True) # add satc
-        
-    #     print("         Test accessing route without providing a project id fails")
-    #     response = self.client.patch("/update-project/1")
-    #     self.assertEqual()
-        
+    # def test4_delte_project(self):
+    #     username, pwd = "test", "pwd"
+    #     print("     4)Test delete project ")
         
         
         

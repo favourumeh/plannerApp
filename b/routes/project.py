@@ -25,7 +25,7 @@ def create_project() -> Tuple[Response, int]:
     content: dict = request.json
     title: str = content.get("title", "Unnamed Project")
     description: str = content.get("description", None)
-    is_complete: bool = content.get("isCompleted", False)
+    is_completed: bool = content.get("isCompleted", False)
     deadline: datetime = content.get("deadline", None)
     last_updated: datetime = datetime.now(tz=timezone.utc)
     tag: str = content.get("tag", None)
@@ -44,7 +44,7 @@ def create_project() -> Tuple[Response, int]:
         deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S.%fZ') #converts str date (format e.g., 2024-11-26T09:18:14.687Z) to dt
 
     try:
-        project: Project = Project(title=title, description=description, is_completed=is_complete, deadline=deadline, last_updated=last_updated, tag=tag, user_id=user_id)
+        project: Project = Project(title=title, description=description, is_completed=is_completed, deadline=deadline, last_updated=last_updated, tag=tag, user_id=user_id)
         db.session.add(project)
         db.session.commit()
         resp_dict["message"] = "Success: Project Added!"
@@ -69,18 +69,62 @@ def read_projects():
         return jsonify(resp_dict), 404
 
 #update
-@project.route("/edit-project/<int:project_id>", methods=["PATCH"])
+@project.route("/update-project/<int:project_id>", methods=["PATCH"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def update_project(project_id: int) -> Tuple[Response, int]: 
-    pass
+    resp_dict = {"message":""}
+    content: dict = request.json
+    project = Project.query.filter_by(id=project_id, user_id=session["userID"]).first()
+
+    if not project:
+        resp_dict["message"] = "Failure: Could not find the selected project in the db. Please choose another project id."
+        return jsonify(resp_dict), 404
+
+    if project.type == "default project":
+        resp_dict["message"] = "Failure: User is attempting to edit the default project which is not allowed."
+        return jsonify(resp_dict), 403
+    
+    project.title = content.get("title", project.title)
+    project.description = content.get("description", project.description)
+    project.is_completed = content.get("isCompleted", project.is_completed)
+    deadline = content.get("deadline", project.deadline)
+    project.last_updated = datetime.now(tz=timezone.utc)
+    project.tag = content.get("tag", project.tag)
+    
+    if isinstance(deadline, str):
+        project.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S.%fZ')
+    
+    try:
+        db.session.commit()
+        resp_dict["message"] = "Success: Project has been updated."
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not update the project! Reason: {e}"
+        return jsonify(resp_dict), 404
+        
 
 #delete
-@project.route("/delete-project/<int:project_id>", methods=["DELETE"])
-@login_required(serializer=serializer)
-@token_required(app=app, serializer=serializer)
-def delete_project(project_id: int) -> Tuple[Response, int]:
-    pass
+# @project.route("/delete-project/<int:project_id>", methods=["DELETE"])
+# @login_required(serializer=serializer)
+# @token_required(app=app, serializer=serializer)
+# def delete_project(project_id: int) -> Tuple[Response, int]:
+#     resp_dict = {"message":""}
+#     project = Project.query.filter_by(id=project_id).first()
+    
+#     if not project:
+#         resp_dict["message"] = "Failure: The project you are trying to delete does not exist"
+#         return jsonify(resp_dict), 404
+    
+#     try:
+#         db.session.delete(project)
+#         db.session.commit()
+#         resp_dict["message"] = "Success: The project was successfully deleted!"
+#         return jsonify(resp_dict), 200
+#     except Exception as e:
+#         resp_dict["message"] = f"Failure: Could not delte the project! Reason: {e}"
+#         return jsonify(resp_dict), 404
+    
 
 
 
