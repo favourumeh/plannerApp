@@ -50,7 +50,7 @@ class Project(db.Model):
     """Defines the properties of the 'Project' entity: id, type, title, description, is_completed, deadline, tag, user_id"""
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(20), default="user project") # 2 types: "default project" and "user project" 
-    title = db.Column(db.String(80), nullable=False)
+    title = db.Column(db.String(80), default="Unnamed Project")
     description = db.Column(db.Text, nullable=False)
     is_completed = db.Column(db.Boolean, default=False)
     deadline = db.Column(db.DateTime(timezone=True))
@@ -120,8 +120,8 @@ class Task(db.Model):
     duration = db.Column(db.Integer, nullable=False) # minutes
     first_task = db.Column(db.Boolean, default=False) 
     precedence_score = db.Column(db.Integer, default=1)
-    sheduled_start = db.Column(db.DateTime(timezone=True))
-    sheduled_finish = db.Column(db.DateTime(timezone=True))
+    scheduled_start = db.Column(db.DateTime(timezone=True))
+    scheduled_finish = db.Column(db.DateTime(timezone=True))
     is_completed = db.Column(db.Boolean, default=False)
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
     last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
@@ -139,8 +139,8 @@ class Task(db.Model):
                 "duration": cls.duration,
                 "firstTask": cls.first_task,
                 "precedenceScore": cls.precedence_score,
-                "scheduledStart": cls.sheduled_start,
-                "scheduledFinish": cls.sheduled_finish,
+                "scheduledStart": cls.scheduled_start,
+                "scheduledFinish": cls.scheduled_finish,
                 "isCompleted": cls.is_completed,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
