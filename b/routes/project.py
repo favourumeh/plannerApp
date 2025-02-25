@@ -27,7 +27,6 @@ def create_project() -> Tuple[Response, int]:
     description: str = content.get("description", None)
     is_completed: bool = content.get("isCompleted", False)
     deadline: datetime = content.get("deadline", None)
-    last_updated: datetime = datetime.now(tz=timezone.utc)
     tag: str = content.get("tag", None)
     user_id: int = session["userID"] 
     
@@ -44,7 +43,7 @@ def create_project() -> Tuple[Response, int]:
         deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S.%fZ') #converts str date (format e.g., 2024-11-26T09:18:14.687Z) to dt
 
     try:
-        project: Project = Project(title=title, description=description, is_completed=is_completed, deadline=deadline, last_updated=last_updated, tag=tag, user_id=user_id)
+        project: Project = Project(title=title, description=description, is_completed=is_completed, deadline=deadline, tag=tag, user_id=user_id)
         db.session.add(project)
         db.session.commit()
         resp_dict["message"] = "Success: Project Added!"
