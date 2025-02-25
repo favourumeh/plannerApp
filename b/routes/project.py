@@ -2,11 +2,11 @@
 import os 
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
-from models import User, Project
-from plannerPackage import login_required, token_required, filter_dict
+from models import Project
+from plannerPackage import login_required, token_required
 from config import db, app, serializer
 from typing import Tuple
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 #create blueprint
 project = Blueprint("project", __name__)
@@ -105,25 +105,28 @@ def update_project(project_id: int) -> Tuple[Response, int]:
         
 
 #delete
-# @project.route("/delete-project/<int:project_id>", methods=["DELETE"])
-# @login_required(serializer=serializer)
-# @token_required(app=app, serializer=serializer)
-# def delete_project(project_id: int) -> Tuple[Response, int]:
-#     resp_dict = {"message":""}
-#     project = Project.query.filter_by(id=project_id).first()
+@project.route("/delete-project/<int:project_id>", methods=["DELETE"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def delete_project(project_id: int) -> Tuple[Response, int]:
+    resp_dict = {"message":""}
+    project = Project.query.filter_by(id=project_id).first()
+    if not project:
+        resp_dict["message"] = "Failure: The project you are trying to delete does not exist"
+        return jsonify(resp_dict), 404
     
-#     if not project:
-#         resp_dict["message"] = "Failure: The project you are trying to delete does not exist"
-#         return jsonify(resp_dict), 404
+    if project.type == "default project":
+        resp_dict["message"] = "Failure: User is attempting to delete the default project which is not allowed."
+        return jsonify(resp_dict), 403
     
-#     try:
-#         db.session.delete(project)
-#         db.session.commit()
-#         resp_dict["message"] = "Success: The project was successfully deleted!"
-#         return jsonify(resp_dict), 200
-#     except Exception as e:
-#         resp_dict["message"] = f"Failure: Could not delte the project! Reason: {e}"
-#         return jsonify(resp_dict), 404
+    try:
+        db.session.delete(project)
+        db.session.commit()
+        resp_dict["message"] = "Success: The project was successfully deleted!"
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not delte the project! Reason: {e}"
+        return jsonify(resp_dict), 404
     
 
 
