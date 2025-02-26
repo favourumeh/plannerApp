@@ -1,6 +1,6 @@
 from typing import List, Dict
 from cryptography.fernet import Fernet
-import os
+from models import Objective
 import json
 from itsdangerous import URLSafeTimedSerializer
 from dotenv import load_dotenv
@@ -49,3 +49,32 @@ def decrypt_bespoke_session_cookie(cookie: str, serializer: URLSafeTimedSerializ
     cipher = Fernet(decryption_key.encode())
     decrypted_session_data: dict = json.loads(cipher.decrypt(encrypted_session_data).decode())
     return decrypted_session_data
+
+def flatten_2d_list(L: List) -> List:
+    """Takes a 2d list (L) and makes it 1d. E.g [[1,2], [3,4], ...] => [1,2...]"""
+    return [i for j in L for i in j]
+
+def generate_objective_number(objective_number: int|None, project_id:int, Objective: Objective):
+    """Generates an 'objective_number' (an objective identifier that is specific to a project). Unlike objective_id
+    an objective_number does not have to be unique in the database rather it should be unique to a specific project. 
+    Args:
+        objective_number: the objective number for the project. Can be changed to force uniqueness within a user project.
+        project_id: the id of the project with which the objective being numbered belongs to.
+        Objective: The Objective entity of the plannerApp database."""
+
+    objectives = Objective.query.filter_by(project_id=project_id).all()
+    if len(objectives)>0:
+        objective_numbers = [objective.objective_number for objective in objectives]
+        if objective_number:
+            while objective_number in objective_numbers:
+                objective_number+=1
+            return objective_number
+
+        if not objective_number:
+            objective_number = len(objective_numbers) + 1
+            while objective_number in objective_numbers:
+                objective_number+=1
+            return objective_number
+        
+    objective_number = 1
+    return objective_number
