@@ -1,4 +1,4 @@
-from routes import auth, project, objective #task # import blueprints
+from routes import auth, project, objective, task # import blueprints
 from config import app, serializer
 from models import db, User, Project, Objective, Refresh_Token
 from datetime import datetime
@@ -12,6 +12,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///:memory:" #use an in-memory 
 app.register_blueprint(auth)
 app.register_blueprint(project)
 app.register_blueprint(objective)
+app.register_blueprint(task)
 
     #add these test routes which will only be used to test the login_required and token_requied decorators
 @app.route("/test-login-required", methods=["GET"])
