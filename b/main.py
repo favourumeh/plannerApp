@@ -1,5 +1,5 @@
 from config import app, db
-from routes import auth
+from routes import auth, project, objective
 
 #create db
 with app.app_context():
@@ -7,6 +7,8 @@ with app.app_context():
     
 #register blueprints
 app.register_blueprint(auth)
+app.register_blueprint(project)
+app.register_blueprint(objective)
 
 if __name__=="__main__":
     app.run(debug=True)
