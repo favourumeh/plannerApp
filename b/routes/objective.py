@@ -1,12 +1,12 @@
 #This handles all the objective routes
 import os 
 from dotenv import load_dotenv
-from flask import Blueprint, Response, jsonify, session
-from models import User
-from plannerPackage import login_required, token_required, filter_dict
+from flask import Blueprint, Response, jsonify, session, request
+from models import Project, Objective
+from plannerPackage import login_required, token_required, flatten_2d_list, generate_objective_number
 from config import db, app, serializer
 from typing import Tuple
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 #create blueprint
 objective = Blueprint("objective", __name__)
@@ -14,35 +14,161 @@ objective = Blueprint("objective", __name__)
 #import env vars from b/.env
 load_dotenv()
 
-#objectives routes 
+#key params 
+objective_title_limit = int(os.environ["objective_title_limit"])
+
 #create
-@objective.route("/create-objective", methods="POST")
+@objective.route("/create-objective", methods=["POST"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def create_objective() -> Tuple[Response, int]:
-    pass
+    resp_dict = {"message":""}
+    content: dict = request.json
+    objective_number: int = content.get("objectiveNumber", None)
+    title: str = content.get("title", None)
+    description: str = content.get("description", None)
+    duration: int = content.get("duration", None) # hours
+    scheduled_start = content.get("scheduledStart", None)
+    scheduled_finish = content.get("scheduledFinish", None)
+    is_completed: bool = content.get("isCompleted", False)
+    last_updated: datetime = datetime.now(tz=timezone.utc)
+    tag: str = content.get("tag", None)
+    project_id: int = content.get("projectID", None)
+    user_id: int = session["userID"] 
     
+    if not project_id:
+        resp_dict["message"] = "Failure: Objective is missing a project ID. Please add one!"
+        return jsonify(resp_dict), 400
+    
+    project  = Project.query.filter_by(id=project_id, user_id=user_id).first()
+    if not project:
+        resp_dict["message"] = "Failure: User does not have any project in the db with the project ID provided."
+        return jsonify(resp_dict), 404
+    
+    type = "free objective" if project.type == "default project" else "project objective"
+        
+    if not title:
+        resp_dict["message"] = "Failure: objective is missing a title. Please add one."
+        return jsonify(resp_dict), 400
+
+    if len(title) > objective_title_limit:
+        resp_dict["message"] = f"Failure: The title has over {objective_title_limit} chars"
+        return jsonify(resp_dict), 400
+
+    #generate objective number if not provided
+    objective_number = generate_objective_number(objective_number=objective_number, project_id=project_id, Objective=Objective)
+    
+    if isinstance(scheduled_start, str):
+        scheduled_start = datetime.strptime(scheduled_start, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+    if isinstance(scheduled_finish, str):
+        scheduled_finish = datetime.strptime(scheduled_finish, '%Y-%m-%dT%H:%M:%S.%fZ')  
+    
+    try:
+        objective: Objective = Objective(objective_number=objective_number, type=type, title=title, description=description, duration=duration, 
+                                         scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, is_completed=is_completed, last_updated=last_updated, tag=tag, project_id=project_id)
+        db.session.add(objective)
+        db.session.commit()
+        resp_dict["message"] = "Success: objective Added!"
+        return jsonify(resp_dict), 201
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not add the objective to the db! Reason: {e}"
+        return jsonify(resp_dict), 404
+
 #read
-@objective.route("/get-objectives", methods="GET")
+@objective.route("/read-objectives", methods=["GET"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def read_objectives(): 
-    pass
+    resp_dict = {"message":"", "objectives":""}
+    user_id = session["userID"]
+    projects = Project.query.filter_by(user_id=user_id).all() #remember: each user has at least one project: the default project that is created on sign up
+    try:
+        objectives = [Objective.query.filter_by(project_id=project.id).all() for project in projects]
+        objectives_flattened = flatten_2d_list(objectives)
+        resp_dict["objectives"] = [objective.to_dict() for objective in objectives_flattened]
+        resp_dict["message"] = "Success: loading objectives"
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not read user's objectives! Reason: {e}"
+        return jsonify(resp_dict), 404
 
 #update
-@objective.route("/edit-objective/<int:objective_id>", methods="PATCH")
+@objective.route("/update-objective/<int:objective_id>", methods=["PATCH"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def update_objective(objective_id: int) -> Tuple[Response, int]: 
-    pass
+    resp_dict = {"message":""}
+    user_id = session["userID"] 
+    content = request.json
+    
+    objective = Objective.query.filter_by(id=objective_id).first()
+    
+    if not objective:
+        resp_dict["message"] = "Failure: Could not find the selected objective."
+        return jsonify(resp_dict), 404
+
+    project = Project.query.filter_by(id=objective.project_id, user_id=user_id).first()
+    
+    if not project:
+        resp_dict["message"] = "Failure: The objective selected does not belong to the user."
+        return jsonify(resp_dict)
+
+    objective.objective_number = content.get("objectiveNumber", objective.objective_number)
+    objective.title = content.get("title", objective.title)
+    objective.description = content.get("description", objective.description)
+    objective.duration = content.get("duration", objective.duration) # hours
+    objective.scheduled_start = content.get("scheduledStart", objective.scheduled_start)
+    objective.scheduled_finish = content.get("scheduledFinish", None)
+    objective.is_completed = content.get("isCompleted", None)
+    objective.last_updated = datetime.now(tz=timezone.utc)
+    objective.tag = content.get("tag", objective.tag)
+    objective.project_id = content.get("projectID", objective.project_id)
+
+    if len(objective.title) > objective_title_limit:
+        resp_dict["message"] = f"Failure: The title has over {objective_title_limit} chars"
+        return jsonify(resp_dict), 400
+
+    if isinstance(objective.scheduled_start, str):
+        objective.scheduled_start = datetime.strptime(objective.scheduled_start, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+    if isinstance(objective.scheduled_finish, str):
+        objective.scheduled_finish = datetime.strptime(objective.scheduled_finish, '%Y-%m-%dT%H:%M:%S.%fZ')  
+
+    try:
+        db.session.commit()
+        resp_dict["message"] = "Success: Objective has been updated."
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not update the objective! Reason: {e}"
+        return jsonify(resp_dict), 404
 
 #delete
-@objective.route("/delete-objective/<int:objective_id>", methods="DELETE")
+@objective.route("/delete-objective/<int:objective_id>", methods=["DELETE"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def delete_objective(objective_id: int) -> Tuple[Response, int]:
-    pass
+    resp_dict = {"message":""}
+    user_id = session["userID"]
 
+    objective = Objective.query.filter_by(id=objective_id).first()
+    if not objective:
+        resp_dict["message"] = "Failure: The objective you are trying to delete does not exist."
+        return jsonify(resp_dict), 404
+    
+    project = Project.query.filter_by(id=objective.project_id, user_id=user_id).first()
+    if not project:
+        resp_dict["message"] = "Failure: The objective selected does not belong to the user."
+        return jsonify(resp_dict), 403
+
+    try:
+        db.session.delete(objective)
+        db.session.commit()
+        resp_dict["message"] = "Success: The objective was successfully deleted!"
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not delete the objective! Reason: {e}"
+        return jsonify(resp_dict), 404
 
 
 
