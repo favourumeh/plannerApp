@@ -79,7 +79,7 @@ class Objective(db.Model):
     """Defines the properties of the 'Objective' entity: id, objective_number, type, title, description, duration, scheduled_start/finish, is_completed, tag, project_id"""
     id = db.Column(db.Integer, primary_key=True)
     objective_number = db.Column(db.Integer, nullable=False)
-    type = db.Column(db.String(20), default="project objective") # 2 types: "free objective" and "project objective"
+    type = db.Column(db.String(20), default="project objective") # 2 types: "free objective" and "project objective" and "default objective"
     title = db.Column(db.String(80), default=f"Project {id}")
     description = db.Column(db.Text)
     duration = db.Column(db.Integer)  #hours
@@ -112,17 +112,22 @@ class Objective(db.Model):
 
 
 class Task(db.Model):
-    """Defines the properties of the 'Task' entity: id, task_number, type, description, duration, first_task, precedence_score, scheduled_start/finish, is_completed, tag, objective_id"""
+    """Defines the properties of the 'Task' entity: id, task_number, type, description, duration, priorityScore, scheduled_start/finish, is_completed, 
+    previous/next_task_id, is_recurring, is_cancelled, dependencies, tag, objective_id"""
     id = db.Column(db.Integer, primary_key=True)
     task_number = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(12), default="project task") # 2 types: "free task" and "project task"
     description = db.Column(db.String(100))
     duration = db.Column(db.Integer, nullable=False) # minutes
-    first_task = db.Column(db.Boolean, default=False) 
-    precedence_score = db.Column(db.Integer, default=1)
+    priority_score = db.Column(db.Integer, default=1)
     scheduled_start = db.Column(db.DateTime(timezone=True))
     scheduled_finish = db.Column(db.DateTime(timezone=True))
     is_completed = db.Column(db.Boolean, default=False)
+    previous_task_id = db.Column(db.Integer)
+    next_task_id = db.Column(db.Integer)
+    is_recurring = db.Column(db.Boolean, default=False)
+    is_cancelled = db.Column(db.Boolean, default=False)
+    dependencies = db.Column(db.Text)
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
     last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
     tag = db.Column(db.String(40))
@@ -137,12 +142,16 @@ class Task(db.Model):
                 "type": cls.type,
                 "description": cls.description,
                 "duration": cls.duration,
-                "firstTask": cls.first_task,
-                "precedenceScore": cls.precedence_score,
+                "priorityScore": cls.priority_score,
                 "scheduledStart": cls.scheduled_start,
                 "scheduledFinish": cls.scheduled_finish,
                 "isCompleted": cls.is_completed,
+                "previousTaskId":cls.previous_task_id,
+                "nextTaskId":cls.next_task_id,
+                "isRecurring":cls.is_recurring,
+                "isCancelled":cls.is_cancelled,
+                "dependencies":cls.dependencies,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
                 "tag": cls.tag,
-                "objectiveID": cls.objective_id}
+                "objectiveId": cls.objective_id}
