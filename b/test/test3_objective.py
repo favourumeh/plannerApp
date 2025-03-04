@@ -125,7 +125,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase):
             #note: In standard_login_and_auth_test, a user is signed up/logged in. Signup => creation of 'default project' 
         self.standard_login_and_auth_test(httpmethod="post", endpoint="/create-objective", 
                                           json_data={"title":"Test project objective", "projectID":1}, username=username, pwd=pwd)
-
+        
         print("         Test requesting to create an objective without a project id fails")
         response = self.client.post("/create-objective", json={"title":"Test project objective"})
         self.assertEqual(response.json["message"], "Failure: Objective is missing a project ID. Please add one!")
@@ -154,12 +154,13 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase):
         filtered_created_objective: dict = filter_dict(created_objective, list(data.keys()))
         data["scheduledStart"], data["scheduledFinish"] = now_str_long, now_str_long
         self.assertDictEqual(data, filtered_created_objective)
+
         
         #region auto-inc obj field
         print("             - Test auto-increment of objective_number field (no objective no. provided; new objective added to existing objectives)")
         expected_outcome = [{'id': 1, 'objectiveNumber': 1, 'projectID': 1}, 
                             {'id': 2, 'objectiveNumber': 2, 'projectID': 1}]
-        self.client.post("/create-objective", json={"title":"test auto-inc", "projectID":1}) #no objective no provided
+        self.client.post("/create-objective", json={"title":"test auto-inc", "projectID":1}) #no objective no. provided
         response_read_objectives = self.client.get("/read-objectives")
         objectives: List[Dict] = response_read_objectives.json["objectives"]
         filtered_objectives = [filter_dict(objective, ["id", "objectiveNumber", "projectID"]) for objective in objectives]
@@ -176,7 +177,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase):
         self.assertEqual(filtered_objectives, expected_outcome)
 
         print("             - Test auto-increment of objective_number field (no objective no. provided; first objective added)")
-        expected_outcome = [{'id': 4, 'objectiveNumber': 1, 'projectID': 2}]
+        expected_outcome = [{'id': 5, 'objectiveNumber': 2, 'projectID': 2}]
         self.client.post("/create-project", json={"description":"boo"}) #create new project to simulate first objective. 
         self.client.post("/create-objective", json={"title":"test auto-inc", "projectID":2}) #no objective number specified
         response_read_objectives = self.client.get("/read-objectives")
@@ -185,14 +186,21 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase):
         self.assertEqual(filtered_objectives, expected_outcome)
 
         print("             - Test auto-increment of objective_number field (objective no. provided is unique; first objective added)")
-        expected_outcome = [{'id': 4, 'objectiveNumber': 1, 'projectID': 2},
-                            {'id': 5, 'objectiveNumber': 2, 'projectID': 2}]
+        expected_outcome = [{'id': 5, 'objectiveNumber': 2, 'projectID': 2},
+                            {'id': 6, 'objectiveNumber': 3, 'projectID': 2}]
         self.client.post("/create-objective", json={"title":"test auto-inc", "objectiveNumber":2, "projectID":2}) #valid objective_number specified
         response_read_objectives = self.client.get("/read-objectives")
         objectives: List[Dict] = list(filter(lambda project: project["type"]=="project objective", response_read_objectives.json["objectives"]))
         filtered_objectives = [filter_dict(objective, ["id", "objectiveNumber", "projectID"]) for objective in objectives]
         self.assertEqual(filtered_objectives, expected_outcome)
         #endregion
+
+        print("         Test that creating a project also creates a default objective which houses all objectiveless tasks")
+        self.client.post("/create-project", json={"description":"blah"})
+        resp_read_objectives = self.client.get("/read-objectives")
+        objectives: List[Dict] = resp_read_objectives.json["objectives"]
+        default_objective = list(filter(lambda objective: objective["type"]=="default objective", objectives))[0]
+        self.assertTrue(default_objective["type"] == "default objective")
 
     #MARK: Test UPDATE_OBJS
     def test3_update_objective(self):

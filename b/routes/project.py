@@ -2,7 +2,7 @@
 import os 
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
-from models import Project
+from models import Project, Objective
 from plannerPackage import login_required, token_required
 from config import db, app, serializer
 from typing import Tuple
@@ -31,6 +31,7 @@ def create_project() -> Tuple[Response, int]:
     description: str = content.get("description", None)
     is_completed: bool = content.get("isCompleted", False)
     deadline: datetime = content.get("deadline", None)
+    last_updated: datetime = datetime.now(tz=timezone.utc) #keep: used to get the project id
     tag: str = content.get("tag", None)
     user_id: int = session["userID"] 
     
@@ -46,8 +47,12 @@ def create_project() -> Tuple[Response, int]:
         deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S.%fZ') #converts str date (format e.g., 2024-11-26T09:18:14.687Z) to dt
 
     try:
-        project: Project = Project(title=title, description=description, is_completed=is_completed, deadline=deadline, tag=tag, user_id=user_id)
+        project = Project(title=title, description=description, is_completed=is_completed, deadline=deadline, last_updated=last_updated, tag=tag, user_id=user_id)
         db.session.add(project)
+        project_id = Project.query.filter_by(title=title, description=description, last_updated=last_updated, user_id=user_id).first().id
+        objective_desc = "Stores all project tasks that do not belong to an objective"
+        default_objective = Objective(title="Default Objective", type="default objective", objective_number=0, description=objective_desc, project_id=project_id)
+        db.session.add(default_objective)
         db.session.commit()
         resp_dict["message"] = "Success: Project Added!"
         return jsonify(resp_dict), 201
