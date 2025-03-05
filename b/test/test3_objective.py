@@ -4,6 +4,7 @@ import unittest
 from . import app
 from . import db
 from . import Project, Objective
+from . import plannerAppTestDependecies
 from datetime import datetime, timezone
 from plannerPackage import filter_dict
 from werkzeug.test import TestResponse
@@ -20,7 +21,7 @@ load_dotenv()
 #key params
 objective_title_limit = int(os.environ["objective_title_limit"])
 
-class FlaskAPIObjectiveTestCase(unittest.TestCase):
+class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
 
     def setUp(self):     
         self.client = app.test_client(use_cookies=True)
@@ -31,59 +32,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase):
         with app.app_context():
             db.session.remove()
             db.drop_all()
-            
 
-    def client_test_request(self, httpmethod:str, endpoint: str, json_data: dict|None) -> TestResponse:
-        """Makes a test request to the API via FlaskClient (self.cleint = app.test_client(use_cookies=True)). 
-        Args:
-            httpmethod: the http method being used (i.e., get, post, patch, delete)
-            endpoint: the endpoint of the route where test request are sent. Must begin with '/'
-            json_data: the json body being passed with test request"""
-        if httpmethod=="get":
-            return self.client.get(endpoint)
-        if httpmethod=="post":
-            return self.client.post(endpoint, json=json_data)
-        if httpmethod=="patch":
-            return self.client.patch(endpoint, json=json_data)
-        if httpmethod=="delete":
-            return self.client.delete(endpoint)
-            
-    def standard_login_and_auth_test(self, httpmethod:str, endpoint:str, json_data:dict|None, username:str, pwd:str) -> None:
-        """These test 2 things: 1) Can the user access a protected route without a bespoke_session cookie(bsc)
-        2) can the user access a protected route without session_AT cookie(satc). 
-        note: In this method a user account is created and the user is login (hence username an password). A user project is also created. 
-        Args:
-            httpmethod: the http method being used (i.e., get, post, patch, delete)
-            endpoint: the (relative) endpoint of the protected route. Must being with "/".
-            json_data: the json body of the request. If http method does not need a json body (e.g., get) then set to None. 
-            username: username used to sign-up and login user
-            pwd: password used to signup and login user"""
-        #Test cases 
-        print("         Test accessing route without login(no bsc) fails")
-        response = self.client_test_request(httpmethod=httpmethod, endpoint=endpoint,json_data=json_data)
-        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
-
-        #signup and login #
-        self.client.post("/sign-up", json={"username":username, "password1":pwd, "password2":pwd})
-        self.client.post("/login", json={"username":username, "password":pwd})
-        satc = self.client.get_cookie("session_AT").value #session_AT cookie(satc)
-
-
-        print("         Test accessing route without login(no satc) fails")
-        self.client.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True) #remove satc
-        response = self.client_test_request(httpmethod=httpmethod, endpoint=endpoint,json_data=json_data)
-        self.assertEqual(response.json["message"], "Request is missing access token. Please login to refresh access token")
-        self.client.set_cookie(key="session_AT", value=satc, httponly=True, samesite="None", secure=True) # add satc
-
-    def read_and_filter_objective_fields(self, rel_fields: List[str]) -> list[Dict]:
-        """Reads all the objectives that belong to the logged in user and filters the relevant objective fields. 
-        Args: 
-            rel_fields: (aka relevant fields) The fields to return from each objective"""
-        response_read_objectives = self.client.get("/read-objectives")
-        objectives: List[Dict] = response_read_objectives.json["objectives"]
-        filtered_objectives = [filter_dict(objective, ["id", "objectiveNumber", "projectID"]) for objective in objectives]
-        return filtered_objectives
-    
     #MARK: Test READ_OBJS
     def test1_read_objective(self):
         username, pwd = "test", "ttt"
