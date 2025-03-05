@@ -1,6 +1,6 @@
 from routes import auth, project, objective, task # import blueprints
 from config import app, serializer
-from models import db, User, Project, Objective, Refresh_Token
+from models import db, User, Project, Objective, Refresh_Token, Task
 from datetime import datetime
 from plannerPackage import login_required, token_required
 from flask import jsonify, Response
