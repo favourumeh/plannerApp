@@ -3,6 +3,8 @@ from .bespoke_funcs import  decrypt_bespoke_session_cookie
 from .bespoke_funcs import filter_dict
 from .bespoke_funcs import flatten_2d_list
 from .bespoke_funcs import generate_objective_number
+from .bespoke_funcs import generate_task_number
+from .bespoke_funcs import filter_list_of_dicts
 from .project_config import access_token_dur
 from .project_config import refresh_token_dur
 from .project_config import allowed_origins

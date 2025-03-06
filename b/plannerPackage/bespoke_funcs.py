@@ -1,6 +1,6 @@
 from typing import List, Dict
 from cryptography.fernet import Fernet
-from models import Objective
+from models import Objective, Task
 import json
 from itsdangerous import URLSafeTimedSerializer
 from dotenv import load_dotenv
@@ -30,7 +30,7 @@ def generate_config_dict(params: List[str], default_config_dict: Dict[str, str])
     return config_dict
 
 def filter_dict(dict_obj: Dict[str, str], keys: List[str]) -> Dict:
-    """Filters a dictionary by the keys provided
+    """Filters a dictionary such that only the keys provided are returned. 
     Args:
         dict_obj: the dictionary being filtered
         keys: the keys to keep from the dict"""
@@ -78,3 +78,39 @@ def generate_objective_number(objective_number: int|None, project_id:int, Object
         
     objective_number = 1
     return objective_number
+
+
+def generate_task_number(task_number: int|None, objective_id:int, Task: Task):
+    """Generates an 'task_number' (an objective identifier that is specific to an objective). Unlike task_id
+    an task_number does not have to be unique in the database rather it should be unique to a specific objective. 
+    Args:
+        task_number: the task number for the objective. Can be changed to force uniqueness within a user's objective.
+        objective_id: the id of the objective with which the task being numbered belongs to.
+        Task: The Task entity of the plannerApp database."""
+
+    tasks = Task.query.filter_by(objective_id=objective_id).all()
+    if len(tasks)>0:
+        task_numbers = [task.task_number for task in tasks]
+        if task_number:
+            while task_number in task_numbers:
+                task_number+=1
+            return task_number
+
+        if not task_number:
+            task_number = len(task_numbers) + 1
+            while task_number in task_numbers:
+                task_number+=1
+            return task_number
+        
+    task_number = 1
+    return task_number
+
+
+def filter_list_of_dicts(L:List[Dict], key:str, value_comparison:str) -> Dict|None:
+    """Filters a list of dictionaries (L) to return the first dictionary in 'L' whose key has a value = 'value_comparison'.
+    Args:
+        L: the list of dictionaries that is being filtered
+        key: the whose value is compared to the 'value_comparison' param as part of the filter condition
+        value_comparison: compared with the value of the dictionary key (Dict[key]) as part of the filter condition"""
+    return list(filter(lambda dict_: dict_[key]==value_comparison, L))[0]
+        
