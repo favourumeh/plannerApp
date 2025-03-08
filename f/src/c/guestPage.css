@@ -1,0 +1,32 @@
+div.flex-container {
+    display: flex;
+    justify-content: center; /* Aligns items horizontally */
+    /* border: 1px solid; */
+    height: 100px;
+}
+
+div.guest-prompts {
+    display: flex;
+    flex-direction: column;
+    /* border: 1px solid; */
+    margin-right:10px;
+    text-align: right;
+  }
+
+div.guest-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* border: 1px solid; */
+    margin-left:10px;
+  }
+
+span.new-user-prompt{
+    position: relative;
+    top: 10px;
+}
+
+span.existing-user-prompt{
+    position: relative;
+    top: 40px
+}
