@@ -4,7 +4,7 @@ import { backendBaseUrl } from './project_config'
 import { fetchProjects, fetchObjectives, fetchTasks } from './fetch_entities'
 import GuestPage from './c/guestPage'
 import globalContext from './context'
-// import Modal from "./c/modal.jsx"
+import Modal from "./c/modal.jsx"
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -60,7 +60,7 @@ function App() {
         <>
         <globalContext.Provider value={globalProps}>
             <GuestPage isLoggedIn={isLoggedIn}/>
-            {/* <Modal>
+            <Modal>
                 <form>
                     <label for="firstName"> First Name: </label>
                     <input type="text"></input>
@@ -71,7 +71,7 @@ function App() {
                     <label for="firstName"> First Name: </label>
                     <input type="text"></input>
                 </form>
-            </Modal> */}
+            </Modal>
         </globalContext.Provider>
         </>
     )
