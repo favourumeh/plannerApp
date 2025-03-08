@@ -22,7 +22,7 @@ const  GuestPage = ({isLoggedIn}) => {
     return (
         <div className="guest-page">
             <h1>Welcome to Favour's Planner</h1>
-            <div class="flex-container">
+            <div className="flex-container">
                 <div className="guest-prompts">
                     <span className="new-user-prompt">New User: </span>
                     <span className="existing-user-prompt">Existing User: </span>
