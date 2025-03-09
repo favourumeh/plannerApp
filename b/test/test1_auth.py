@@ -170,13 +170,18 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
     
         print("         Test invalid Input - email too long")
-        data = {"username":"test5", "password1": "ttt", "password2": "ttt", "email": "test@test.com"*10} 
+        data = {"username":"test5", "password1": "ttt", "password2": "ttt", "email": "test@test."+"com"*110} 
         response = self.client.post("/sign-up", json = data)
         self.assertEqual(response.json, {"message": "Failure: Email is too long. Must be <= 120 characters."})
         self.assertEqual(response.status_code, 400)
         
+        print("         Test invalid Input - invalid email")
+        data = {"username":"test6", "password1": "ttt", "password2": "ttt", "email": "blah@blah"} 
+        response = self.client.post("/sign-up", json = data)
+        self.assertEqual(response.json, {"message": "Failure: Email is not valid"})
+        
         print("         Test invalid Input - password mismatch")
-        data = {"username":"test6", "password1": "ttt1", "password2": "ttt"} 
+        data = {"username":"test7", "password1": "ttt1", "password2": "ttt"} 
         response = self.client.post("/sign-up", json = data)
         self.assertEqual(response.json, {"message": "Failure: Passwords do not match"})
         self.assertEqual(response.status_code, 400)

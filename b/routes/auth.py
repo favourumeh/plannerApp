@@ -1,4 +1,5 @@
 import os
+import re
 from dotenv import load_dotenv
 import json
 from config import db, app, serializer
@@ -28,7 +29,7 @@ def signup() -> Tuple[Response, int]:
     email = creds.get("email", None)
     password1 = creds.get("password1", None)
     password2 = creds.get("password2", None)
-    
+
     #Validate Client Input
     if not username:
         resp_dict["message"] = "Failure: Username is missing!"
@@ -41,7 +42,16 @@ def signup() -> Tuple[Response, int]:
     if len(username) > 15:
         resp_dict["message"] = "Failure: Username is too long. Must be <= 15 characters."
         return jsonify(resp_dict), 400
+
+    #account for blank email fields
+    email = None if email=="" else email
+
     if email:
+        email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if  not re.match(email_regex, email):
+            resp_dict["message"] = "Failure: Email is not valid"
+            return jsonify(resp_dict), 400
+
         user_e = User.query.filter_by(email=email).first()
         if user_e:
             resp_dict["message"] = "Failure: Email is taken. Please choose another one."
