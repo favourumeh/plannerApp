@@ -24,12 +24,16 @@ def signup() -> Tuple[Response, int]:
     """Creates a user entry into the User Table"""
     resp_dict = {"message":""}
     creds = request.json
-    username = creds["username"]
+    username = creds.get("username", None)
     email = creds.get("email", None)
-    password1 = creds["password1"]
-    password2 = creds["password2"]
+    password1 = creds.get("password1", None)
+    password2 = creds.get("password2", None)
     
     #Validate Client Input
+    if not username:
+        resp_dict["message"] = "Failure: Username is missing!"
+        return jsonify(resp_dict), 400
+
     user = User.query.filter_by(username = username).first()
     if user:
         resp_dict["message"] = "Failure: Username is taken. Please choose another one."

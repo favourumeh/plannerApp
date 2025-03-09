@@ -142,7 +142,15 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         response = self.client.post("/sign-up", json = data )
         self.assertEqual(response.json, {"message": "Success: Account Created! Login to start planning"})
         self.assertEqual(response.status_code, 201)
-
+        
+        print("         Test invlaid Input - blank or NO username provided")
+        data = {"username":"", "password1":"ttt", "password2":"ttt"}
+        response = self.client.post("/sign-up", json=data)
+        self.assertEqual(response.json["message"], "Failure: Username is missing!")
+        data = {"password1":"ttt", "password2":"ttt"}
+        response = self.client.post("/sign-up", json=data)
+        self.assertEqual(response.json["message"], "Failure: Username is missing!")
+        
         print("         Test invalid Input - existing user in db")
         data = {"username":"test", "password1": "ttt", "password2": "ttt"} 
         response = self.client.post("/sign-up", json = data)
