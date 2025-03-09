@@ -19,7 +19,7 @@ flask_app_secret_key = os.environ["flask_app_secret_key"]
 #Create Flask app instance
 app = Flask(__name__)
 CORS(app, 
-     resources={"r/*":{"origins":pp.allowed_origins}},
+     resources={r"/*":{"origins":pp.allowed_origins}},
      methods=["GET","POST","PATCH", "DELETE"],
      supports_credentials=True
 )
