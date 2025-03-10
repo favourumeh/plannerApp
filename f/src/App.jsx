@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { backendBaseUrl } from './project_config'
 import { fetchProjects, fetchObjectives, fetchTasks } from './fetch_entities'
@@ -7,6 +7,7 @@ import globalContext from './context'
 import Modal from "./c/modal.jsx"
 import SignUp from './c/signUp.jsx'
 import Login from "./c/login.jsx"
+import NotificationBar from './c/notificationBar.jsx'
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -15,18 +16,18 @@ const persistState = (sessionName, default_) => {
 
 function App() {
     const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",false))
-    const [isLoggedIn, setIsLoggedIn] = useState(() => persistState("isLoggedIn",false))
-    const [clientAction, setClientAction] = useState(() => persistState("clientAction","")) //sign-up, login, edit-notes, delete-notes
+    const [isLoggedIn, setIsLoggedIn] = useState(false) //useState(() => persistState("isLoggedIn",false))
+    const [clientAction, setClientAction] = useState(() => persistState("clientAction","")) //sign-up, login
     const [currentUser, setCurrentUser] = useState(() => persistState("currentUser",{}))
-    // const [notificationMessage, setNotificationMessage] = useState("")
-    // const [isNotiBarVisible, setIsNotiBarVisible] = useState(false)
-    // const [isNotiMessageError, setIsNotiMessageError] = useState(false) // determines the colour of the noti message bar (green or red)
+    const [notificationMessage, setNotificationMessage] = useState("")
+    const [isNotiBarVisible, setIsNotiBarVisible] = useState(false)
+    const [isNotiMessageError, setIsNotiMessageError] = useState(false) // determines the colour of the noti message bar (green or red)
 
     //Update session storage object when state variable changes
     useEffect(() => sessionStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn)), [isLoggedIn])
     useEffect(() => sessionStorage.setItem("isModalOpen", JSON.stringify(isModalOpen)), [isModalOpen])
     useEffect(() => sessionStorage.setItem("clientAction", JSON.stringify(clientAction)), [clientAction])
-    // useEffect(() => sessionStorage.setItem("currentUser", JSON.stringify(currentUser)), [currentUser])
+    useEffect(() => sessionStorage.setItem("currentUser", JSON.stringify(currentUser)), [currentUser])
 
     // const handleLogin = (user) => {
     //     setCurrentUser(user)
@@ -42,25 +43,26 @@ function App() {
     //     isModalOpen && setIsModalOpen(false) // && returns first falsey value. if both falsey then return last value
     // }
 
-    // const handleNotification = (message, category) => {
-    //     setIsNotiBarVisible(true)
-    //     setNotificationMessage(message)
-    //     setIsNotiMessageError(category=="success"? false:true)
-    // } 
+    const handleNotification = (message, category) => {
+        setIsNotiBarVisible(true)
+        setNotificationMessage(message)
+        setIsNotiMessageError(category=="success"? false:true)
+    } 
 
     const globalProps = {
         isModalOpen, setIsModalOpen,
         clientAction, setClientAction,
         currentUser, setCurrentUser,
-        // notificationMessage, setNotificationMessage,
-        // isNotiBarVisible, setIsNotiBarVisible,
-        // isNotiMessageError, setIsNotiMessageError,
-        // handleNotification, fetchTasks, fetchObjectives, fetchProjects
+        notificationMessage, setNotificationMessage,
+        isNotiBarVisible, setIsNotiBarVisible,
+        isNotiMessageError, setIsNotiMessageError,
+        handleNotification, //fetchTasks, fetchObjectives, fetchProjects
     }
 
     return (
         <>
         <globalContext.Provider value={globalProps}>
+            <NotificationBar/>
             <GuestPage isLoggedIn={isLoggedIn}/>
             <Modal>
                 <SignUp/>
