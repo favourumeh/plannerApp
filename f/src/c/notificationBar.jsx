@@ -3,16 +3,14 @@ import globalContext from "../context"
 import { useState, useRef, useEffect, useContext } from "react"
 
 function NotificationBar () {
-    const {notificationMessage, setNotificationMessage, isNotiBarVisible, setIsNotiBarVisible, isNotiMessageError} = useContext(globalContext)
+    const {notificationMessage, setNotificationMessage, isNotiBarVisible, setIsNotiBarVisible, isNotiMessageError, requestAmount, notiBarTimerRef} = useContext(globalContext)
     const [isNotiBarExpanded, setIsNotiBarExpanded] = useState(false)
     const [isHoverNotificationBar, setIsHoverNotificationBar] = useState(false)
-    const notiBarTimerRef = useRef()
 
     useEffect(() => {
         if (!isHoverNotificationBar){
             notiBarTimerRef.current = setTimeout(()=> {
                 setIsNotiBarVisible(false)
-                setNotificationMessage("")
             }, 5000)
         }
         return () => clearTimeout(notiBarTimerRef.current)
@@ -35,7 +33,7 @@ function NotificationBar () {
     //monitoring use-Effect: Can comment out
     useEffect(() => {console.log("isNotiBarVisible:", isNotiBarVisible)}, [isNotiBarVisible] ) // used to track noti bar is removed from html
     useEffect(() => {console.log("isHoverNotificationBar:",  isHoverNotificationBar)}, [isHoverNotificationBar]) //used to track if mouse hovers over noti bar#
-    useEffect(() => console.log("timerRef:",notiBarTimerRef), [notiBarTimerRef.current])
+    // useEffect(() => console.log("timerRef:",notiBarTimerRef), [notiBarTimerRef.current])
 
 
     if (!isNotiBarVisible) {

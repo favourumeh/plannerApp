@@ -22,6 +22,8 @@ function App() {
     const [notificationMessage, setNotificationMessage] = useState("")
     const [isNotiBarVisible, setIsNotiBarVisible] = useState(false)
     const [isNotiMessageError, setIsNotiMessageError] = useState(false) // determines the colour of the noti message bar (green or red)
+    const requestAmount = useRef(0)
+    const notiBarTimerRef = useRef()
 
     //Update session storage object when state variable changes
     useEffect(() => sessionStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn)), [isLoggedIn])
@@ -47,6 +49,9 @@ function App() {
         setIsNotiBarVisible(true)
         setNotificationMessage(message)
         setIsNotiMessageError(category=="success"? false:true)
+        requestAmount.current += 1
+
+        console.log("request amount:", requestAmount.current)
     } 
 
     const globalProps = {
@@ -56,7 +61,7 @@ function App() {
         notificationMessage, setNotificationMessage,
         isNotiBarVisible, setIsNotiBarVisible,
         isNotiMessageError, setIsNotiMessageError,
-        handleNotification, //fetchTasks, fetchObjectives, fetchProjects
+        handleNotification, requestAmount, notiBarTimerRef//fetchTasks, fetchObjectives, fetchProjects
     }
 
     return (
