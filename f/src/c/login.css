@@ -1,0 +1,54 @@
+.login-content {
+    position: relative;
+    text-align: left;
+    width: 100%;
+    /* border: 1px solid; */
+}
+
+
+div.form-div {
+    display: flex;
+    margin: 0px;
+    /* border: 1px solid; */
+    width: 312px;
+}
+
+
+form.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    /* border: 1px solid; */
+}
+
+.form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* border: 1px solid; */
+}
+
+input {
+    background-color: white;
+    color: black;
+}
+
+label {
+    text-align: right;
+    width: 80px;
+    /* border: 1px dotted; */
+}
+
+div.btn-div {
+    display: flex;
+    justify-content: left;
+}
+
+button.login-btn {
+    position: relative;
+    width: 100px;
+
+}
+span.required-asterisk {
+    color: red;
+}
