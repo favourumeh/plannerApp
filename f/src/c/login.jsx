@@ -4,7 +4,7 @@ import globalContext from "../context"
 import { backendBaseUrl } from "../project_config"
 
 const Login = ({setIsLoggedIn}) => {
-    const {setIsModalOpen, clientAction, setClientAction, currentUser, setCurrentUser} = useContext(globalContext)
+    const {setIsModalOpen, clientAction, setClientAction, setCurrentUser, handleNotification} = useContext(globalContext)
     const [accountDetails, setAccountDetails] = useState({username:"", password:"" })
 
     if (clientAction != 'login') {
@@ -29,8 +29,12 @@ const Login = ({setIsLoggedIn}) => {
             setClientAction("read-tasks")
             setCurrentUser(resp_json.user)
             setIsLoggedIn(true)
+            handleNotification(resp_json.message, "success")
         } else {
             console.log(resp_json.message)
+            setIsModalOpen(false)
+            handleNotification(resp_json.message, "failure")
+
         }
     }
 

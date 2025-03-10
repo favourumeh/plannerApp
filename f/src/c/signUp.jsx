@@ -4,7 +4,7 @@ import globalContext from "../context"
 import { backendBaseUrl } from "../project_config"
 
 const SignUp = () => {
-    const {setIsModalOpen, clientAction, setClientAction} = useContext(globalContext)
+    const {setIsModalOpen, clientAction, setClientAction, handleNotification} = useContext(globalContext)
     const [accountDetails, setAccountDetails] = useState({username:"", email:undefined, password1:"", password2:""})
 
     if (clientAction != 'sign-up') {
@@ -28,9 +28,11 @@ const SignUp = () => {
             console.log(resp_json.message)
             setIsModalOpen(false)
             setClientAction("")
-
+            handleNotification(resp_json.message, "success")
         } else {
             console.log(resp_json.message)
+            setIsModalOpen(false)
+            handleNotification(resp_json.message, "failure")
         }
     }
 
@@ -75,7 +77,7 @@ const SignUp = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password2">Re-enter Password<span className="required-asterisk">*</span>: </label>
+                        <label htmlFor="password2">Confirm<span className="required-asterisk">*</span>: </label>
                         <input 
                             type = "password"
                             id = "password2"
