@@ -6,6 +6,7 @@ import GuestPage from './c/guestPage'
 import globalContext from './context'
 import Modal from "./c/modal.jsx"
 import SignUp from './c/signUp.jsx'
+import Login from "./c/login.jsx"
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -13,10 +14,10 @@ const persistState = (sessionName, default_) => {
 }
 
 function App() {
-    const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",true))
+    const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",false))
     const [isLoggedIn, setIsLoggedIn] = useState(() => persistState("isLoggedIn",false))
     const [clientAction, setClientAction] = useState(() => persistState("clientAction","")) //sign-up, login, edit-notes, delete-notes
-    // const [currentUser, setCurrentUser] = useState(() => persistState("currentUser",{}))
+    const [currentUser, setCurrentUser] = useState(() => persistState("currentUser",{}))
     // const [notificationMessage, setNotificationMessage] = useState("")
     // const [isNotiBarVisible, setIsNotiBarVisible] = useState(false)
     // const [isNotiMessageError, setIsNotiMessageError] = useState(false) // determines the colour of the noti message bar (green or red)
@@ -50,7 +51,7 @@ function App() {
     const globalProps = {
         isModalOpen, setIsModalOpen,
         clientAction, setClientAction,
-        // currentUser, setCurrentUser,
+        currentUser, setCurrentUser,
         // notificationMessage, setNotificationMessage,
         // isNotiBarVisible, setIsNotiBarVisible,
         // isNotiMessageError, setIsNotiMessageError,
@@ -63,6 +64,7 @@ function App() {
             <GuestPage isLoggedIn={isLoggedIn}/>
             <Modal>
                 <SignUp/>
+                <Login setIsLoggedIn={setIsLoggedIn}/>
             </Modal>
         </globalContext.Provider>
         </>
