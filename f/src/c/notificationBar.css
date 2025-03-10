@@ -1,0 +1,53 @@
+#notification-overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 1;
+}
+
+#notification-overlay.animation {
+  animation: fadeOut 5s ease forwards;
+}
+
+@keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1; 
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+/* Animation stops when mouse hovers over notification overlay */
+#notification-overlay:hover {
+    animation: none;
+  }
+
+#notification-overlay .close-noti-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
+}
+
+#notification-overlay .notification-message{
+    margin-right: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: break-word; 
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+
+#notification-overlay .close-noti-btn:hover  {
+    border-color: rgba(0, 0, 0, 0);
+
+}
