@@ -23,7 +23,7 @@ task_description_limit = int(os.environ["task_description_limit"])
 @token_required(app=app, serializer=serializer)
 def create_task() -> Tuple[Response, int]:
     resp_dict = {"message":""}
-    user_id = session["userID"]
+    user_id = session["userId"]
     content = request.json
     task_number = content.get("taskNumber", None)
     description = content.get("description", None)
@@ -96,7 +96,7 @@ def create_task() -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def read_tasks(): 
     resp_dict = {"message":"", "tasks":""}
-    user_id = session["userID"]
+    user_id = session["userId"]
     try:
         user_projects: List[Project] = Project.query.filter_by(user_id = user_id).all() # a default project is created on user signs up
         user_project_ids: List[int] = [project.id for project in user_projects]
@@ -119,7 +119,7 @@ def read_tasks():
 @token_required(app=app, serializer=serializer)
 def update_task(task_id: int) -> Tuple[Response, int]:
     resp_dict = {"message":""} 
-    user_id = session["userID"]
+    user_id = session["userId"]
     task = Task.query.filter_by(id=task_id).first()
 
     if not task:
@@ -171,7 +171,7 @@ def update_task(task_id: int) -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def delete_task(task_id: int) -> Tuple[Response, int]:
     resp_dict = {"message":""}
-    user_id = session["userID"]
+    user_id = session["userId"]
     task = Task.query.filter_by(id=task_id).first()
     if not task:
         resp_dict["message"] = "Failure: The task referenced does not exist."

@@ -3,7 +3,7 @@ allowed_origins= [
     "http://localhost:5173"
     ]
 
-access_token_dur = 10 #(~10mins)
+access_token_dur = 30 #(~10mins)
 refresh_token_dur =  3600/86400 #(~1hr)
 
 #generate a new secret key 

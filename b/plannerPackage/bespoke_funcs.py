@@ -38,7 +38,7 @@ def filter_dict(dict_obj: Dict[str, str], keys: List[str]) -> Dict:
 
 
 def decrypt_bespoke_session_cookie(cookie: str, serializer: URLSafeTimedSerializer, decryption_key: str) -> Dict:
-    """Converts the 'bespoke session' cookie string to its original python dictionary which contains: logged_in, userID, username and refreshToken
+    """Converts the 'bespoke session' cookie string to its original python dictionary which contains: logged_in, userId, username and refreshToken
     It involves the desrialisation of the cookie, the decrption of the cookie
     Args:
         cookie: 'bespoke_session' cookie

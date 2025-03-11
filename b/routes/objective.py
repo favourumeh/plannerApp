@@ -34,7 +34,7 @@ def create_objective() -> Tuple[Response, int]:
     last_updated: datetime = datetime.now(tz=timezone.utc)
     tag: str = content.get("tag", None)
     project_id: int = content.get("projectId", None)
-    user_id: int = session["userID"] 
+    user_id: int = session["userId"] 
     
     if not project_id:
         resp_dict["message"] = "Failure: Objective is missing a project ID. Please add one!"
@@ -81,7 +81,7 @@ def create_objective() -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def read_objectives(): 
     resp_dict = {"message":"", "objectives":""}
-    user_id = session["userID"]
+    user_id = session["userId"]
     projects = Project.query.filter_by(user_id=user_id).all() #remember: each user has at least one project: the default project that is created on sign up
     try:
         objectives = [Objective.query.filter_by(project_id=project.id).all() for project in projects]
@@ -99,7 +99,7 @@ def read_objectives():
 @token_required(app=app, serializer=serializer)
 def update_objective(objective_id: int) -> Tuple[Response, int]: 
     resp_dict = {"message":""}
-    user_id = session["userID"] 
+    user_id = session["userId"] 
     content = request.json
     
     objective = Objective.query.filter_by(id=objective_id).first()
@@ -149,7 +149,7 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def delete_objective(objective_id: int) -> Tuple[Response, int]:
     resp_dict = {"message":""}
-    user_id = session["userID"]
+    user_id = session["userId"]
 
     objective = Objective.query.filter_by(id=objective_id).first()
     if not objective:

@@ -33,7 +33,7 @@ def create_project() -> Tuple[Response, int]:
     deadline: datetime = content.get("deadline", None)
     last_updated: datetime = datetime.now(tz=timezone.utc) #keep: used to get the project id
     tag: str = content.get("tag", None)
-    user_id: int = session["userID"] 
+    user_id: int = session["userId"] 
     
     if not description:
         resp_dict["message"] = "Failure: Project is missing a description. Please add one."
@@ -67,7 +67,7 @@ def create_project() -> Tuple[Response, int]:
 def read_projects(): 
     resp_dict = {"message":"", "projects":""}
     try:
-        projects = Project.query.filter_by(user_id=session["userID"]).all()
+        projects = Project.query.filter_by(user_id=session["userId"]).all()
         resp_dict["projects"] = [project.to_dict() for project in projects]
         resp_dict["message"] = "Success: loading projects"
         return jsonify(resp_dict), 200
@@ -82,7 +82,7 @@ def read_projects():
 def update_project(project_id: int) -> Tuple[Response, int]: 
     resp_dict = {"message":""}
     content: dict = request.json
-    project = Project.query.filter_by(id=project_id, user_id=session["userID"]).first()
+    project = Project.query.filter_by(id=project_id, user_id=session["userId"]).first()
 
     if not project:
         resp_dict["message"] = "Failure: Could not find the selected project in the db. Please choose another project id."

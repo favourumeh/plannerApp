@@ -44,7 +44,7 @@ class Refresh_Token(db.Model):
         return{"id": cls.id,
                "token": cls.token,
                "exp": f"{cls.exp}",
-               "user_id": cls.user_id}
+               "userId": cls.user_id}
                 
 class Project(db.Model):
     """Defines the properties of the 'Project' entity: id, type, title, description, is_completed, deadline, tag, user_id"""
@@ -73,7 +73,7 @@ class Project(db.Model):
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
                 "tag": cls.tag,
-                "userID": cls.user_id}
+                "userId": cls.user_id}
 
 class Objective(db.Model):
     """Defines the properties of the 'Objective' entity: id, objective_number, type, title, description, duration, scheduled_start/finish, is_completed, tag, project_id"""

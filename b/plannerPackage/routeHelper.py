@@ -77,12 +77,12 @@ def login_required(serializer: URLSafeTimedSerializer):
                 return jsonify(resp_dict), 400
     
             #Extract user id,username and refreshToken  from the session data and store it in session object for use in downstream function
-            session["userID"] = decrypted_session_data["userID"]
+            session["userId"] = decrypted_session_data["userId"]
             session["username"] = decrypted_session_data["username"]
             session["refreshToken"] = decrypted_session_data["refreshToken"]
             
             #Check if the user has a refresh_token. If they don't then they are not logged in
-            refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userID"]).first()
+            refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userId"]).first()
             if not refresh_token_obj:
                 resp_dict["message"] = "Failure: User is not logged in (no rt). Please login!"
                 return jsonify(resp_dict) , 404
@@ -107,7 +107,7 @@ def update_refresh_token_table(action: str, refresh_token_obj: Refresh_Token|Non
     """Adds to/Updates the entries of the Refresh_Token table. Note: each user gets ONE refresh token. 
     Args:
         action: 'create' adds an entry to the Refresh_Token db table for a specified user (user_id). 'update' updates the exp and refresh token hash for a specific user.
-        refresh_token_obj: an instance of models.Refresh_Token class. Derived from first result of a query of Refresh_Token which searched for the refrehs token of a user via userID.  
+        refresh_token_obj: an instance of models.Refresh_Token class. Derived from first result of a query of Refresh_Token which searched for the refrehs token of a user via userId.  
         db: the SQLAlchemy database intance for the app.
         token_UUID: the refresh token (uuid4). 
         user_id: user id of user whose refresh token is being created/updated

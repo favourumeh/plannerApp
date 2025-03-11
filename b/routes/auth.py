@@ -97,7 +97,7 @@ def login() -> Tuple[Response, int]:
     #create session dict (soon to be http-only cookie)
     session_data: dict = {"logged_in": "True",
                           "username": user.username,
-                          "userID": user.id}
+                          "userId": user.id}
 
     token_UUID = str(uuid4())
     session_data["refreshToken"] = token_UUID
@@ -131,7 +131,7 @@ def login() -> Tuple[Response, int]:
         payload = {"sub": "access token", # identifies the subject of the jwt
                    "iat":  int(now.timestamp()), #time jwt was issued (as timestamp integer). To convert back to datetime.datetime:  datetime.fromtimestamp(<timestamp>, tz=timezone.utc)
                    "exp": now + timedelta(minutes=access_token_dur), #token expiration date
-                   "userID": user.id,
+                   "userId": user.id,
                    "username": user.username},
         key = app.config["SECRET_KEY"],
         algorithm = "HS256"
@@ -155,7 +155,7 @@ def logout() -> Tuple[Response, int]:
     resp_dict = {"message": ""}
     #delete refresh token
     try:
-        refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id = session["userID"]).first()
+        refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id = session["userId"]).first()
         db.session.delete(refresh_token_obj)
         db.session.commit()
         resp_dict["message"] = "Success: Logout completed"
@@ -177,7 +177,7 @@ def refresh() -> Tuple[Response, int]:
     resp_dict = {"message":""}
     
     #Use userID from bespoke cookies dict to extract user entry
-    user_id: int = session["userID"] 
+    user_id: int = session["userId"] 
     user: User = User.query.filter(User.id == user_id).first()
 
     #generate access token (JWT)
@@ -186,7 +186,7 @@ def refresh() -> Tuple[Response, int]:
         payload = {"sub": "access token", # identifies the subject of the jwt
                    "iat": int(now.timestamp()), #time jwt was issued as a timestamp integer
                    "exp": now + timedelta(minutes=access_token_dur), #token expiration date
-                   "userID": user.id,
+                   "userId": user.id,
                    "username": user.username},
         key = app.config["SECRET_KEY"],
         algorithm = "HS256"
@@ -204,14 +204,14 @@ def refresh() -> Tuple[Response, int]:
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def delete_user(user_id: int) -> Tuple[Response, int]:
-    resp_dict = {"message": "boo", "userID": f"{session["userID"]}"}
+    resp_dict = {"message": "boo", "userId": f"{session["userId"]}"}
 
-    if user_id != session["userID"]:
+    if user_id != session["userId"]:
         resp_dict["message"] = "Failure: Account chosen for deletion does not match the account logged in."
         return jsonify(resp_dict), 403
     
-    user: User = User.query.filter_by(id=session["userID"]).first()
-    refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userID"]).first()
+    user: User = User.query.filter_by(id=session["userId"]).first()
+    refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userId"]).first()
 
     try:
         db.session.delete(user)
@@ -229,7 +229,7 @@ def delete_user(user_id: int) -> Tuple[Response, int]:
 def edit_user(user_id: int) -> Tuple[Response, int]:
     resp_dict = {"message":""}
 
-    if user_id != session["userID"]:
+    if user_id != session["userId"]:
         resp_dict["message"] = "Failure: The account you are attempting to edit does not match the account that is logged in"
         return jsonify(resp_dict), 403
 
@@ -273,7 +273,7 @@ def get_user(user_id: int) -> Tuple[Response, int]:
     """Allows the admin to gets all fields in of a User's account"""
     resp_dict = {"message":"", "user": ""}
 
-    admin_user: User = User.query.filter_by(id=session["userID"]).first()    
+    admin_user: User = User.query.filter_by(id=session["userId"]).first()    
     if not admin_user.is_admin:
         resp_dict["message"] = "Failure: User is not permitted to access this route"
         return jsonify(resp_dict), 403
@@ -294,7 +294,7 @@ def get_user_refresh_token(user_id: int) -> Tuple[Response, int]:
     """Allows the admin to gets all fields in of a User's refresh token entry/entries"""
     resp_dict = {"message":"", "user": ""}
 
-    admin_user: User = User.query.filter_by(id=session["userID"]).first()    
+    admin_user: User = User.query.filter_by(id=session["userId"]).first()    
     if not admin_user.is_admin:
         resp_dict["message"] = "Failure: User is not permitted to access this route"
         return jsonify(resp_dict), 403
