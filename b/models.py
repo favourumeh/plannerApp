@@ -108,7 +108,7 @@ class Objective(db.Model):
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
                 "tag": cls.tag,
-                "projectID": cls.project_id}
+                "projectId": cls.project_id}
 
 
 class Task(db.Model):

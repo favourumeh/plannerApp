@@ -33,7 +33,7 @@ def create_objective() -> Tuple[Response, int]:
     is_completed: bool = content.get("isCompleted", False)
     last_updated: datetime = datetime.now(tz=timezone.utc)
     tag: str = content.get("tag", None)
-    project_id: int = content.get("projectID", None)
+    project_id: int = content.get("projectId", None)
     user_id: int = session["userID"] 
     
     if not project_id:
@@ -123,7 +123,7 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     objective.is_completed = content.get("isCompleted", None)
     objective.last_updated = datetime.now(tz=timezone.utc)
     objective.tag = content.get("tag", objective.tag)
-    objective.project_id = content.get("projectID", objective.project_id)
+    objective.project_id = content.get("projectId", objective.project_id)
 
     if len(objective.title) > objective_title_limit:
         resp_dict["message"] = f"Failure: The title has over {objective_title_limit} chars"

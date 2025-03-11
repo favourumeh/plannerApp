@@ -65,14 +65,14 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.standard_login_and_auth_test("post", "/create-task", json_data=None, username=user1_username, pwd=pwd)
 
         #create an objective (assigned to the default project) for user1
-        self.client.post("/create-objective", json={"title":"user1 objective", "projectID":1})
+        self.client.post("/create-objective", json={"title":"user1 objective", "projectId":1})
         user1_objectives: list[Dict] = self.read_and_filter_fields(read_endpoint="/read-objectives", entity="objectives", rel_fields=["id", "title"])
         user1_objective_id: int = list(filter(lambda objective: objective["title"]=="user1 objective", user1_objectives))[0]["id"]
 
         #create user2, login and create a objective (assinged to default project)
         self.client.post("/sign-up", json={"username":user2_username, "password1":pwd, "password2":pwd})
         self.client.post("/login", json = {"username":user2_username, "password":pwd})
-        self.client.post("/create-objective", json ={"title":"user2 objective", "projectID":2})
+        self.client.post("/create-objective", json ={"title":"user2 objective", "projectId":2})
         user2_objectives: list[Dict] = self.read_and_filter_fields(read_endpoint="/read-objectives", entity="objectives", rel_fields=["id", "title"])
         user2_objective_id: int = list(filter(lambda objective: objective["title"]=="user2 objective", user2_objectives))[0]["id"]
 
@@ -152,7 +152,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         user_username, pwd = "test", "ttt"
         self.client.post("/sign-up", json={"username":user_username, "password1":pwd, "password2":pwd})
         self.client.post("/login", json={"username":user_username, "password":pwd})
-        self.client.post("/create-objective", json={"title":"user-created objective", "projectID":1})
+        self.client.post("/create-objective", json={"title":"user-created objective", "projectId":1})
         
         print("         TaskNumber field when not specified and when not other task in the user's objective default to 1")
         expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1}] 
@@ -214,7 +214,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertListEqual(expected_outcome, field_filtered_output)
         
         print("         TaskNumber field restart to 1 when creating a task for a new objective")
-        self.client.post("/create-objective", json={"title":"user-created objective 2", "projectID":1}) #create new objective in proj 1
+        self.client.post("/create-objective", json={"title":"user-created objective 2", "projectId":1}) #create new objective in proj 1
         expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
                             {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1},
                             {'id': 3, 'taskNumber':3, "description":"Test 3", "duration":10, 'objectiveId':1},
