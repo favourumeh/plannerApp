@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
 from models import User, Project, Objective, Task
-from plannerPackage import login_required, token_required, flatten_2d_list, generate_task_number
+from plannerPackage import login_required, token_required, flatten_2d_list, generate_task_number, generate_user_content
 from config import db, app, serializer
 from typing import Tuple, List
 from datetime import datetime, timezone, timedelta
@@ -98,20 +98,13 @@ def read_tasks():
     resp_dict = {"message":"", "tasks":""}
     user_id = session["userId"]
     try:
-        user_projects: List[Project] = Project.query.filter_by(user_id = user_id).all() # a default project is created on user signs up
-        user_project_ids: List[int] = [project.id for project in user_projects]
-        user_objectives: List[List[Objective]] = [Objective.query.filter_by(project_id=id).all() for id in user_project_ids] # a default objective is created on a project's creation
-        user_objectives_flattened: List[Objective] = flatten_2d_list(user_objectives)
-        user_objective_ids: List[int] = [user_objective.id for user_objective in user_objectives_flattened]
-        user_tasks: List[List[Task]] =  [Task.query.filter_by(objective_id=id).all() for id in user_objective_ids]
-        user_tasks_flattened: List[Task] = flatten_2d_list(user_tasks)
+        tasks: List[Task] = generate_user_content(user_id=user_id, content="tasks")
         resp_dict["message"] = "Success: User Tasks extracted"
-        resp_dict["tasks"] = [task.to_dict() for task in user_tasks_flattened]
+        resp_dict["tasks"] = [task.to_dict() for task in tasks]
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not read user task! Reason: {e}"
         return jsonify(resp_dict), 404
-    pass
 
 #update
 @task.route("/update-task/<int:task_id>", methods=["PATCH"])
