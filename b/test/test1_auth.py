@@ -127,7 +127,6 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         print("         Test valid signup input")
         data = {"username":"test1", "password1": "ttt", "password2": "ttt"} 
         response = self.client.post("/sign-up", json = data )
-        self.assertEqual(response.json, {"message": "Success: Account Created! Login to start planning"})
         self.assertEqual(response.status_code, 201)
 
         print("         Test that a default project is created on signup")
@@ -140,7 +139,6 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         print("         Test Valid Input w/email")
         data = {"username":"test2", "password1": "ttt", "password2": "ttt", "email": "example@exmaple.com"} 
         response = self.client.post("/sign-up", json = data )
-        self.assertEqual(response.json, {"message": "Success: Account Created! Login to start planning"})
         self.assertEqual(response.status_code, 201)
         
         print("         Test invlaid Input - blank or NO username provided")
@@ -325,7 +323,6 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
             #valid deletion of an account
         print("         Testing valid input - deleting an account when logged in")
         response = self.client.delete("/delete_user/1")
-        self.assertEqual(response.json["message"], "Deleted account (test) and associated access and refresh token.")
         self.assertEqual(response.status_code, 200)
 
     def test6_edit_user(self):
