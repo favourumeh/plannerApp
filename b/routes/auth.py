@@ -71,6 +71,9 @@ def signup() -> Tuple[Response, int]:
         user_id = User.query.filter_by(username=username).first().id
         default_project = Project(type="default project", title="Default", description="Stores all objectives and tasks that don't belong to a user-created project", tag="default", user_id=user_id)
         db.session.add(default_project)
+        project_id = Project.query.filter_by(type="default project", user_id=user_id).first().id
+        default_objective = Objective(type="default project objective", objective_number=0, title="Default", description="Stores all tasks that don't belong to a user-created project", tag="default", project_id=project_id)
+        db.session.add(default_objective)
         db.session.commit()
         resp_dict["message"] = f"Success: Account Created! Login to start planning"
         return jsonify(resp_dict), 201
