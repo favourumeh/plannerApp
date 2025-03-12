@@ -144,12 +144,12 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(filtered_objectives, expected_outcome)
         #endregion
 
-        print("         Test that creating a project also creates a default objective which houses all objectiveless tasks")
+        print("         Test that creating a project also creates a default user project objective which houses all objectiveless tasks")
         self.client.post("/create-project", json={"description":"blah"})
         resp_read_objectives = self.client.get("/read-objectives")
         objectives: List[Dict] = resp_read_objectives.json["objectives"]
-        default_objective = list(filter(lambda objective: objective["type"]=="default objective", objectives))[0]
-        self.assertTrue(default_objective["type"] == "default objective")
+        default_objective = list(filter(lambda objective: objective["type"]=="default user project objective", objectives))[0]
+        self.assertTrue(default_objective["type"] == "default user project objective")
 
     #MARK: Test UPDATE_OBJS
     def test3_update_objective(self):

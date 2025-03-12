@@ -40,7 +40,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         username, pwd = "test", "ttt"
         self.standard_login_and_auth_test("get", "/read-tasks", json_data=None, username=username, pwd=pwd)
 
-        #create a project (and thus default objective)
+        #create a project (and thus default user project objective)
         self.client.post("/create-project", json={"description":"blah"}) 
         task_input = {"description":"Test task", "task_number":1, "duration":10, "objective_id":1}
         task_input_camelCase: Dict = snake_to_camel_dict(task_input)
@@ -126,10 +126,10 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.status_code, 201)
         self.assertDictEqual(task_input, filter_tasks)
 
-        print("         Test that user can create a task after creating a project due to the creation of the 'default objective'")
+        print("         Test that user can create a task after creating a project due to the creation of the 'default user project objective'")
         self.client.post("/create-project", json={"description":"user-created project"})
         default_objective: List[Dict] = self.read_and_filter_fields("/read-objectives", "objectives", ["id", "type"])
-        default_objective_id: int = filter_list_of_dicts(default_objective, "type", "default objective")["id"]
+        default_objective_id: int = filter_list_of_dicts(default_objective, "type", "default user project objective")["id"]
         task_input = {"description":"Task 'without' objective", "duration":10, "objectiveId":default_objective_id}
         response = self.client.post("/create-task", json=task_input)
         self.assertEqual(response.status_code, 201)
@@ -235,12 +235,12 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         user2_username = "test2"
         self.standard_login_and_auth_test("patch", "/update-task/1", json_data=None, username=user1_username, pwd=pwd)
 
-        #create a project (and thus default objective) and task for user1
+        #create a project (and thus default user project objective) and task for user1
         self.client.post("/create-project", json={"description":"user1 project"})
         self.client.post("/create-task", json={"description":"user1 task", "duration":10, "objectiveId":1})
         user1_task_id: int = self.read_and_filter_fields("/read-tasks", "tasks", ["id"])[0]["id"]
         
-        #create user2, login and create a project (and thus default objective)
+        #create user2, login and create a project (and thus default user project objective)
         self.client.post("/sign-up", json={"username":user2_username, "password1":pwd, "password2":pwd})
         self.client.post("/login", json = {"username":user2_username, "password":pwd})
         self.client.post("/create-project", json ={"description":"user2 project"})
@@ -282,12 +282,12 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         user2_username = "test2"
         self.standard_login_and_auth_test("delete", "/delete-task/1", json_data=None, username=user1_username, pwd=pwd)
 
-        #create a project (and thus default objective) and task for user1
+        #create a project (and thus default user project objective) and task for user1
         self.client.post("/create-project", json={"description":"user1 project"})
         self.client.post("/create-task", json={"description":"user1 task", "duration":10, "objectiveId":1})
         user1_task_id: int = self.read_and_filter_fields("/read-tasks", "tasks", ["id"])[0]["id"]
 
-        #create user2, login and create a project (and thus default objective)
+        #create user2, login and create a project (and thus default user project objective)
         self.client.post("/sign-up", json={"username":user2_username, "password1":pwd, "password2":pwd})
         self.client.post("/login", json={"username":user2_username, "password":pwd})
         self.client.post("/create-project", json ={"description":"user2 project"})

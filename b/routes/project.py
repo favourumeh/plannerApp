@@ -51,7 +51,7 @@ def create_project() -> Tuple[Response, int]:
         db.session.add(project)
         project_id = Project.query.filter_by(title=title, description=description, last_updated=last_updated, user_id=user_id).first().id
         objective_desc = "Stores all project tasks that do not belong to an objective"
-        default_objective = Objective(title="Default Objective", type="default objective", objective_number=0, description=objective_desc, project_id=project_id)
+        default_objective = Objective(title="Default Objective", type="default user project objective", objective_number=0, description=objective_desc, project_id=project_id)
         db.session.add(default_objective)
         db.session.commit()
         resp_dict["message"] = "Success: Project Added!"
