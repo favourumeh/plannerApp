@@ -5,6 +5,8 @@ from .bespoke_funcs import flatten_2d_list
 from .bespoke_funcs import generate_objective_number
 from .bespoke_funcs import generate_task_number
 from .bespoke_funcs import filter_list_of_dicts
+from .bespoke_funcs import generate_all_user_content
+from .bespoke_funcs import generate_user_content
 from .project_config import access_token_dur
 from .project_config import refresh_token_dur
 from .project_config import allowed_origins

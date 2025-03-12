@@ -1,6 +1,6 @@
-from typing import List, Dict
+from typing import Tuple, List, Dict
 from cryptography.fernet import Fernet
-from models import Objective, Task
+from models import User, Refresh_Token, Project, Objective, Task
 import json
 from itsdangerous import URLSafeTimedSerializer
 from dotenv import load_dotenv
@@ -114,3 +114,31 @@ def filter_list_of_dicts(L:List[Dict], key:str, value_comparison:str) -> Dict|No
         value_comparison: compared with the value of the dictionary key (Dict[key]) as part of the filter condition"""
     return list(filter(lambda dict_: dict_[key]==value_comparison, L))[0]
         
+
+def generate_all_user_content(user_id:int) -> Tuple[List[Refresh_Token|None], List[Project|None], List[Objective|None], List[Task|None]]:
+    """Generates a user's refresh_tokens, projects, objectives AND tasks"""
+    refresh_tokens: List[Refresh_Token] = Refresh_Token.query.filter_by(user_id=user_id).all()
+    projects: List[Project] = Project.query.filter_by(user_id = user_id).all() # a default project is created on user signs up
+    project_ids: List[int] = [project.id for project in projects]
+    objectives: List[List[Objective]] = [Objective.query.filter_by(project_id=id).all() for id in project_ids] # a default user project objective is created on a project's creation
+    objectives_flattened: List[Objective] = flatten_2d_list(objectives)
+    objective_ids: List[int] = [user_objective.id for user_objective in objectives_flattened]
+    tasks: List[List[Task]] =  [Task.query.filter_by(objective_id=id).all() for id in objective_ids]
+    tasks_flattened: List[Task] = flatten_2d_list(tasks)
+    return refresh_tokens, projects, objectives_flattened, tasks_flattened
+    
+def generate_user_content(user_id:int, content:str)-> List[Refresh_Token] | List[Project]| List[Objective]| List[Task] | List[None]:
+    """Generates a user's refresh tokens or projects, OR objectives or tasks.
+    Args:
+        content: the user content to return. Is not one of: 'refresh tokens', 'projects', 'objectives' or 'tasks'"""
+    refresh_tokens, projects, objectives, tasks = generate_all_user_content(user_id=user_id)
+    if content == "refresh tokens":
+        return refresh_tokens
+    elif content == "projects":
+        return projects
+    elif content == "objectives":
+        return objectives
+    elif content == "tasks":
+        return tasks
+    else:
+        raise Exception("Content specified is not one of: 'refresh tokens', 'projects', 'objectives' or 'tasks' ")
