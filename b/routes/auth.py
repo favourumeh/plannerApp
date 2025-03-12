@@ -4,13 +4,13 @@ from dotenv import load_dotenv
 import json
 from config import db, app, serializer
 from flask import Blueprint, request, jsonify, Response, session
-from models import User, Refresh_Token, Project
+from models import User, Refresh_Token, Project, Objective, Task
 from werkzeug.security import generate_password_hash, check_password_hash
-from typing import Tuple
+from typing import Tuple, List
 import jwt
 from datetime import datetime, timezone, timedelta
 from uuid import uuid4
-from plannerPackage import login_required, token_required, update_refresh_token_table, access_token_dur, filter_dict
+from plannerPackage import login_required, token_required, update_refresh_token_table, access_token_dur, filter_dict, generate_all_user_content
 from cryptography.fernet import Fernet
 
 #import env vars from b/.env file
@@ -211,13 +211,15 @@ def delete_user(user_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 403
     
     user: User = User.query.filter_by(id=session["userId"]).first()
-    refresh_token_obj: Refresh_Token = Refresh_Token.query.filter_by(user_id=session["userId"]).first()
+    refresh_tokens, projects, objectives, tasks = generate_all_user_content(user_id)
+    content_to_delete: List[Refresh_Token|None, Task|None, Objective|None, Project|None] = refresh_tokens + tasks + objectives + projects # note: sequence of list matters for foreign key null contraints 
 
     try:
+        for instance in content_to_delete:
+            db.session.delete(instance)
         db.session.delete(user)
-        db.session.delete(refresh_token_obj)
         db.session.commit()
-        resp_dict["message"] = f"Deleted account ({user.username}) and associated access and refresh token."
+        resp_dict["message"] = f"Deleted account ({user.username}) and associated rt, projects, objectives and tasks."
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Could not delete the chosen user. Reason {e}"
