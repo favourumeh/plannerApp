@@ -69,7 +69,7 @@ def signup() -> Tuple[Response, int]:
         user = User(username=username, email=email, password=password_hash)
         db.session.add(user)
         user_id = User.query.filter_by(username=username).first().id
-        default_project = Project(type="default project", title="Default", description="Refrences all non-user created objectives and tasks", tag="default", user_id=user_id)
+        default_project = Project(type="default project", title="Default", description="Stores all objectives and tasks that don't belong to a user-created project", tag="default", user_id=user_id)
         db.session.add(default_project)
         db.session.commit()
         resp_dict["message"] = f"Success: Account Created! Login to start planning"
@@ -176,7 +176,7 @@ def refresh() -> Tuple[Response, int]:
     "refreshes the access token"
     resp_dict = {"message":""}
     
-    #Use userID from bespoke cookies dict to extract user entry
+    #Use userId from bespoke cookies dict to extract user entry
     user_id: int = session["userId"] 
     user: User = User.query.filter(User.id == user_id).first()
 
