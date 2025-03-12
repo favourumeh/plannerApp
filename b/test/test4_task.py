@@ -62,6 +62,8 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         print("     2A)Testing create_task")
         user1_username, pwd = "test", "ttt"
         user2_username = "test2"
+        
+        #note: In standard_login_and_auth_test, a user is created/logged => creation of 'default project' and 'default objective' 
         self.standard_login_and_auth_test("post", "/create-task", json_data=None, username=user1_username, pwd=pwd)
 
         #create an objective (assigned to the default project) for user1
@@ -152,16 +154,15 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         user_username, pwd = "test", "ttt"
         self.client.post("/sign-up", json={"username":user_username, "password1":pwd, "password2":pwd})
         self.client.post("/login", json={"username":user_username, "password":pwd})
-        self.client.post("/create-objective", json={"title":"user-created objective", "projectId":1})
-        
-        print("         TaskNumber field when not specified and when not other task in the user's objective default to 1")
+
+        print("         TaskNumber field when not specified and when no other task in the user's objective defaults to 1")
         expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1}] 
         task_input = {"description":"Test 1", "duration":10, "objectiveId":1}
         self.client.post("/create-task", json=task_input)
         field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
         self.assertListEqual(expected_outcome, field_filtered_output)
         
-        print("         Test auto-increment of task_number field (i.e., no task no. provided; NOT empty task table) succeeds")
+        print("         TaskNumber generated when no task no. provided AND NON-mpty task table succeeds")
         expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
                             {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1} ] 
         task_input = {"description":"Test 2", "duration":10, "objectiveId":1}
@@ -212,7 +213,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
         #print("output dict:", field_filtered_output)
         self.assertListEqual(expected_outcome, field_filtered_output)
-        
+
         print("         TaskNumber field restart to 1 when creating a task for a new objective")
         self.client.post("/create-objective", json={"title":"user-created objective 2", "projectId":1}) #create new objective in proj 1
         expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
@@ -233,17 +234,19 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         print("     3)Testing update_task")
         user1_username, pwd = "test", "ttt"
         user2_username = "test2"
+
+        #note: In standard_login_and_auth_test, a user is created/logged => creation of 'default project' and 'default objective' 
         self.standard_login_and_auth_test("patch", "/update-task/1", json_data=None, username=user1_username, pwd=pwd)
 
-        #create a project (and thus default user project objective) and task for user1
-        self.client.post("/create-project", json={"description":"user1 project"})
+        #create a task for user1 (connected to the default objective and default project created on signup)
         self.client.post("/create-task", json={"description":"user1 task", "duration":10, "objectiveId":1})
         user1_task_id: int = self.read_and_filter_fields("/read-tasks", "tasks", ["id"])[0]["id"]
-        
-        #create user2, login and create a project (and thus default user project objective)
+
+        #signup and login user2 => creation of 'default project' and 'default objective'
         self.client.post("/sign-up", json={"username":user2_username, "password1":pwd, "password2":pwd})
         self.client.post("/login", json = {"username":user2_username, "password":pwd})
-        self.client.post("/create-project", json ={"description":"user2 project"})
+        
+        #create a task for user2, (connected to the default objective and default project created on signup)
         self.client.post("/create-task", json={"description":"user2 task", "duration":10, "objectiveId":2})
         field_filtered_tasks: List[Dict] = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "description", "objectiveId"])
         user2_task_id: int = filter_list_of_dicts(field_filtered_tasks, "description", "user2 task")["id"]
@@ -265,7 +268,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         print("         Test requesting to update a task after login succeeds")
         task_update_input = {"description":"updated user2 task", "duration":20, "priorityScore":2,
                              "scheduledStart":now_str, "scheduledFinish":now_str, "isCompleted":True,
-                             "previousTaskId":2, "nextTaskId":4, "isRecurring":True, "dependencies":"1,2", 
+                             "previousTaskId":2, "nextTaskId":4, "isRecurring":True, "dependencies":"1;2", 
                              "tag":"test","objectiveId":user2_objective_id}
         response = self.client.patch(f"/update-task/{user2_task_id}", json=task_update_input) 
         self.assertEqual(response.status_code, 200)
@@ -283,14 +286,12 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.standard_login_and_auth_test("delete", "/delete-task/1", json_data=None, username=user1_username, pwd=pwd)
 
         #create a project (and thus default user project objective) and task for user1
-        self.client.post("/create-project", json={"description":"user1 project"})
         self.client.post("/create-task", json={"description":"user1 task", "duration":10, "objectiveId":1})
         user1_task_id: int = self.read_and_filter_fields("/read-tasks", "tasks", ["id"])[0]["id"]
 
         #create user2, login and create a project (and thus default user project objective)
         self.client.post("/sign-up", json={"username":user2_username, "password1":pwd, "password2":pwd})
         self.client.post("/login", json={"username":user2_username, "password":pwd})
-        self.client.post("/create-project", json ={"description":"user2 project"})
         self.client.post("/create-task", json={"description":"user2 task", "duration":10, "objectiveId":2})
         field_filtered_tasks: List[Dict] = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "description"])
         user2_task_id: int = filter_list_of_dicts(field_filtered_tasks, "description", "user2 task")["id"]
