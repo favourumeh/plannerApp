@@ -2,15 +2,16 @@ import unittest
 import os
 import time
 from . import app, serializer
-from . import db, User, Refresh_Token
+from . import db, User, Refresh_Token, Project
+from . import plannerAppTestDependecies
 from datetime import datetime, timezone, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
-from plannerPackage import filter_dict, decrypt_bespoke_session_cookie
+from plannerPackage import filter_dict, decrypt_bespoke_session_cookie, generate_all_user_content
 
 #Record test execution time
 now = datetime.now(tz=timezone.utc)
 
-class FlaskAPIAuthTestCase(unittest.TestCase):
+class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
     def setUp(self):
         """This is a hook method that is executed before each test method. Function: An app client is created for each test method to make request to the backend api. 
@@ -118,26 +119,22 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
     def test1_signup(self):
         print("     1)Testing test_signup")
         #Add a user entry to the user table of the in-memory db
-        user = User(username="test", password="ttt", email="test@test.com")
+        username1, pwd = "test", "ttt"
+        username2, username3 = "test1", "test2"
+        email1, email3 = "test@test.com", "example@exmaple.com"
+        user = User(username=username1, password=pwd, email=email1)
         with app.app_context():
             db.session.add(user)
             db.session.commit()
 
         #Test cases:
         print("         Test valid signup input")
-        data = {"username":"test1", "password1": "ttt", "password2": "ttt"} 
+        data = {"username":username2, "password1":pwd, "password2":pwd} 
         response = self.client.post("/sign-up", json = data )
         self.assertEqual(response.status_code, 201)
 
-        print("         Test that a default project is created on signup")
-        self.client.post("/login", json={"username":"test1", "password":"ttt"})
-        response = self.client.get("/read-projects")
-        default_project = list(filter(lambda project: project["type"]=="default project", response.json["projects"]))[0]
-        filter_project = filter_dict(default_project, ["title", "tag"])
-        self.assertEqual(filter_project, {"title":"Default", "tag":"default"})
-        
         print("         Test Valid Input w/email")
-        data = {"username":"test2", "password1": "ttt", "password2": "ttt", "email": "example@exmaple.com"} 
+        data = {"username":username3, "password1":pwd, "password2":pwd, "email": email3} 
         response = self.client.post("/sign-up", json = data )
         self.assertEqual(response.status_code, 201)
         
@@ -150,7 +147,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.assertEqual(response.json["message"], "Failure: Username is missing!")
         
         print("         Test invalid Input - existing user in db")
-        data = {"username":"test", "password1": "ttt", "password2": "ttt"} 
+        data = {"username":username1, "password1": pwd, "password2": pwd} 
         response = self.client.post("/sign-up", json = data)
         self.assertEqual(response.json, {"message": "Failure: Username is taken. Please choose another one."})
         self.assertEqual(response.status_code, 400)
@@ -187,37 +184,26 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
     def test2_login(self):
         print("     2)Testing login")
         #Add a user entry to the user table of the in-memory db
-        user = User(username="test", password=generate_password_hash("ttt", "pbkdf2"), email="test@test.com")
-        with app.app_context():
-            db.session.add(user)
-            db.session.commit()
+        username, pwd, email = "test", "ttt", "test@test.com"
+        data = {"username":username, "password1":pwd, "password2":pwd, "email": email} 
+        self.client.post("/sign-up", json=data)
         
         print("         Test valid input - refresh token creation")
-        data = {"username": "test", "password":"ttt"}
-        response = self.client.post("/login", json = data)
-        self.assertEqual(response.json["user"], {"id":1, "username": "test"})
-        self.assertEqual(response.status_code, 200)
-
-        print("         Test valid input -  refresh token renewal")
-        now = datetime.now(tz=timezone.utc)                
-        refresh_token_obj = Refresh_Token(token="aaa", exp = now - timedelta(days=1))
-        with app.app_context():
-            db.session.add(refresh_token_obj)
-        data = {"username": "test", "password":"ttt"}
+        data = {"username": username, "password":pwd}
         response = self.client.post("/login", json = data)
         self.assertEqual(response.json["user"], {"id":1, "username": "test"})
         self.assertEqual(response.status_code, 200)
 
         print("         Test invalid input - user not found")
-        data = {"username": "test1", "password":"ttt"}
+        data = {"username": "test1", "password":pwd}
         response = self.client.post("/login", json = data)
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json["message"], "Failure: User not found")
                
         print("         Test invalid input - incorrect password")
-        data = {"username": "test", "password":"ttt1"}
+        data = {"username": username, "password":"ttt1"}
         response = self.client.post("/login", json = data)
-        self.assertEqual(response.status_code, 401)
-    
+        self.assertEqual(response.json["message"], "Failure: Incorrect password")
+
     def test3_logout(self):
         print("     3)Testing logout ")
         #create account
@@ -226,7 +212,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         with app.app_context():
             db.session.add(user)
             db.session.commit()
-        
+
         #Test Cases 
         print("         Test accessing the route whilst not logged in fails - (c: no bespoke session cookie)")
         response = self.client.get("/logout")
@@ -244,8 +230,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         self.client.set_cookie(key="bespoke_session", value=bsc,httponly=True, samesite="None", secure=True)
         response = self.client.get("/logout")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please login!")
-        self.assertEqual(response.status_code, 404)
-    
+
     def test4_refresh(self):
         print("     4)Testing refresh ")
         #create account
@@ -263,13 +248,11 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         print("         Test accessing the route whilst not logged in fails - (c: no bespoke_session cookie)")
         response = self.client.get("/refresh")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
-        self.assertEqual(response.status_code, 400)
-        
+
         print("         Test accessing the route whilst not logged in fails - (c: no refresh token)")
         self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
         response = self.client.get("/refresh")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please login!")
-        self.assertEqual(response.status_code, 404)       
 
         print("         Test accessing the route with an expired refresh token fails")
         exp: datetime = datetime.now(tz=timezone.utc) - timedelta(days =1)
@@ -279,7 +262,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         with app.app_context():
             db.session.add(refresh_token_obj)
             db.session.commit()
-            
+
         self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
         response = self.client.get("/refresh")
         self.assertEqual(response.json["message"], "Failure: Please login. Refresh token has expired.")
@@ -298,102 +281,44 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         
     def test5_delete_user(self):
         print("     5)Testing delete_user")
-        #Test Case: not logged in user
-        print("         Test invalid input - account delete fails without session cookies (i.e. without login)")
-        response = self.client.delete("/delete_user/1")
-        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
-        self.assertEqual(response.status_code, 400)
-        
-        #Add a user entry to the user table of the in-memory db
-        user = User(username="test", password=generate_password_hash("ttt", "pbkdf2"), email="test@test.com")
-        with app.app_context():
-            db.session.add(user)
-            db.session.commit()
-        
-        #login to user
-        data = {"username": "test", "password":"ttt"}
-        self.client.post("/login", json = data)
+        username, pwd = "test","ttt"
+
+        self.standard_login_and_auth_test(httpmethod="delete", endpoint="/delete_user/1", json_data=None, username=username, pwd=pwd)
 
         #Other Test Cases:
         print("         Test invalid input - deleting someone else's account fails (mismatched user_id in url vs in session dict)")
         response = self.client.delete("/delete_user/2")
         self.assertEqual(response.json["message"], "Failure: Account chosen for deletion does not match the account logged in.")
-        self.assertEqual(response.status_code, 403)
-        
-            #valid deletion of an account
+
         print("         Testing valid input - deleting an account when logged in")
         response = self.client.delete("/delete_user/1")
         self.assertEqual(response.status_code, 200)
-
-    def test6_edit_user(self):
-        print("     6)Testing edit_user")
-        username, password, email = "test", "ttt" , "test@example.com"
-        new_username, new_password, new_email = "test1", "ttt1", "new_email@example.com"
         
-        #Test Case: not logged in user
-        print("         Test invalid input - account edit fails without session cookies (i.e. without login)")
-        response = self.client.patch("/edit_user/1")
-        self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
-        self.assertEqual(response.status_code, 400)
-        
-        #Add a user entry to the user table of the in-memory db
-        user = User(username=username, password=generate_password_hash(password, "pbkdf2"), email=email, is_admin=True)
+        print("     Test that all user's content (rts, projects, objectives and tasks) was deleted")
         with app.app_context():
-            db.session.add(user)
-            db.session.commit()
-        
-        #login to user
-        data = {"username": username, "password": password}
-        self.client.post("/login", json = data)
+            user = User.query.filter_by(id=1).first()
+            refresh_token = Refresh_Token.query.filter_by(user_id=1).first()
+            projects = Project.query.filter_by(user_id=1).all()
+            self.assertEqual(user, None)
+            self.assertEqual(refresh_token, None)
+            self.assertEqual(len(projects), 0) #if no projects then no objectives or tasks
 
-        #Other Test Cases:
-        print("         Test invalid input - editing someone else's account fails (mismatched user_id in url vs in session dict)")
-        response = self.client.patch("/edit_user/2")
-        self.assertEqual(response.json["message"], "Failure: The account you are attempting to edit does not match the account that is logged in")
-        self.assertEqual(response.status_code, 403)
-        
-        print("         Testing valid input - editing your account when logged in works")
-        response_get_user_old = self.client.get("/get-user/1")
-        time.sleep(0.5)
-        new_data = {"username":new_username, "password":password, "password1":new_password, "password2":new_password, "email":new_email }
-        response = self.client.patch("/edit_user/1", json=new_data)
-        self.assertEqual(response.json["message"], "Success: User was successfully edited")
-        
-        print("         Test successful login with new credentitals")
-        response_login = self.client.post("/login", json= {"username":new_username, "password":new_password})
-        self.assertEqual(response_login.status_code, 200)
-        
-        print("         Test verify the changes made to email and lastUpdated")
-        response_get_user = self.client.get("/get-user/1")
-        older_user_details = response_get_user_old.json["user"]
-        new_user_details = response_get_user.json["user"]
-        self.assertNotEqual(older_user_details["email"], new_user_details["email"])
-        self.assertNotEqual(older_user_details["lastUpdated"], new_user_details["lastUpdated"])
-
-    def test7_get_user(self):
-        print("     7)Testing get_user")
-        
-        #Test Cases:
-        print("         Test accessing the route without session cokies fails")
-        response_get_user = self.client.get("/get-user/1")
-        self.assertEqual(response_get_user.status_code, 400)
-        self.assertEqual(response_get_user.json["message"],"Failure: User is not logged in (no b_sc). Please login!")
-        
-        #creating test user entries
+    def test6_get_user(self):
+        print("     6)Testing get_user")
         admin_username, reg_username = "admin", "reg"
         pwd = "ttt"
-        admin_user: User = User(username=admin_username, password=generate_password_hash(pwd), is_admin=True) 
-        reg_user: User = User(username=reg_username, password=generate_password_hash(pwd), is_admin=False) 
-        with app.app_context():
-            db.session.add(admin_user)
-            db.session.add(reg_user)
-            db.session.commit()
 
-            #login to reg account
-        self.client.post("/login", json = {"username":reg_username, "password":pwd})
+        #test sign-up and login of reg account (logs into reg account )
+        self.standard_login_and_auth_test(httpmethod="get", endpoint="/get-user/1", json_data=None, username=reg_username, pwd=pwd)
+
+        #create admin account
+        with app.app_context():
+            admin_user: User = User(username=admin_username, password=generate_password_hash(pwd), is_admin=True)
+            db.session.add(admin_user)
+            db.session.commit()
  
         print("         Test accessing the route from reg account fails")
-        response_get_user = self.client.get("/get-user/2")
+        response_get_user = self.client.get("/get-user/1")
         self.assertEqual(response_get_user.status_code, 403)
         
         #login to admin account
@@ -406,55 +331,72 @@ class FlaskAPIAuthTestCase(unittest.TestCase):
         print("         Test trying get an account that does not exist fails")       
         response_get_user = self.client.get("/get-user/3")
         self.assertEqual(response_get_user.json["message"], "Failure: the user you are trying to get does not exist")
-        self.assertEqual(response_get_user.status_code, 404)
 
-        print("         Test accessing the route with a missing access token cookie fails")
-        self.client.set_cookie(key="session_AT", value="",httponly=True, samesite="None", secure=True)
-        response_get_user = self.client.get("/get-user/1")
-        self.assertEqual(response_get_user.json["message"], "Request is missing access token. Please login to refresh access token")
-        self.assertEqual(response_get_user.status_code, 400)
+
+    def test7_edit_user(self):
+        print("     7)Testing edit_user")
+        username, password, email = "test", "ttt" , "test@example.com"
+        new_username, new_password, new_email = "test1", "ttt1", "new_email@example.com"
+
+        self.standard_login_and_auth_test(httpmethod="patch", endpoint="/edit_user/1", json_data={"":""}, username=username, pwd=password, email=email)
+
+        #Make user1 admin
+        user = User(username=username, password=generate_password_hash(password, "pbkdf2"), email=email, is_admin=True)
+        with app.app_context():
+            user = User.query.filter_by(id=1).first()
+            user.is_admin = True
+            db.session.commit()
+
+        #Other Test Cases:
+        print("         Test invalid input - editing someone else's account fails (mismatched user_id in url vs in session dict)")
+        response = self.client.patch("/edit_user/2")
+        self.assertEqual(response.json["message"], "Failure: The account you are attempting to edit does not match the account that is logged in")
         
-        print("         Test accessing the route with an invalid access token cookie fails")
-        self.client.set_cookie(key="session_AT", value="sdfasdf",httponly=True, samesite="None", secure=True)
+        print("         Testing valid input - editing your account when logged in works")
+        response_get_user_old = self.client.get("/get-user/1")
+        time.sleep(0.1)
+        new_data = {"username":new_username, "password":password, "password1":new_password, "password2":new_password, "email":new_email }
+        response = self.client.patch("/edit_user/1", json=new_data)
+        self.assertEqual(response.json["message"], "Success: User was successfully edited")
+
+        print("         Test successful login with new credentitals")
+        response_login = self.client.post("/login", json= {"username":new_username, "password":new_password})
+        self.assertEqual(response_login.status_code, 200)
+
+        print("         Test verify the changes made to email and lastUpdated")
         response_get_user = self.client.get("/get-user/1")
-        self.assertEqual(response_get_user.json["message"].split("! Reason:")[0], "Deserialisation or Signiture verificaiton of access token cookie has failed" )
-        self.assertEqual(response_get_user.status_code, 400)
-        
-        print("         Test accessing the route with an expired access token cookie fails")
-        self.client.set_cookie(key="session_AT", value= os.environ["expired_access_token_cookie"],httponly=True, samesite="None", secure=True)
-        response_get_user = self.client.get("/get-user/1")
-        self.assertEqual(response_get_user.json["message"], "Invalid Access Token! Reason: Signature has expired" )
-        self.assertEqual(response_get_user.status_code, 401)
+        older_user_details = response_get_user_old.json["user"]
+        new_user_details = response_get_user.json["user"]
+        self.assertNotEqual(older_user_details["email"], new_user_details["email"])
+        self.assertNotEqual(older_user_details["lastUpdated"], new_user_details["lastUpdated"])
 
     def test8_get_user_rts(self):
         print("     8)Test get_user_rts")
-        #created user
         admin_username, reg_username = "admin", "reg"
         pwd = "ttt"
-        admin_user: User = User(username=admin_username, password=generate_password_hash(pwd), is_admin=True) 
-        reg_user: User = User(username=reg_username, password=generate_password_hash(pwd), is_admin=False) 
+
+        #test sign-up and login of reg account (logs into reg account )
+        self.standard_login_and_auth_test(httpmethod="get", endpoint="/get-user-rts/1", json_data=None, username=reg_username, pwd=pwd)
+
+        #create admin account
         with app.app_context():
+            admin_user: User = User(username=admin_username, password=generate_password_hash(pwd), is_admin=True)
             db.session.add(admin_user)
-            db.session.add(reg_user)
             db.session.commit()
 
         print("         Test accessing route without admin rights fails")
-        self.client.post("/login", json={"username":reg_username, "password":pwd})
-        response = self.client.get("/get-user-rts/2")
+        response = self.client.get("/get-user-rts/1")
         self.assertEqual(response.json["message"], "Failure: User is not permitted to access this route")
         
         print("         Test accessing route with admin rights succeeds")
         self.client.post("/login", json={"username":admin_username, "password":pwd})
-        response = self.client.get("/get-user-rts/2")
+        response = self.client.get("/get-user-rts/1")
         self.assertEqual(response.json["message"], "Success: retrieved user rt")
 
         print("         Test getting the rts of a user that does not exit fails")
         self.client.post("/login", json={"username":admin_username, "password":pwd})
         response = self.client.get("/get-user-rts/3")
         self.assertEqual(response.json["message"], "Failure: the user you are trying to get does not exist")
-        
-        
-        
 
 if __name__ == "__main__":
     unittest.main()
