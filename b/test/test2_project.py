@@ -7,11 +7,11 @@ from . import plannerAppTestDependecies
 from datetime import datetime, timezone
 from plannerPackage import filter_dict
 from werkzeug.test import TestResponse
-
+from typing import List, Dict
 #Record test execution time
 now: datetime = datetime.now(tz=timezone.utc)
 now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M:%S.%fZ')
-now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:%S %Z")
+now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:%S %Z").replace("UTC", "GMT")
 
 #load env vars
 load_dotenv()
@@ -31,10 +31,26 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
             db.session.remove()
             db.drop_all()
 
-    def test1_create_project(self):
+    def test1_read_projects(self):
         username, pwd = "test", "ttt"
         print("\nTesting routes of Project Blueprint")
-        print("     1)Testing create_project")
+        print("     \n1)Testing read_project")
+        
+        #Test cases 
+        self.standard_login_and_auth_test(httpmethod="get", endpoint="/read-projects", json_data=None , username=username, pwd=pwd)
+
+        print("         Test accessing the route whilst logged succeeds")
+        response = self.client.get("/read-projects")
+        self.assertEqual(response.status_code, 200)
+        
+        print("         Test default project is created on sign up")
+        user_projects: List[Dict] = self.read_and_filter_fields("/read-projects", "projects", ["id", "type"])
+        default_project: Dict = list(filter(lambda project: project["type"]=="default project", user_projects))[0]
+        self.assertEqual(default_project["type"], "default project")
+        
+    def test2_create_project(self):
+        username, pwd = "test", "ttt"
+        print("     \n2)Testing create_project")
 
         #Test cases 
         self.standard_login_and_auth_test(httpmethod="post", endpoint="/create-project", json_data={"description":"blah"} , username=username, pwd=pwd)
@@ -46,8 +62,8 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         user_project = list(filter(lambda project: project["type"]=="user project", response_get_project.json["projects"]))[0]
         filtered_project = filter_dict(user_project, ["title", "description", "isCompleted", "tag", "deadline"])
         self.assertEqual(response.status_code, 201)
-        data["deadline"] = now_str_long.replace("UTC", "GMT")
-        self.assertDictEqual(filtered_project, data)
+        data["deadline"] = now_str_long
+        self.assertDictEqual(data, filtered_project)
 
         print("         Test creating a project with no description fails")
         data = {"title":"Test User Project", "isCompleted":False, "tag":"test"}
@@ -59,21 +75,9 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         response = self.client.post("/create-project", json=data)
         self.assertEqual(response.json["message"], f"Failure: The title has over {project_title_limit} chars")
 
-    def test2_read_projects(self):
-        username, pwd = "test", "ttt"
-        print("     2)Testing read_project")
-        
-        #Test cases 
-        self.standard_login_and_auth_test(httpmethod="get", endpoint="/read-projects", json_data=None , username=username, pwd=pwd)
-
-        print("         Test accessing the route whilst logged succeeds")
-        response = self.client.get("/read-projects")
-        self.assertEqual(response.status_code, 200)
-              
-        
     def test3_update_projects(self):
         username, pwd = "test", "ttt"
-        print("     3)Testing update_project")
+        print("     \n3)Testing update_project")
         print("         note: bsc=bespoke_session cookie and satc=session_AT(access token) cookie.")
         
         #Test cases 
@@ -101,7 +105,7 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         response_read_projects = self.client.get("/read-projects")
         updated_project: dict = list(filter(lambda project: project["type"]=="user project", response_read_projects.json["projects"]))[0]
         filtered_updated_project: dict = filter_dict(updated_project, list(data.keys()))
-        data["deadline"] = now_str_long.replace("UTC", "GMT")
+        data["deadline"] = now_str_long
         self.assertDictEqual(data, filtered_updated_project)
 
         print(f"         Test request with project title>{project_title_limit} chars")
@@ -110,7 +114,7 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         
     def test4_delete_project(self):
         username, pwd = "test", "pwd"
-        print("     4)Test delete_project")
+        print("     \n4)Test delete_project")
         print("         note: bsc=bespoke_session cookie and satc=session_AT(access token) cookie.")
 
         #Test cases 
