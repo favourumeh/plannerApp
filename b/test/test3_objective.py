@@ -37,7 +37,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
     def test1_read_objective(self):
         username, pwd = "test", "ttt"
         print("\nTesting routes of Objective Blueprint")
-        print("     1)Testing read_objectives")
+        print("     \n1)Testing read_objectives")
 
         #Test Cases:
         #note: In standard_login_and_auth_test, a user is created/logged => creation of 'default project' and 'default objective' 
@@ -56,7 +56,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
             db.session.add(project_objective)
             db.session.commit()
 
-        print("         Test that signing up creates a default project objective which houses all objectiveless tasks for an account...")
+        print("         Test that signing up creates a default project objective ...")
         print("         ...AND test user requesting their objectives after login is successfull and yields the expected output")
         filtered_objectives = self.read_and_filter_fields(read_endpoint="/read-objectives", entity="objectives", rel_fields=["id", "objectiveNumber", "projectId", "title", "type"])
         expected_output = [{'id': 1, 'objectiveNumber': 0, 'projectId': 1, 'title': 'Default', 'type': 'default project objective'},
@@ -67,7 +67,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
     #MARK: Test CREATE_OBJS
     def test2A_create_objective(self):
         username, pwd = "test", "ttt"
-        print("     2A)Testing create_objective")
+        print("     \n2A)Testing create_objective")
 
         #Test Cases:
         #note: In standard_login_and_auth_test, a user is created/logged => creation of 'default project' and 'default objective' 
@@ -112,7 +112,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
 
     # def test2B_generate_objective_number(self):
     #     #region auto-inc obj field
-    #     print("     2b)Testing generate objective number")
+    #     print("     \n2b)Testing generate objective number")
     #     user_username, pwd = "test", "ttt"
     #     self.client.post("/sign-up", json={"username":user_username, "password1":pwd, "password2":pwd})
     #     self.client.post("/login", json={"username":user_username, "password":pwd})
@@ -161,7 +161,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
     def test3_update_objective(self):
         username, pwd = "test", "ttt"
         username1 = "test1"
-        print("     3)Testing update_objective")
+        print("     \n3)Testing update_objective")
 
         #Test Cases:
             #note: In standard_login_and_auth_test, user1 is signed up/logged in. Signup => creation of 'default project' and 'default objective' 
@@ -201,7 +201,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
     def test4_delete_objective(self):
         username, pwd = "test", "ttt" #username for user1
         username1 = "test1" #username for user2
-        print("     4)Testing delete_objective")
+        print("     \n4)Testing delete_objective")
 
         #Test Cases:
             #note: In standard_login_and_auth_test, a user is signed up/logged in. Signup => creation of 'default project' and 'default objective' 
