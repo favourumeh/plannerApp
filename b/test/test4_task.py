@@ -36,7 +36,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
 
     def test1_read_tasks(self):
         print("\nTesting routes of Task Blueprint")
-        print("     1)Testing read_tasks")
+        print("     \n1)Testing read_tasks")
         username, pwd = "test", "ttt"
         self.standard_login_and_auth_test("get", "/read-tasks", json_data=None, username=username, pwd=pwd)
 
@@ -59,7 +59,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertDictEqual(task_input_camelCase, filter_tasks)
 
     def test2A_create_tasks(self):
-        print("     2A)Testing create_task")
+        print("     \n2A)Testing create_task")
         user1_username, pwd = "test", "ttt"
         user2_username = "test2"
         
@@ -150,7 +150,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertDictEqual(create_task_input, updated_task)
 
     def test2B_generate_task_number(self):
-        print("     2b)Testing generate task number")
+        print("     \n2b)Testing generate task number")
         user_username, pwd = "test", "ttt"
         self.client.post("/sign-up", json={"username":user_username, "password1":pwd, "password2":pwd})
         self.client.post("/login", json={"username":user_username, "password":pwd})
@@ -231,7 +231,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertListEqual(expected_outcome, field_filtered_output)
 
     def test3_update_task(self):
-        print("     3)Testing update_task")
+        print("     \n3)Testing update_task")
         user1_username, pwd = "test", "ttt"
         user2_username = "test2"
 
@@ -280,7 +280,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertDictEqual(task_update_input, updated_task)
 
     def test4_delete_task(self):
-        print("     4)Testing delete_task")
+        print("     \n4)Testing delete_task")
         user1_username, pwd = "test", "ttt"
         user2_username = "test2"
         self.standard_login_and_auth_test("delete", "/delete-task/1", json_data=None, username=user1_username, pwd=pwd)

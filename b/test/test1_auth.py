@@ -29,7 +29,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
     def test0_A_test_login_required(self):
         print(f"\nTest time: {str(now.time()).split(".")[0]}. (date = {now.date()}) ------------------------")
         print("Testing Auth Blueprint")
-        print("     0A)Test login_required decorator")
+        print("     \n0A)Test login_required decorator")
         print("         notes: bsc = bespoke_session cookie")
         username, pwd = "test", "ttt"
         expired_bsc = os.environ["expired_bespoke_session_cookie"]
@@ -82,7 +82,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.json["message"], "Failure: Please login. Refresh token has expired.")
         
     def test0_B_test_token_required(self):
-        print("     0B)Test token_required decorator")
+        print("     \n0B)Test token_required decorator")
         print("         note1: satc = session_AT cookie.\n         note2: All tests are made with after user login is verified.")
         expired_satc = os.environ["expired_access_token_cookie"]
         username, pwd = "test", "ttt"
@@ -117,7 +117,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         
         
     def test1_signup(self):
-        print("     1)Testing test_signup")
+        print("     \n1)Testing test_signup")
         #Add a user entry to the user table of the in-memory db
         username1, pwd = "test", "ttt"
         username2, username3 = "test1", "test2"
@@ -182,7 +182,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.status_code, 400)
 
     def test2_login(self):
-        print("     2)Testing login")
+        print("     \n2)Testing login")
         #Add a user entry to the user table of the in-memory db
         username, pwd, email = "test", "ttt", "test@test.com"
         data = {"username":username, "password1":pwd, "password2":pwd, "email": email} 
@@ -205,7 +205,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.json["message"], "Failure: Incorrect password")
 
     def test3_logout(self):
-        print("     3)Testing logout ")
+        print("     \n3)Testing logout ")
         #create account
         username, pwd = "test","ttt"
         user: User = User(username=username, password=generate_password_hash(pwd))
@@ -232,7 +232,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please login!")
 
     def test4_refresh(self):
-        print("     4)Testing refresh ")
+        print("     \n4)Testing refresh ")
         #create account
         username, pwd = "test","ttt"
         user: User = User(username=username, password=generate_password_hash(pwd))
@@ -280,7 +280,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.json["message"], "Failure: Refresh token is invalid. Please login")
         
     def test5_delete_user(self):
-        print("     5)Testing delete_user")
+        print("     \n5)Testing delete_user")
         username, pwd = "test","ttt"
 
         self.standard_login_and_auth_test(httpmethod="delete", endpoint="/delete_user/1", json_data=None, username=username, pwd=pwd)
@@ -304,7 +304,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
             self.assertEqual(len(projects), 0) #if no projects then no objectives or tasks
 
     def test6_get_user(self):
-        print("     6)Testing get_user")
+        print("     \n6)Testing get_user")
         admin_username, reg_username = "admin", "reg"
         pwd = "ttt"
 
@@ -334,7 +334,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
 
     def test7_edit_user(self):
-        print("     7)Testing edit_user")
+        print("     \n7)Testing edit_user")
         username, password, email = "test", "ttt" , "test@example.com"
         new_username, new_password, new_email = "test1", "ttt1", "new_email@example.com"
 
@@ -371,7 +371,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertNotEqual(older_user_details["lastUpdated"], new_user_details["lastUpdated"])
 
     def test8_get_user_rts(self):
-        print("     8)Test get_user_rts")
+        print("     \n8)Test get_user_rts")
         admin_username, reg_username = "admin", "reg"
         pwd = "ttt"
 
