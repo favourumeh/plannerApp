@@ -73,7 +73,7 @@ class plannerAppTestDependecies():
         if httpmethod=="delete":
             return self.client.delete(endpoint)
             
-    def standard_login_and_auth_test(self, httpmethod:str, endpoint:str, json_data:dict|None, username:str, pwd:str) -> None:
+    def standard_login_and_auth_test(self, httpmethod:str, endpoint:str, json_data:dict|None, username:str, pwd:str, email:str|None=None) -> None:
         """These test 2 things: 1) Can the user access a protected route without a bespoke_session cookie(bsc)
         2) can the user access a protected route without session_AT cookie(satc). 
         note: In this method a user account is created and the user is login (hence username an password). A user project is also created. 
@@ -82,15 +82,19 @@ class plannerAppTestDependecies():
             endpoint: the (relative) endpoint of the protected route. Must being with "/".
             json_data: the json body of the request. If http method does not need a json body (e.g., get) then set to None. 
             username: username used to sign-up and login user
-            pwd: password used to signup and login user"""
+            pwd: password used to signup and login user
+            email: email used in user sign-up"""
         #Test cases 
         print("         Test accessing route without login(no bsc) fails")
         response = self.client_test_request(httpmethod=httpmethod, endpoint=endpoint,json_data=json_data)
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
 
         #signup and login #
-        self.client.post("/sign-up", json={"username":username, "password1":pwd, "password2":pwd})
-        self.client.post("/login", json={"username":username, "password":pwd})
+        print("         Test valid sign up and login")
+        rs = self.client.post("/sign-up", json={"username":username, "password1":pwd, "password2":pwd, "email":email})
+        rl = self.client.post("/login", json={"username":username, "password":pwd})
+        self.assertEqual(rs.status_code, 201)
+        self.assertEqual(rl.status_code, 200)
         satc = self.client.get_cookie("session_AT").value #session_AT cookie(satc)
 
         print("         Test accessing route without login(no satc) fails")
