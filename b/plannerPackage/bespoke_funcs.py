@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 def generate_config_dict(params: List[str], default_config_dict: Dict[str, str]) -> Dict[str, str]:
     """
     Creates a dictornary that stores the current backend environemnt and the relationship databse management system(rdbms) used
@@ -54,57 +53,40 @@ def flatten_2d_list(L: List) -> List:
     """Takes a 2d list (L) and makes it 1d. E.g [[1,2], [3,4], ...] => [1,2...]"""
     return [i for j in L for i in j]
 
-def generate_objective_number(objective_number: int|None, project_id:int, Objective: Objective):
-    """Generates an 'objective_number' (an objective identifier that is specific to a project). Unlike objective_id
-    an objective_number does not have to be unique in the database rather it should be unique to a specific project. 
+def generate_entity_number(entity_number:int|None, parent_entity_id:int, parent_entity_name:str, entity_name:str, entity:Project|Objective|Task):
+    """Generates an 'entity_number' which is an identifier for a child entity of a parent enitity. 
+    Unlike entity_id, an entity_number does not have to be unique in the database rather it should be unique to 
+    a specific parent entity (... To-do - UNLESS the entity is a recurring task as each recurring task group share the same task_number). 
     Args:
-        objective_number: the objective number for the project. Can be changed to force uniqueness within a user project.
-        project_id: the id of the project with which the objective being numbered belongs to.
-        Objective: The Objective entity of the plannerApp database."""
+        entity_number: an (optional) suggestion for the entity number for the entity. Can be changed to force uniqueness within a user's enitity.
+        parent_entity_id: the id of the parent entity with which the child entity being numbered belongs to (e.g., objective_id for a task|| user_id for a project).
+        parent_entity_name: the (lowercase) name of the parent entity... (e.g., user, project, objective).
+        entity_name: the (lowercase) name of the entity being numbered (e.g., project, objective, task).
+        entity: the entity (class) object"""
+    if parent_entity_name=="user":
+        entities = entity.query.filter_by(user_id=parent_entity_id).all()
+    elif parent_entity_name=="project":
+        entities = entity.query.filter_by(project_id=parent_entity_id).all()
+    elif parent_entity_name=="objective":
+        entities = entity.query.filter_by(objective_id=parent_entity_id).all()
+    else:
+        raise Exception("The specified parent_entity_name in 'generate_entity_number()' is not one of: 'user', 'project' of 'objective'.")
 
-    objectives = Objective.query.filter_by(project_id=project_id).all()
-    if len(objectives)>0:
-        objective_numbers = [objective.objective_number for objective in objectives]
-        if objective_number:
-            while objective_number in objective_numbers:
-                objective_number+=1
-            return objective_number
+    if len(entities)>0:
+        entity_numbers = [getattr(entity, f'{entity_name}_number') for entity in entities]
+        if entity_number:
+            while entity_number in entity_numbers:
+                entity_number+=1
+            return entity_number
 
-        if not objective_number:
-            objective_number = len(objective_numbers) + 1
-            while objective_number in objective_numbers:
-                objective_number+=1
-            return objective_number
-        
-    objective_number = 1
-    return objective_number
-
-
-def generate_task_number(task_number: int|None, objective_id:int, Task: Task):
-    """Generates an 'task_number' (an objective identifier that is specific to an objective). Unlike task_id
-    an task_number does not have to be unique in the database rather it should be unique to a specific objective. 
-    Args:
-        task_number: the task number for the objective. Can be changed to force uniqueness within a user's objective.
-        objective_id: the id of the objective with which the task being numbered belongs to.
-        Task: The Task entity of the plannerApp database."""
-
-    tasks = Task.query.filter_by(objective_id=objective_id).all()
-    if len(tasks)>0:
-        task_numbers = [task.task_number for task in tasks]
-        if task_number:
-            while task_number in task_numbers:
-                task_number+=1
-            return task_number
-
-        if not task_number:
-            task_number = len(task_numbers) + 1
-            while task_number in task_numbers:
-                task_number+=1
-            return task_number
-        
-    task_number = 1
-    return task_number
-
+        if not entity_number:
+            entity_number = len(set(entity_numbers)) + 1
+            while entity_number in entity_numbers:
+                entity_number+=1
+            return entity_number
+    else: 
+        entity_number = 1
+    return entity_number
 
 def filter_list_of_dicts(L:List[Dict], key:str, value_comparison:str) -> Dict|None:
     """Filters a list of dictionaries (L) to return the first dictionary in 'L' whose key has a value = 'value_comparison'.

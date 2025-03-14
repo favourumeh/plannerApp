@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
 from models import Project, Objective
-from plannerPackage import login_required, token_required, flatten_2d_list, generate_objective_number
+from plannerPackage import login_required, token_required, flatten_2d_list, generate_entity_number
 from config import db, app, serializer
 from typing import Tuple
 from datetime import datetime, timezone
@@ -56,8 +56,8 @@ def create_objective() -> Tuple[Response, int]:
         return jsonify(resp_dict), 400
 
     #generate objective number if not provided
-    objective_number = generate_objective_number(objective_number=objective_number, project_id=project_id, Objective=Objective)
-    
+    objective_number = generate_entity_number(entity_number=objective_number, parent_entity_id=project_id, parent_entity_name="project", entity_name="objective", entity=Objective)
+
     if isinstance(scheduled_start, str):
         scheduled_start = datetime.strptime(scheduled_start, '%Y-%m-%dT%H:%M:%S.%fZ')
 

@@ -2,8 +2,7 @@ from plannerPackage.bespoke_funcs import generate_config_dict
 from .bespoke_funcs import  decrypt_bespoke_session_cookie
 from .bespoke_funcs import filter_dict
 from .bespoke_funcs import flatten_2d_list
-from .bespoke_funcs import generate_objective_number
-from .bespoke_funcs import generate_task_number
+from .bespoke_funcs import generate_entity_number
 from .bespoke_funcs import filter_list_of_dicts
 from .bespoke_funcs import generate_all_user_content
 from .bespoke_funcs import generate_user_content

@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
 from models import User, Project, Objective, Task
-from plannerPackage import login_required, token_required, flatten_2d_list, generate_task_number, generate_user_content
+from plannerPackage import login_required, token_required, generate_user_content, generate_entity_number
 from config import db, app, serializer
 from typing import Tuple, List
 from datetime import datetime, timezone, timedelta
@@ -74,7 +74,7 @@ def create_task() -> Tuple[Response, int]:
     if isinstance(scheduled_finish, str):
         scheduled_finish = datetime.strptime(scheduled_finish, '%Y-%m-%dT%H:%M:%S.%fZ')  
         
-    task_number = generate_task_number(task_number=task_number, objective_id=objective_id, Task=Task)
+    task_number = generate_entity_number(entity_number=task_number, parent_entity_id=objective_id, parent_entity_name="objective", entity_name="task", entity=Task)
 
     try:
         task = Task(task_number=task_number, description=description, 
