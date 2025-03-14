@@ -37,11 +37,11 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
     def test1_read_tasks(self):
         print("\nTesting routes of Task Blueprint")
         print("     \n1)Testing read_tasks")
-        username, pwd = "test", "ttt"
-        self.standard_login_and_auth_test("get", "/read-tasks", json_data=None, username=username, pwd=pwd)
+        user1_username, pwd = "test", "ttt"
+        user2_username = "test1"
+        self.standard_login_and_auth_test("get", "/read-tasks", json_data=None, username=user1_username, pwd=pwd)
 
-        #create a project (and thus default user project objective)
-        self.client.post("/create-project", json={"description":"blah"}) 
+        #create a task and add it to the default project objective
         task_input = {"description":"Test task", "task_number":1, "duration":10, "objective_id":1}
         task_input_camelCase: Dict = snake_to_camel_dict(task_input)
         task = Task(**task_input)
@@ -57,6 +57,18 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         filter_tasks: Dict = list(filter(lambda task: task["description"]==task_input_camelCase["description"], task_entries_filtered_fields))[0]
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(task_input_camelCase, filter_tasks)
+        
+        #sign-up and login to user 2
+        self.client.post("/sign-up", json={"username":user2_username, "password1":pwd, "password2":pwd})
+        self.client.post("/login", json = {"username":user2_username, "password":pwd})
+
+        print("         Test that a default objective and task is created when a new user signs up")
+        default_task = self.read_and_filter_fields("/read-tasks", "tasks", ["taskNumber", "type","objectiveId"])
+        expected_outcome = [{"taskNumber":0, "type":"example task","objectiveId":2}]
+        self.assertEqual(expected_outcome, default_task)
+        default_objective = self.read_and_filter_fields("/read-objectives", "objectives", ["objectiveNumber", "type","projectId"])
+        expected_outcome = [{"objectiveNumber":0, "type":"default project objective","projectId":2}]
+        self.assertEqual(expected_outcome, default_objective)
 
     def test2A_create_tasks(self):
         print("     \n2A)Testing create_task")

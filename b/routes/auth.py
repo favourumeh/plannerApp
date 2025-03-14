@@ -69,14 +69,15 @@ def signup() -> Tuple[Response, int]:
         user = User(username=username, email=email, password=password_hash)
         db.session.add(user)
         user_id = User.query.filter_by(username=username).first().id
-        default_project = Project(project_number=0, type="default project", title="Default", description="Stores all objectives and tasks that don't belong to a user-created project", tag="default", user_id=user_id)
+        description = "Stores all objectives and tasks that don't belong to a user-created project"
+        default_project = Project(project_number=0, type="default project", title="No Project", description=description, tag="default", user_id=user_id)
         db.session.add(default_project)
         project_id = Project.query.filter_by(type="default project", user_id=user_id).first().id
-        default_objective = Objective(objective_number=0,  type="default project objective", title="Default", description="Stores all tasks that don't belong to a user-created project", tag="default", project_id=project_id)
+        description = "Stores all tasks that don't belong to a user-created project"
+        default_objective = Objective(objective_number=0,  type="default project objective", title="No Objective", description=description, tag="default", project_id=project_id)
         db.session.add(default_objective)
-        objective_id = Objective.query.filter_by(type="default project objective").first().id
-        print("objective_id: ", objective_id)
-        example_task = Task(description="Example Description", type="example task", task_number=0, duration=10, objective_id=objective_id)
+        objective_id = Objective.query.filter_by(type="default project objective", project_id=project_id).first().id #tag distinguishes user's default project objective 
+        example_task = Task(task_number=0, description="Example Task", type="example task", duration=10, objective_id=objective_id)
         db.session.add(example_task)
         db.session.commit()
         resp_dict["message"] = f"Success: Account Created! Login to start planning"

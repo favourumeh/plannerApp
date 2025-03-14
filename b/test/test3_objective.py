@@ -59,7 +59,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
         print("         Test that signing up creates a default project objective ...")
         print("         ...AND test user requesting their objectives after login is successfull and yields the expected output")
         filtered_objectives = self.read_and_filter_fields(read_endpoint="/read-objectives", entity="objectives", rel_fields=["id", "objectiveNumber", "projectId", "title", "type"])
-        expected_output = [{'id': 1, 'objectiveNumber': 0, 'projectId': 1, 'title': 'Default', 'type': 'default project objective'},
+        expected_output = [{'id': 1, 'objectiveNumber': 0, 'projectId': 1, 'title': 'No Objective', 'type': 'default project objective'},
                            {'id': 2, 'objectiveNumber': 1, 'projectId': 1, 'title': 'Free Objective', 'type': 'free objective'}, 
                            {'id': 3, 'objectiveNumber': 1, 'projectId': 2, 'title': 'Project Objective', 'type': 'project objective'}]
         self.assertListEqual(filtered_objectives, expected_output)
