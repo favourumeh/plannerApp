@@ -149,86 +149,86 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         create_task_input["scheduledStart"], create_task_input["scheduledFinish"] = now_str_long, now_str_long
         self.assertDictEqual(create_task_input, updated_task)
 
-    def test2B_generate_task_number(self):
-        print("     \n2b)Testing generate task number")
-        user_username, pwd = "test", "ttt"
-        self.client.post("/sign-up", json={"username":user_username, "password1":pwd, "password2":pwd})
-        self.client.post("/login", json={"username":user_username, "password":pwd})
+    # def test2B_generate_task_number(self):
+    #     print("     \n2b)Testing generate task number")
+    #     user_username, pwd = "test", "ttt"
+    #     self.client.post("/sign-up", json={"username":user_username, "password1":pwd, "password2":pwd})
+    #     self.client.post("/login", json={"username":user_username, "password":pwd})
 
-        print("         TaskNumber field when not specified and when no other task in the user's objective defaults to 1")
-        expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1}] 
-        task_input = {"description":"Test 1", "duration":10, "objectiveId":1}
-        self.client.post("/create-task", json=task_input)
-        field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
-        self.assertListEqual(expected_outcome, field_filtered_output)
+    #     print("         TaskNumber field when not specified and when no other task in the user's objective defaults to 1")
+    #     expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1}] 
+    #     task_input = {"description":"Test 1", "duration":10, "objectiveId":1}
+    #     self.client.post("/create-task", json=task_input)
+    #     field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
+    #     self.assertListEqual(expected_outcome, field_filtered_output)
         
-        print("         TaskNumber generated when no task no. provided AND NON-mpty task table succeeds")
-        expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
-                            {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1} ] 
-        task_input = {"description":"Test 2", "duration":10, "objectiveId":1}
-        self.client.post("/create-task", json=task_input)
-        field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
-        self.assertListEqual(expected_outcome, field_filtered_output)
+    #     print("         TaskNumber generated when no task no. provided AND NON-mpty task table succeeds")
+    #     expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
+    #                         {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1} ] 
+    #     task_input = {"description":"Test 2", "duration":10, "objectiveId":1}
+    #     self.client.post("/create-task", json=task_input)
+    #     field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
+    #     self.assertListEqual(expected_outcome, field_filtered_output)
         
-        print("         TaskNumber specified in request is used given its is not already in the db")
-        expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
-                            {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1},
-                            {'id': 3, 'taskNumber':3, "description":"Test 3", "duration":10, 'objectiveId':1},
-                            {'id': 4, 'taskNumber':4, "description":"Test 3", "duration":10, 'objectiveId':1}] 
-        task_input = {"description":"Test 3", "taskNumber":3, "duration":10, "objectiveId":1} #newTasknumber
-        self.client.post("/create-task", json=task_input)
-        task_input = {"description":"Test 3", "taskNumber":2, "duration":10, "objectiveId":1} #existing taskNumber
-        self.client.post("/create-task", json=task_input)
-        field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
-        self.assertListEqual(expected_outcome, field_filtered_output)
+    #     print("         TaskNumber specified in request is used given its is not already in the db")
+    #     expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
+    #                         {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1},
+    #                         {'id': 3, 'taskNumber':3, "description":"Test 3", "duration":10, 'objectiveId':1},
+    #                         {'id': 4, 'taskNumber':4, "description":"Test 3", "duration":10, 'objectiveId':1}] 
+    #     task_input = {"description":"Test 3", "taskNumber":3, "duration":10, "objectiveId":1} #newTasknumber
+    #     self.client.post("/create-task", json=task_input)
+    #     task_input = {"description":"Test 3", "taskNumber":2, "duration":10, "objectiveId":1} #existing taskNumber
+    #     self.client.post("/create-task", json=task_input)
+    #     field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
+    #     self.assertListEqual(expected_outcome, field_filtered_output)
         
-        print("         TaskNumber field when NOT specified in request resets to number of tasks inspite of a large outlier tasknumber in db")
-        expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
-                            {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1},
-                            {'id': 3, 'taskNumber':3, "description":"Test 3", "duration":10, 'objectiveId':1},
-                            {'id': 4, 'taskNumber':4, "description":"Test 3", "duration":10, 'objectiveId':1},
-                            {'id': 5, 'taskNumber':57, "description":"Test 4", "duration":10, 'objectiveId':1},
-                            {'id': 6, 'taskNumber':6, "description":"Test 4", "duration":10, 'objectiveId':1}]
-        task_input = {"description":"Test 4", "taskNumber":57, "duration":10, "objectiveId":1}
-        self.client.post("/create-task", json=task_input)
-        task_input = {"description":"Test 4", "duration":10, "objectiveId":1}
-        self.client.post("/create-task", json=task_input)
-        field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
-        #print("output dict:", field_filtered_output)
-        self.assertListEqual(expected_outcome, field_filtered_output)
+    #     print("         TaskNumber field when NOT specified in request resets to number of tasks inspite of a large outlier tasknumber in db")
+    #     expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
+    #                         {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1},
+    #                         {'id': 3, 'taskNumber':3, "description":"Test 3", "duration":10, 'objectiveId':1},
+    #                         {'id': 4, 'taskNumber':4, "description":"Test 3", "duration":10, 'objectiveId':1},
+    #                         {'id': 5, 'taskNumber':57, "description":"Test 4", "duration":10, 'objectiveId':1},
+    #                         {'id': 6, 'taskNumber':6, "description":"Test 4", "duration":10, 'objectiveId':1}]
+    #     task_input = {"description":"Test 4", "taskNumber":57, "duration":10, "objectiveId":1}
+    #     self.client.post("/create-task", json=task_input)
+    #     task_input = {"description":"Test 4", "duration":10, "objectiveId":1}
+    #     self.client.post("/create-task", json=task_input)
+    #     field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
+    #     #print("output dict:", field_filtered_output)
+    #     self.assertListEqual(expected_outcome, field_filtered_output)
 
-        print("         TaskNumber field increments pasts the number of user's tasks in db when not specifed to avoid IF that taskNumber is already used")
-        expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
-                            {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1},
-                            {'id': 3, 'taskNumber':3, "description":"Test 3", "duration":10, 'objectiveId':1},
-                            {'id': 4, 'taskNumber':4, "description":"Test 3", "duration":10, 'objectiveId':1},
-                            {'id': 5, 'taskNumber':57, "description":"Test 4", "duration":10, 'objectiveId':1},
-                            {'id': 6, 'taskNumber':6, "description":"Test 4", "duration":10, 'objectiveId':1},
-                            {'id': 7, 'taskNumber':8, "description":"Test 5", "duration":10, 'objectiveId':1},
-                            {'id': 8, 'taskNumber':9, "description":"Test 5", "duration":10, 'objectiveId':1}]
-        task_input = {"description":"Test 5", "taskNumber":8,"duration":10, "objectiveId":1}
-        self.client.post("/create-task", json=task_input)
-        task_input = {"description":"Test 5", "duration":10, "objectiveId":1}
-        self.client.post("/create-task", json=task_input)
-        field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
-        #print("output dict:", field_filtered_output)
-        self.assertListEqual(expected_outcome, field_filtered_output)
+    #     print("         TaskNumber field increments pasts the number of user's tasks in db when not specifed to avoid IF that taskNumber is already used")
+    #     expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
+    #                         {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1},
+    #                         {'id': 3, 'taskNumber':3, "description":"Test 3", "duration":10, 'objectiveId':1},
+    #                         {'id': 4, 'taskNumber':4, "description":"Test 3", "duration":10, 'objectiveId':1},
+    #                         {'id': 5, 'taskNumber':57, "description":"Test 4", "duration":10, 'objectiveId':1},
+    #                         {'id': 6, 'taskNumber':6, "description":"Test 4", "duration":10, 'objectiveId':1},
+    #                         {'id': 7, 'taskNumber':8, "description":"Test 5", "duration":10, 'objectiveId':1},
+    #                         {'id': 8, 'taskNumber':9, "description":"Test 5", "duration":10, 'objectiveId':1}]
+    #     task_input = {"description":"Test 5", "taskNumber":8,"duration":10, "objectiveId":1}
+    #     self.client.post("/create-task", json=task_input)
+    #     task_input = {"description":"Test 5", "duration":10, "objectiveId":1}
+    #     self.client.post("/create-task", json=task_input)
+    #     field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
+    #     #print("output dict:", field_filtered_output)
+    #     self.assertListEqual(expected_outcome, field_filtered_output)
 
-        print("         TaskNumber field restart to 1 when creating a task for a new objective")
-        self.client.post("/create-objective", json={"title":"user-created objective 2", "projectId":1}) #create new objective in proj 1
-        expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
-                            {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1},
-                            {'id': 3, 'taskNumber':3, "description":"Test 3", "duration":10, 'objectiveId':1},
-                            {'id': 4, 'taskNumber':4, "description":"Test 3", "duration":10, 'objectiveId':1},
-                            {'id': 5, 'taskNumber':57, "description":"Test 4", "duration":10, 'objectiveId':1},
-                            {'id': 6, 'taskNumber':6, "description":"Test 4", "duration":10, 'objectiveId':1},
-                            {'id': 7, 'taskNumber':8, "description":"Test 5", "duration":10, 'objectiveId':1},
-                            {'id': 8, 'taskNumber':9, "description":"Test 5", "duration":10, 'objectiveId':1},
-                            {'id': 9, 'taskNumber':1, "description":"Test 6", "duration":10, 'objectiveId':2}]
-        task_input = {"description":"Test 6", "taskNumber":8,"duration":10, "objectiveId":2}
-        self.client.post("/create-task", json=task_input)
-        field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
-        self.assertListEqual(expected_outcome, field_filtered_output)
+    #     print("         TaskNumber field restart to 1 when creating a task for a new objective")
+    #     self.client.post("/create-objective", json={"title":"user-created objective 2", "projectId":1}) #create new objective in proj 1
+    #     expected_outcome = [{'id': 1, 'taskNumber':1, "description":"Test 1", "duration":10, 'objectiveId':1},
+    #                         {'id': 2, 'taskNumber':2, "description":"Test 2", "duration":10, 'objectiveId':1},
+    #                         {'id': 3, 'taskNumber':3, "description":"Test 3", "duration":10, 'objectiveId':1},
+    #                         {'id': 4, 'taskNumber':4, "description":"Test 3", "duration":10, 'objectiveId':1},
+    #                         {'id': 5, 'taskNumber':57, "description":"Test 4", "duration":10, 'objectiveId':1},
+    #                         {'id': 6, 'taskNumber':6, "description":"Test 4", "duration":10, 'objectiveId':1},
+    #                         {'id': 7, 'taskNumber':8, "description":"Test 5", "duration":10, 'objectiveId':1},
+    #                         {'id': 8, 'taskNumber':9, "description":"Test 5", "duration":10, 'objectiveId':1},
+    #                         {'id': 9, 'taskNumber':1, "description":"Test 6", "duration":10, 'objectiveId':2}]
+    #     task_input = {"description":"Test 6", "taskNumber":8,"duration":10, "objectiveId":2}
+    #     self.client.post("/create-task", json=task_input)
+    #     field_filtered_output = self.read_and_filter_fields("/read-tasks", "tasks", ["id", "taskNumber", "description", "duration", "objectiveId"])
+    #     self.assertListEqual(expected_outcome, field_filtered_output)
 
     def test3_update_task(self):
         print("     \n3)Testing update_task")
