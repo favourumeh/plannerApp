@@ -49,6 +49,7 @@ class Refresh_Token(db.Model):
 class Project(db.Model):
     """Defines the properties of the 'Project' entity: id, type, title, description, is_completed, deadline, tag, user_id"""
     id = db.Column(db.Integer, primary_key=True)
+    project_number = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(20), default="user project") # 2 types: "default project" and "user project" 
     title = db.Column(db.String(80), default="Unnamed Project")
     description = db.Column(db.Text, nullable=False)
@@ -65,6 +66,7 @@ class Project(db.Model):
     
     def to_dict(cls) -> Dict:
         return {"id": cls.id,
+                "projectNumber": cls.project_number,
                 "type": cls.type,
                 "title": cls.title,
                 "description": cls.description,

@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
 from models import Project, Objective
-from plannerPackage import login_required, token_required
+from plannerPackage import login_required, token_required, generate_entity_number
 from config import db, app, serializer
 from typing import Tuple
 from datetime import datetime, timezone
@@ -27,6 +27,7 @@ project_title_limit = int(os.environ["project_title_limit"])
 def create_project() -> Tuple[Response, int]:
     resp_dict = {"message":""}
     content: dict = request.json
+    project_number: int = content.get("projectNumber", None)
     title: str = content.get("title", "Unnamed Project")
     description: str = content.get("description", None)
     is_completed: bool = content.get("isCompleted", False)
@@ -46,8 +47,10 @@ def create_project() -> Tuple[Response, int]:
     if isinstance(deadline, str): #if string then value is from request otherwise its from db
         deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S.%fZ') #converts str date (format e.g., 2024-11-26T09:18:14.687Z) to dt
 
+    project_number = generate_entity_number(entity_number=project_number, parent_entity_id=user_id, parent_entity_name="user", entity_name="project", entity=Project)
+
     try:
-        project = Project(title=title, description=description, is_completed=is_completed, deadline=deadline, last_updated=last_updated, tag=tag, user_id=user_id)
+        project = Project(project_number=project_number, title=title, description=description, is_completed=is_completed, deadline=deadline, last_updated=last_updated, tag=tag, user_id=user_id)
         db.session.add(project)
         project_id = Project.query.filter_by(title=title, description=description, last_updated=last_updated, user_id=user_id).first().id
         objective_desc = "Stores all project tasks that do not belong to an objective"

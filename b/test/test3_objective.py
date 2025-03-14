@@ -45,7 +45,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
 
             #create db entries
                 #create user project 
-        user_project = Project(id=2, description="user project desc", user_id=1)
+        user_project = Project(id=2, project_number=1, description="user project desc", user_id=1)
                 #create 2 objectives of type free object and project objective 
         free_objective = Objective(objective_number=1, title="Free Objective", type="free objective", project_id=1)
         project_objective = Objective(objective_number=1, title="Project Objective", project_id=2)
