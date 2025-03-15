@@ -80,7 +80,7 @@ def generate_entity_number(entity_number:int|None, parent_entity_id:int, parent_
             return entity_number
 
         if not entity_number:
-            entity_number = len(set(entity_numbers)) + 1
+            entity_number = max(set(entity_numbers)) + 1
             while entity_number in entity_numbers:
                 entity_number+=1
             return entity_number
