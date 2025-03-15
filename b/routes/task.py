@@ -99,7 +99,7 @@ def read_tasks():
     user_id = session["userId"]
     try:
         tasks: List[Task] = generate_user_content(user_id=user_id, content="tasks")
-        resp_dict["message"] = "Success: User Tasks extracted"
+        resp_dict["message"] = "Success: user's tasks loaded"
         resp_dict["tasks"] = [task.to_dict() for task in tasks]
         return jsonify(resp_dict), 200
     except Exception as e:
@@ -179,7 +179,7 @@ def delete_task(task_id: int) -> Tuple[Response, int]:
     try:
         db.session.delete(task)
         db.session.commit()
-        resp_dict["message"] = "Success: The task was delete!"
+        resp_dict["message"] = "Success: The task was deleted!"
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = "Failure: The task could not be delete"

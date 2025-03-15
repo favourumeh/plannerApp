@@ -72,7 +72,7 @@ def read_projects():
     try:
         projects = Project.query.filter_by(user_id=session["userId"]).all()
         resp_dict["projects"] = [project.to_dict() for project in projects]
-        resp_dict["message"] = "Success: loading projects"
+        resp_dict["message"] = "Success: user's projects loaded"
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not read user's projects! Reason: {e}"

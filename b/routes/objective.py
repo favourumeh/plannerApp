@@ -87,7 +87,7 @@ def read_objectives():
         objectives = [Objective.query.filter_by(project_id=project.id).all() for project in projects]
         objectives_flattened = flatten_2d_list(objectives)
         resp_dict["objectives"] = [objective.to_dict() for objective in objectives_flattened]
-        resp_dict["message"] = "Success: loading objectives"
+        resp_dict["message"] = "Success: user's objectives loaded"
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not read user's objectives! Reason: {e}"
