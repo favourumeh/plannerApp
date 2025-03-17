@@ -3,15 +3,15 @@ import {useState, useContext} from "react"
 import globalContext from "../context"
 import { backendBaseUrl } from "../project_config"
 
-const Login = ({setIsLoggedIn}) => {
-    const {setIsModalOpen, clientAction, setClientAction, setCurrentUser, handleNotification} = useContext(globalContext)
+const Login = ({isLoggedIn}) => {
+    const {setIsModalOpen, clientAction, handleNotification, handleLogin} = useContext(globalContext)
     const [accountDetails, setAccountDetails] = useState({username:"", password:"" })
 
     if (clientAction != 'login') {
         return null
     }
 
-    const handlelogin = async(e) =>{
+    const onSubmit = async(e) =>{
         e.preventDefault()
         const url = `${backendBaseUrl}/login`
         const options = {
@@ -25,16 +25,13 @@ const Login = ({setIsLoggedIn}) => {
 
         if (resp.status == 200){
             console.log(resp_json.message)
-            setIsModalOpen(false)
-            setClientAction("read-tasks")
-            setCurrentUser(resp_json.user)
-            setIsLoggedIn(true)
+            handleLogin(resp_json.user)
             handleNotification(resp_json.message, "success")
+            console.log("isLoggedIn", isLoggedIn)
         } else {
             console.log(resp_json.message)
             setIsModalOpen(false)
             handleNotification(resp_json.message, "failure")
-
         }
     }
 
@@ -77,7 +74,7 @@ const Login = ({setIsLoggedIn}) => {
                         disabled={
                             accountDetails.username=="" || typeof accountDetails.username==undefined ||
                             accountDetails.password=="" || typeof accountDetails.password==undefined? true:false} 
-                        onClick={(e)=>handlelogin(e)}>Login </button>
+                        onClick={(e)=>onSubmit(e)}>Login </button>
                     </div>
                 </form>
             </div>
