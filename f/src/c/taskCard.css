@@ -1,3 +1,13 @@
+div.task-row{
+    /* border: 1px solid; */
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+i.fa-plus:hover{
+    cursor: pointer;
+}
 div.task-card {
     display: flex;
     justify-content: space-between;
@@ -6,6 +16,7 @@ div.task-card {
     margin-bottom: 2px;
     height: 15px;
     max-width: 355px;
+    width: 100%;
 }
 
 div.task-card:hover{

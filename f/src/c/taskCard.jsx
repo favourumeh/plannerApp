@@ -14,10 +14,17 @@ function TaskCard ({task, handleDeleteTask}) {
     }
     useEffect(()=>handleEntityNumbers, [])
     return (
-        <div className="task-card">
-            <div className="task-content"><span className="task-identifier"> Task {projectNumber}.{objectiveNumber}.{task.taskNumber} </span> {task.description}</div>
-            <button className="task-delete-btn" onClick={(e) => handleDeleteTask(e, task.id)}>&times;</button>
+        <div id={`row-id-${task.id}`} className="task-row">
+            <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"></i>
+            <div id={`task-card-id-${task.id}`} className="task-card">
+                <div id={`task-content-id-${task.id}`}className="task-content">
+                    <span id={`task-identifier-id-${task.id}`} className="task-identifier"> Task {projectNumber}.{objectiveNumber}.{task.taskNumber} </span> 
+                    {task.description}
+                </div>
+                <button id={`delete-task-id-${task.id}`} className="task-delete-btn" onClick={(e) => handleDeleteTask(e, task.id)}>&times;</button>
+            </div>
         </div>
+
     )
 }
 export default TaskCard
