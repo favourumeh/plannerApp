@@ -14,10 +14,7 @@ function HomePage ({isLoggedIn}) {
     const {
         clientAction, setClientAction, 
         handleNotification, handleLogout, 
-        setIsModalOpen,
-        fetchTasks, tasks, setTasks, 
-        fetchObjectives, objectives, setObjectives,
-        fetchProjects, projects, setProjects} = useContext(globalContext)
+        setIsModalOpen, tasks, fetchAllContent} = useContext(globalContext)
 
     if (!isLoggedIn) {
         return null
@@ -94,9 +91,7 @@ function HomePage ({isLoggedIn}) {
 
     const handleRefresh = async (hideNoti=true) => {
         try {
-            fetchProjects()
-            fetchObjectives()
-            fetchTasks()
+            fetchAllContent()
             hideNoti || handleNotification("User content refreshed", "success")
         } catch {
             handleNotification("Could not refresh User Content", "failure")
