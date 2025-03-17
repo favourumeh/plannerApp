@@ -1,0 +1,139 @@
+div.homepage button:hover{
+    color:rgb(0, 230, 0);
+    border-color: rgba(0, 0, 0, 0);
+}
+
+div.homepage button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+div.homepage-header{
+    /* border: 1px solid; */
+}
+
+div.homepage-header-row1{
+    background-color: rgba(48, 48, 100, 0.39);
+    border-radius: 10px;
+}
+
+div.homepage-header-row1 button{
+    background: none;
+    border: none;
+}
+
+div.homepage-header button{
+    /* border: 1px solid; */
+    font-size: 0.9rem;
+}
+div.clock-overlay{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* border: 1px solid; */
+}
+
+div.clock{
+    /* border-bottom: 1px solid; */
+    width: 200px;
+    font-weight:400;
+}
+
+span.homepage-day {
+    color:red
+}
+
+div.homepage-header-row2{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 0px;
+    background-color: rgba(48, 48, 100, 0.137);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0);
+
+}
+
+div.homepage-header-row2 button{
+    background: none;
+}
+.homepage-header-row2:hover{
+    border: 1px solid;
+
+}
+
+.homepage-header-row3{
+    display: flex;
+    justify-content: center;
+    margin: 4px 0px;
+    background-color: rgba(48, 48, 100, 0.137);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0);
+}
+
+.homepage-header-row3:hover{
+    border: 1px solid;
+}
+
+.homepage-header-row3 button{
+    background:none;
+}
+
+div.create-dropdown{
+    /* border: 1px solid; */
+    /* display: flex; */
+    position: relative;
+    display: inline-block;
+    width: 150px;
+}
+
+div.create-dropbtn-content{
+    display: none;
+    position: absolute;
+    text-align: left;
+    background-color: black;
+    /* border: 1px solid; */
+    width: 140px;
+    z-index: 1;
+}
+
+div.create-dropdown:hover .create-dropbtn-content {display: block;}
+
+
+div.create-dropbtn-content div:hover {
+    background-color: rgba(177, 177, 177, 0.616);
+    cursor: pointer;
+    /* border: 1px solid; */
+}
+
+
+div.homepage-body {
+    border: 1px solid white ;
+    border-radius: 10px;
+    background-color: rgb(30, 23, 36);
+    display: flex;
+    justify-content: flex-start;
+    align-content: flex-start;
+}
+
+div.timeslots {
+    position: relative;
+    width: 70px;
+    height: 900px;
+    /* background-color: rgb(76, 54, 105); */
+    background-color: rgba(99, 99, 99, 0.377);
+
+    border-radius: 10px;
+}
+
+ol.task-list{
+    list-style-type: none;
+    /* border: 1px solid white; */
+    padding-left:0px;
+    width: 100%;
+}
+
+#task-list div.task-card:hover{
+    color: grey;
+    cursor: pointer;
+}
