@@ -1,0 +1,26 @@
+div.dropdown{
+    /* border: 1px solid; */
+    /* display: flex; */
+    position: relative;
+    display: inline-block;
+    width: 150px;
+}
+
+div.dropbtn-content{
+    display: none;
+    position: absolute;
+    text-align: left;
+    background-color: black;
+    /* border: 1px solid; */
+    width: 140px;
+    z-index: 1;
+}
+
+div.dropdown:hover .dropbtn-content {display: block;}
+
+
+div.dropbtn-content div:hover {
+    background-color: rgba(177, 177, 177, 0.616);
+    cursor: pointer;
+    /* border: 1px solid; */
+}
