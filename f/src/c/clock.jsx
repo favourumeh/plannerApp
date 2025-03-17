@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 
 const Clock = () => {
   const [time, setTime] = useState(new Date())
@@ -18,8 +18,12 @@ const Clock = () => {
     return date.toLocaleTimeString()
   }
 
+  const fromatDate = (date) => {
+    return date.toJSON().slice(0, 10)
+  }
+
   return (
-      <strong className="clock">{formatTime(time)}</strong>
+      <div className="clock">{fromatDate(time)} | {formatTime(time)}</div>
   )
 }
 
