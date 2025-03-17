@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
 from models import User, Project, Objective, Task
-from plannerPackage import login_required, token_required, generate_user_content, generate_entity_number
+from plannerPackage import login_required, token_required, generate_all_user_content, generate_user_content, generate_entity_number
 from config import db, app, serializer
 from typing import Tuple, List
 from datetime import datetime, timezone, timedelta
@@ -105,6 +105,28 @@ def read_tasks():
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not read user task! Reason: {e}"
         return jsonify(resp_dict), 404
+
+#read - all projects, objectives and tasks
+@app.route("/read-all", methods=["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def read_all():
+    """Reads all user's projects, objectives and tasks."""
+    resp_json = {"message":"", "tasks":"", "objectives":"", "projects":""}
+    user_id = session["userId"]
+    try:
+        rts, projects, objectives, tasks = generate_all_user_content(user_id)
+        projects = [project.to_dict() for project in projects]
+        objectives = [objective.to_dict() for objective in objectives]
+        tasks = [task.to_dict() for task in tasks]
+        resp_json["projects"] = projects
+        resp_json["objectives"] = objectives
+        resp_json["tasks"] = tasks
+        resp_json["message"] = "Success: Extracted user's projects, objectives and tasks"
+        return jsonify(resp_json), 200
+    except Exception as e:
+        resp_json["message"] = f"Failure: Could not retrieve user's projects, tasks and objectives! Reason: {e}."
+        return jsonify(resp_json), 404
 
 #update
 @task.route("/update-task/<int:task_id>", methods=["PATCH"])
