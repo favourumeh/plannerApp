@@ -3,16 +3,24 @@ import { useState, useContext } from "react"
 import globalContext from "../context.js"
 
 function Modal ({children}) {
-    const {isModalOpen, setIsModalOpen} = useContext(globalContext)
+    const {isModalOpen, setIsModalOpen, setClientAction, setCurrentTask, setCurrentObjective, setCurrentProject} = useContext(globalContext)
 
     if (!isModalOpen) {
         return null
     }
 
+    const handleModalClose = () => {
+        setIsModalOpen(false)
+        setClientAction("")
+        setCurrentTask({isCompleted:false, isRecurring:false, priorityScore:1})
+        setCurrentProject({})
+        setCurrentObjective({})
+    }
+
     return (
-        <div className="modal-overlay" onClick={()=>setIsModalOpen(false)} >
+        <div className="modal-overlay" onClick={handleModalClose} >
             <div className="modal-content" onClick={(e)=>e.stopPropagation()}> 
-                <button className="modal-close-btn" onClick={()=>setIsModalOpen(false)}>&times;</button>
+                <button className="modal-close-btn" onClick={()=>handleModalClose()}>&times;</button>
                 {children}
             </div>
         </div>
