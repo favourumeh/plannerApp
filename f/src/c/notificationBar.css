@@ -4,6 +4,7 @@
     left: 0;
     width: 100%;
     opacity: 1;
+    z-index: 2;
 }
 
 #notification-overlay.animation {
@@ -27,15 +28,6 @@
     animation: none;
   }
 
-#notification-overlay .close-noti-btn {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0);
-    cursor: pointer;
-}
-
 #notification-overlay .notification-message{
     margin-right: 40px;
     overflow: hidden;
@@ -47,7 +39,20 @@
 }
 
 
+#notification-overlay .close-noti-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
+}
+
 #notification-overlay .close-noti-btn:hover  {
     border-color: rgba(0, 0, 0, 0);
+}
 
+#notification-overlay button:focus,
+button:focus-visible {
+  outline: none;
 }
