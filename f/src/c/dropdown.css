@@ -22,5 +22,5 @@ div.dropdown:hover .dropbtn-content {display: block;}
 div.dropbtn-content div:hover {
     background-color: rgba(177, 177, 177, 0.616);
     cursor: pointer;
-    /* border: 1px solid; */
+    border: 1px solid;
 }

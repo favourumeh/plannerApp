@@ -79,34 +79,6 @@ div.homepage-header-row2 button{
     background:none;
 }
 
-div.create-dropdown{
-    /* border: 1px solid; */
-    /* display: flex; */
-    position: relative;
-    display: inline-block;
-    width: 150px;
-}
-
-div.create-dropbtn-content{
-    display: none;
-    position: absolute;
-    text-align: left;
-    background-color: black;
-    /* border: 1px solid; */
-    width: 140px;
-    z-index: 1;
-}
-
-div.create-dropdown:hover .create-dropbtn-content {display: block;}
-
-
-div.create-dropbtn-content div:hover {
-    background-color: rgba(177, 177, 177, 0.616);
-    cursor: pointer;
-    /* border: 1px solid; */
-}
-
-
 div.homepage-body {
     border: 1px solid white ;
     border-radius: 10px;
