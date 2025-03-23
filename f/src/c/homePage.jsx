@@ -64,7 +64,17 @@ function HomePage ({isLoggedIn}) {
             handleRefresh()
         } else {
             console.log(resp_json.message)
-            handleNotification(resp_json.message, "failure")
+            const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
+            const resp_ref_json = await resp_ref.json()
+
+            if (resp_ref.status !=200) {
+                console.log(resp_ref_json.message)
+                handleLogout()
+                handleNotification(resp_ref_json.message, "failure")
+            } else {
+                console.log(resp_ref_json.message)
+                handleDeleteTask(e, id)
+            }
         }
 
     }
