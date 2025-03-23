@@ -45,7 +45,7 @@ def create_project() -> Tuple[Response, int]:
         return jsonify(resp_dict), 400
 
     if isinstance(deadline, str): #if string then value is from request otherwise its from db
-        deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S.%fZ') #converts str date (format e.g., 2024-11-26T09:18:14.687Z) to dt
+        deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M') #converts str date (format e.g., 2024-11-26T09:18:14.687Z) to dt
 
     project_number = generate_entity_number(entity_number=project_number, parent_entity_id=user_id, parent_entity_name="user", entity_name="project", entity=Project)
 
@@ -54,7 +54,7 @@ def create_project() -> Tuple[Response, int]:
         db.session.add(project)
         project_id = Project.query.filter_by(title=title, description=description, last_updated=last_updated, user_id=user_id).first().id
         objective_desc = "Stores all project tasks that do not belong to an objective"
-        default_objective = Objective(title="Default Objective", type="default user project objective", objective_number=0, description=objective_desc, project_id=project_id)
+        default_objective = Objective(title="No Objective", type="default user project objective", objective_number=0, description=objective_desc, project_id=project_id)
         db.session.add(default_objective)
         db.session.commit()
         resp_dict["message"] = "Success: Project Added!"
