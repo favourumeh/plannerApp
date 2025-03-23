@@ -9,6 +9,7 @@ import Login from "./c/login.jsx"
 import NotificationBar from './c/notificationBar.jsx'
 import HomePage from './c/homePage.jsx'
 import TaskForm from "./c/taskForm.jsx"
+import ProjectForm from "./c/projectForm.jsx"
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -48,6 +49,8 @@ function App() {
     useEffect(() => sessionStorage.setItem("defaultProject", JSON.stringify(defaultProject)), [defaultProject])
     useEffect(() => sessionStorage.setItem("defaultProjectObjective", JSON.stringify(defaultProjectObjective)), [defaultProjectObjective])
     useEffect(() => sessionStorage.setItem("currentTask", JSON.stringify(currentTask)), [currentTask])
+    useEffect(() => sessionStorage.setItem("currentProject", JSON.stringify(currentProject)), [currentProject])
+    useEffect(() => sessionStorage.setItem("currentObjective", JSON.stringify(currentObjective)), [currentObjective])
 
 
     const handleNotification = (message, category) => {
@@ -108,7 +111,8 @@ function App() {
         handleLogin, handleLogout,
         fetchAllContent, handleRefresh, defaultProject, defaultProjectObjective,
         currentTask, setCurrentTask,
-        setCurrentProject, setCurrentObjective,
+        currentProject, setCurrentProject,
+        currentObjective, setCurrentObjective,
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult
     }
@@ -122,6 +126,7 @@ function App() {
                 <SignUp/>
                 <Login isLoggedIn={isLoggedIn}/>
                 <TaskForm/>
+                <ProjectForm/>
             </Modal>
             <HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
         </globalContext.Provider>
