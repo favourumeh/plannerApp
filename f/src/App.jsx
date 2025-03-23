@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
-import { backendBaseUrl } from './project_config'
-import { fetchAllUserContent, fetchUserProjects, fetchUserObjectives, fetchUserTasks } from './fetch_entities'
+import { fetchAllUserContent} from './fetch_entities'
 import GuestPage from './c/guestPage'
 import globalContext from './context'
 import Modal from "./c/modal.jsx"
@@ -9,6 +8,7 @@ import SignUp from './c/signUp.jsx'
 import Login from "./c/login.jsx"
 import NotificationBar from './c/notificationBar.jsx'
 import HomePage from './c/homePage.jsx'
+import TaskForm from "./c/taskForm.jsx"
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -28,6 +28,12 @@ function App() {
     const [projects, setProjects] = useState(() => persistState("projects",[])) 
     const [defaultProject, setDefaultProject] = useState(() => persistState("defaultProject",{})) 
     const [defaultProjectObjective, setDefaultProjectObjective] = useState(() => persistState("defaultProjectObjective",{}))
+    const [currentTask, setCurrentTask] = useState(() => persistState("currentTask", {isCompleted:true, isRecurring:false, priorityScore:1, projectTitle:"", objectiveTitle:""})) //useState({isCompleted:false, isRecurring:false})
+    const [currentObjective, setCurrentObjective] = useState({})
+    const [currentProject, setCurrentProject] = useState({})
+    const [showProjectQueryResult, setShowProjectQueryResult] = useState(false)
+    const [showObjectiveQueryResult, setShowObjectiveQueryResult] = useState(false)
+
     const requestAmount = useRef(0)
     const notiBarTimerRef = useRef()
 
@@ -41,6 +47,7 @@ function App() {
     useEffect(() => sessionStorage.setItem("projects", JSON.stringify(projects)), [projects])
     useEffect(() => sessionStorage.setItem("defaultProject", JSON.stringify(defaultProject)), [defaultProject])
     useEffect(() => sessionStorage.setItem("defaultProjectObjective", JSON.stringify(defaultProjectObjective)), [defaultProjectObjective])
+    useEffect(() => sessionStorage.setItem("currentTask", JSON.stringify(currentTask)), [currentTask])
 
 
     const handleNotification = (message, category) => {
@@ -77,6 +84,15 @@ function App() {
         clearContent()
     }
 
+    const handleRefresh = async (hideNoti=true) => {
+        try {
+            fetchAllContent()
+            hideNoti || handleNotification("User content refreshed", "success")
+        } catch {
+            handleNotification("Could not refresh User Content", "failure")
+        }
+    }
+
     // create global prop object
     const globalProps = {
         isModalOpen, setIsModalOpen,
@@ -90,7 +106,11 @@ function App() {
         projects, setProjects,
         handleNotification, requestAmount, notiBarTimerRef,
         handleLogin, handleLogout,
-        fetchAllContent, defaultProject, defaultProjectObjective
+        fetchAllContent, handleRefresh, defaultProject, defaultProjectObjective,
+        currentTask, setCurrentTask,
+        setCurrentProject, setCurrentObjective,
+        showProjectQueryResult, setShowProjectQueryResult,
+        showObjectiveQueryResult, setShowObjectiveQueryResult
     }
 
     return (
@@ -101,6 +121,7 @@ function App() {
             <Modal>
                 <SignUp/>
                 <Login isLoggedIn={isLoggedIn}/>
+                <TaskForm/>
             </Modal>
             <HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
         </globalContext.Provider>
