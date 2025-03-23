@@ -1,10 +1,9 @@
 import "./modal.css"
-import { useState, useContext } from "react"
+import { useEffect, useContext } from "react"
 import globalContext from "../context.js"
 
 function Modal ({children}) {
-    const {isModalOpen, setIsModalOpen, setClientAction, setCurrentTask, setCurrentObjective, setCurrentProject} = useContext(globalContext)
-
+    const {isModalOpen, setIsModalOpen, setClientAction, setCurrentTask, setCurrentObjective, setCurrentProject, setShowProjectQueryResult, setShowObjectiveQueryResult} = useContext(globalContext)
     if (!isModalOpen) {
         return null
     }
@@ -12,9 +11,11 @@ function Modal ({children}) {
     const handleModalClose = () => {
         setIsModalOpen(false)
         setClientAction("")
-        setCurrentTask({isCompleted:false, isRecurring:false, priorityScore:1})
+        setCurrentTask({isCompleted:false, isRecurring:false, priorityScore:1, projectTitle:"", objectiveTitle:""})
         setCurrentProject({})
         setCurrentObjective({})
+        setShowProjectQueryResult(false)
+        setShowObjectiveQueryResult(false)
     }
 
     return (
