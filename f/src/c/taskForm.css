@@ -1,0 +1,105 @@
+.form-overlay {
+    position: relative;
+    text-align: left;
+    /* border: 1px solid; */
+    width: 100%;
+}
+
+
+div.form-header-overlay{
+    /* border: 1px solid; */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* background-color: rgba(84, 84, 128, 0.466); */
+    margin-bottom: 4px;
+    /* border-radius: 10px; */
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    width: 400px;
+
+}
+
+div.form-title {
+    font-weight: bold;
+}
+
+div.form-header-buttons button{
+    background: white;
+    border: 1px solid black;
+    color: black;
+    color: black;
+    padding: 4px;
+    margin: 4px;
+}
+
+div.form-header-buttons button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+
+div.form-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin: 0px;
+    border: 1px solid;
+    border-radius: 5px;
+    width: 400px;
+}
+
+
+form.form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    border: 1px solid;
+    width: 400px;
+
+}
+
+.form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* border: 1px solid; */
+    width: 100%;
+}
+
+.form-group.searchfield {
+    border: 1px solid;
+
+}
+input {
+    background-color: white;
+    color: black;
+    width: 100%;
+    /* border: none; */
+}
+
+input[type="datetime-local"] {
+    appearance: auto; /* Reset to default */
+  }
+
+label {
+    text-align: right;
+    width: 190px;
+    margin-right:2px;
+    /* border: 1px dotted; */
+}
+
+div.btn-div {
+    display: flex;
+    justify-content: left;
+}
+
+button.submit-btn {
+    position: relative;
+    width: 100px;
+
+}
+span.required-asterisk {
+    color: red;
+}
