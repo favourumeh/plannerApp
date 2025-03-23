@@ -14,10 +14,15 @@ function HomePage ({isLoggedIn}) {
     const {
         clientAction, setClientAction, 
         handleNotification, handleLogout, 
-        setIsModalOpen, tasks, fetchAllContent} = useContext(globalContext)
+        setIsModalOpen, tasks, handleRefresh} = useContext(globalContext)
 
     if (!isLoggedIn) {
         return null
+    }
+
+    const handleCreateContent = (content) => {
+        setClientAction(`create-${content}`)
+        setIsModalOpen(true)
     }
 
     const onLogout = async() => {
@@ -39,31 +44,6 @@ function HomePage ({isLoggedIn}) {
             handleLogout()
 
         }
-    }
-    
-    const onCreateTask = async () => {
-        url = `${backendBaseUrl}/create-Task`
-        body = {
-            "description":"created user1 task", 
-            "duration":20, 
-            "priorityScore":2,
-            "scheduledStart":now_str, 
-            "scheduledFinish":now_str, 
-            "isCompleted":True,
-            "previousTaskId":2, 
-            "nextTaskId":4, 
-            "isRecurring":True, 
-            "dependencies":"1,2",
-            "tag":"test", 
-            "objectiveId":user1_objective_id
-
-        }
-        // options = {
-        //     method:"post",
-        //     headers:{"content-type":"application/json"},
-        //     body:
-        // }
-        setIsModalOpen(true)
     }
 
     const handleDeleteTask = async (e, id) => {
@@ -89,22 +69,10 @@ function HomePage ({isLoggedIn}) {
 
     }
 
-    const handleRefresh = async (hideNoti=true) => {
-        try {
-            fetchAllContent()
-            hideNoti || handleNotification("User content refreshed", "success")
-        } catch {
-            handleNotification("Could not refresh User Content", "failure")
-        }
-    }
-
     return (
         <div className="homepage">
-
             <div className="homepage-header"> 
-
                 <div className="homepage-header-row1">
-
                     <div className="clock-overlay">
                         <button type="button" className="settings-btn" > <i className="fa fa-bars" aria-hidden="true"></i> </button>
                         Task Manager <Clock/>
@@ -120,9 +88,9 @@ function HomePage ({isLoggedIn}) {
 
                 <div className="homepage-header-row3">
                     <Dropdown buttonContent={<i className="fa fa-plus" aria-hidden="true"></i>}>
-                        <div> Create Task</div>
-                        <div> Create Objective</div>
-                        <div> Create Project</div>
+                        <div onClick={() => handleCreateContent("task")}> Create Task</div>
+                        <div onClick={() => handleCreateContent("objective")}> Create Objective</div>
+                        <div onClick={() => handleCreateContent("project")}> Create Project</div>
                     </Dropdown>
                     <button type="button" className="refresh-btn" onClick={() => handleRefresh(false)} > <i className="fa fa-refresh" aria-hidden="true"></i> </button>
                     <Dropdown buttonContent={<i className="fa fa-filter" aria-hidden="true"></i>}>
