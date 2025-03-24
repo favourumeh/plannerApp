@@ -21,7 +21,7 @@ const persistState = (sessionName, default_) => {
 function App() {
     const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",false))
     const [isLoggedIn, setIsLoggedIn] = useState(() => persistState("isLoggedIn",false))
-    const [clientAction, setClientAction] = useState(() => persistState("clientAction","")) // view-guest-page, view-webpage, view-projects, view-objectives, view-tasks
+    const [sitePage, setSitePage] = useState(() => persistState("sitePage","")) // view-guest-page, view-webpage, view-projects, view-objectives, view-tasks
     const [form, setForm]  = useState("") //sign-up, login, create/edit-task, create/edit-objective, create/edit-project
     const [currentUser, setCurrentUser] = useState(() => persistState("currentUser",{}))
     const [notificationMessage, setNotificationMessage] = useState("")
@@ -43,7 +43,7 @@ function App() {
     //Update session storage object when state variable changes
     useEffect(() => sessionStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn)), [isLoggedIn])
     useEffect(() => sessionStorage.setItem("isModalOpen", JSON.stringify(isModalOpen)), [isModalOpen])
-    useEffect(() => sessionStorage.setItem("clientAction", JSON.stringify(clientAction)), [clientAction])
+    useEffect(() => sessionStorage.setItem("sitePage", JSON.stringify(sitePage)), [sitePage])
     useEffect(() => sessionStorage.setItem("form", JSON.stringify(form)), [form])
     useEffect(() => sessionStorage.setItem("currentUser", JSON.stringify(currentUser)), [currentUser])
     useEffect(() => sessionStorage.setItem("tasks", JSON.stringify(tasks)), [tasks])
@@ -70,7 +70,7 @@ function App() {
         setCurrentUser(user)
         setIsLoggedIn(true)
         setIsModalOpen(false)
-        setClientAction("view-homepage")
+        setSitePage("view-homepage")
         fetchAllContent()
     }
 
@@ -86,7 +86,7 @@ function App() {
         onLogout()
         setCurrentUser({})
         setIsLoggedIn(false)
-        setClientAction("logout")
+        setSitePage("logout")
         setForm("") 
         isModalOpen && setIsModalOpen(false) // && returns first falsey value. if both falsey then return last value
         clearContent()
@@ -156,7 +156,7 @@ function App() {
     // create global prop object
     const globalProps = {
         isModalOpen, setIsModalOpen,
-        clientAction, setClientAction,
+        sitePage, setSitePage,
         currentUser, setCurrentUser,
         notificationMessage, setNotificationMessage,
         isNotiBarVisible, setIsNotiBarVisible,

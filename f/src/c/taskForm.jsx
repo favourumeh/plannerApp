@@ -6,7 +6,7 @@ import SearchResult from "./searchResult"
 
 function TaskForm () {
     const {
-        setIsModalOpen, clientAction, form, setClientAction, handleNotification, 
+        setIsModalOpen, sitePage, form, setSitePage, handleNotification, 
         currentTask, setCurrentTask, handleRefresh,
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
@@ -73,7 +73,7 @@ function TaskForm () {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "success")
             setIsModalOpen(false)
-            setClientAction("view-homepage")
+            setSitePage("view-homepage")
             handleRefresh()
         } else {
             console.log(resp_json.message)

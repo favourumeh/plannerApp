@@ -4,7 +4,7 @@ import globalContext from "../context"
 import { backendBaseUrl } from "../project_config"
 
 const SignUp = () => {
-    const {setIsModalOpen, form, setClientAction, handleNotification} = useContext(globalContext)
+    const {setIsModalOpen, form, setSitePage, handleNotification} = useContext(globalContext)
     const [accountDetails, setAccountDetails] = useState({username:"", email:undefined, password1:"", password2:""})
 
     if (form != 'sign-up') {
@@ -27,7 +27,7 @@ const SignUp = () => {
         if (resp.status == 201){
             console.log(resp_json.message)
             setIsModalOpen(false)
-            setClientAction("view-guest-page")
+            setSitePage("view-guest-page")
             handleNotification(resp_json.message, "success")
         } else {
             console.log(resp_json.message)

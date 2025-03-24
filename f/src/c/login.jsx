@@ -4,7 +4,7 @@ import globalContext from "../context"
 import { backendBaseUrl } from "../project_config"
 
 const Login = ({isLoggedIn}) => {
-    const {setIsModalOpen, setClientAction, form, setForm, handleNotification, handleLogin} = useContext(globalContext)
+    const {setIsModalOpen, setSitePage, form, setForm, handleNotification, handleLogin} = useContext(globalContext)
     const [accountDetails, setAccountDetails] = useState({username:"", password:"" })
 
     if (form != 'login') {
@@ -27,7 +27,7 @@ const Login = ({isLoggedIn}) => {
             console.log(resp_json.message)
             handleLogin(resp_json.user)
             handleNotification(resp_json.message, "success")
-            setClientAction("view-homepage")
+            setSitePage("view-homepage")
             setForm("")
             console.log("isLoggedIn", isLoggedIn)
         } else {

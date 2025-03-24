@@ -6,7 +6,7 @@ import globalContext from "../context"
 function ProjectForm () {
 
     const {
-        setIsModalOpen, clientAction, form, handleNotification, 
+        setIsModalOpen, sitePage, form, handleNotification, 
         currentProject, setCurrentProject, handleRefresh,
         handleLogout} = useContext(globalContext)
 

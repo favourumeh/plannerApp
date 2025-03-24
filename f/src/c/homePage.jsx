@@ -12,10 +12,10 @@ let currentDay = daysOfWeek[current_date.getDay()]
 
 function HomePage ({isLoggedIn}) {
     const {
-        clientAction, setClientAction, setForm, handleDeleteEntity,
+        sitePage, setSitePage, setForm, handleDeleteEntity,
         setIsModalOpen, tasks, handleRefresh} = useContext(globalContext)
 
-    if (!isLoggedIn || clientAction!=="view-homepage") {
+    if (!isLoggedIn || sitePage!=="view-homepage") {
         return null
     }
 
@@ -45,9 +45,9 @@ function HomePage ({isLoggedIn}) {
                         <div onClick={() => handleCreateContent("project")}> Create Project</div>
                     </Dropdown>
                     <Dropdown buttonContent={<i className="fa fa-eye" aria-hidden="true"></i>}>
-                        <div onClick={() => setClientAction("view-projects")}> view projects </div>
-                        <div onClick={() => setClientAction("view-objectives")}> view objectives </div>
-                        <div onClick={() => setClientAction("view-tasks")}> view tasks </div>
+                        <div onClick={() => setSitePage("view-projects")}> view projects </div>
+                        <div onClick={() => setSitePage("view-objectives")}> view objectives </div>
+                        <div onClick={() => setSitePage("view-tasks")}> view tasks </div>
                     </Dropdown>
                     <button type="button" className="refresh-btn" onClick={() => handleRefresh(false)} > <i className="fa fa-refresh" aria-hidden="true"></i> </button>
                     <Dropdown buttonContent={<i className="fa fa-filter" aria-hidden="true"></i>}>
