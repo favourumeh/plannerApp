@@ -1,9 +1,11 @@
 div.dropdown{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
     /* border: 1px solid; */
-    /* display: flex; */
     position: relative;
-    display: inline-block;
-    width: 150px;
+    width: 50px;
 }
 
 div.dropbtn-content{
@@ -14,6 +16,7 @@ div.dropbtn-content{
     /* border: 1px solid; */
     width: 140px;
     z-index: 1;
+    translate: 0% 52%;
 }
 
 div.dropdown:hover .dropbtn-content {display: block;}

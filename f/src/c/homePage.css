@@ -59,12 +59,11 @@ div.homepage-header-row2 button{
 }
 .homepage-header-row2:hover{
     border: 1px solid;
-
 }
 
 .homepage-header-row3{
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     margin: 4px 0px;
     background-color: rgba(48, 48, 100, 0.137);
     border-radius: 10px;

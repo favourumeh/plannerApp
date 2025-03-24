@@ -102,6 +102,11 @@ function HomePage ({isLoggedIn}) {
                         <div onClick={() => handleCreateContent("objective")}> Create Objective</div>
                         <div onClick={() => handleCreateContent("project")}> Create Project</div>
                     </Dropdown>
+                    <Dropdown buttonContent={<i class="fa fa-eye" aria-hidden="true"></i>}>
+                        <div> view projects </div>
+                        <div> view objectives </div>
+                        <div> view tasks </div>
+                    </Dropdown>
                     <button type="button" className="refresh-btn" onClick={() => handleRefresh(false)} > <i className="fa fa-refresh" aria-hidden="true"></i> </button>
                     <Dropdown buttonContent={<i className="fa fa-filter" aria-hidden="true"></i>}>
                         <div> by project </div>
