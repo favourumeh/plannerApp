@@ -107,7 +107,7 @@ def update_project(project_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 400
     
     if isinstance(deadline, str):
-        project.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M:%S.%fZ')
+        project.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M')
     
     try:
         db.session.commit()
