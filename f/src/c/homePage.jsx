@@ -5,6 +5,7 @@ import { backendBaseUrl } from "../project_config"
 import Clock from "./clock"
 import TaskCard from "./taskCard"
 import Dropdown from "./Dropdown"
+import Header from "./header"
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 let current_date = new Date()
@@ -23,27 +24,6 @@ function HomePage ({isLoggedIn}) {
     const handleCreateContent = (content) => {
         setClientAction(`create-${content}`)
         setIsModalOpen(true)
-    }
-
-    const onLogout = async() => {
-        const url = `${backendBaseUrl}/logout`
-        const options = {
-            method:"GET",
-            headers:{"Content-Type":"application/json"},
-            credentials:"include"
-        }
-        const resp = await fetch(url, options)
-        const resp_json = await resp.json() 
-
-        if (resp.status == 200) {
-            console.log(resp_json.message)
-            handleNotification(resp_json.message, "success")
-            handleLogout()
-        }else {
-            console.log(resp_json.message)
-            handleLogout()
-
-        }
     }
 
     const handleDeleteTask = async (e, id) => {
@@ -83,11 +63,7 @@ function HomePage ({isLoggedIn}) {
         <div className="homepage">
             <div className="homepage-header"> 
                 <div className="homepage-header-row1">
-                    <div className="clock-overlay">
-                        <button type="button" className="settings-btn" > <i className="fa fa-bars" aria-hidden="true"></i> </button>
-                        Task Manager <Clock/>
-                        <button type="button" className="logout-btn" onClick={onLogout}> Logout </button>
-                    </div>
+                    <Header/>
                 </div>
 
                 <div className="homepage-header-row2">

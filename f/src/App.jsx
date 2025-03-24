@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
+import { backendBaseUrl } from './project_config.js'
 import { fetchAllUserContent} from './fetch_entities'
 import GuestPage from './c/guestPage'
 import globalContext from './context'
@@ -80,6 +81,7 @@ function App() {
     }
 
     const handleLogout = () => {
+        onLogout()
         setCurrentUser({})
         setIsLoggedIn(false)
         setClientAction("logout")
@@ -93,6 +95,24 @@ function App() {
             hideNoti || handleNotification("User content refreshed", "success")
         } catch {
             handleNotification("Could not refresh User Content", "failure")
+        }
+    }
+
+    const onLogout = async() => {
+        const url = `${backendBaseUrl}/logout`
+        const options = {
+            method:"GET",
+            headers:{"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        const resp = await fetch(url, options)
+        const resp_json = await resp.json() 
+
+        if (resp.status == 200) {
+            console.log(resp_json.message)
+            handleNotification(resp_json.message, "success")
+        }else {
+            console.log(resp_json.message)
         }
     }
 
