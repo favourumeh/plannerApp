@@ -12,34 +12,7 @@ div.homepage-header{
     /* border: 1px solid; */
 }
 
-div.homepage-header-row1{
-    background-color: rgba(48, 48, 100, 0.39);
-    border-radius: 10px;
-}
-
-div.homepage-header-row1 button{
-    background: none;
-    border: none;
-}
-
-div.homepage-header button{
-    /* border: 1px solid; */
-    font-size: 0.9rem;
-}
-div.clock-overlay{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* border: 1px solid; */
-}
-
-div.clock{
-    /* border-bottom: 1px solid; */
-    width: 200px;
-    font-weight:400;
-}
-
-span.homepage-day {
+div.homepage-header-row2 span.homepage-day {
     color:red
 }
 
