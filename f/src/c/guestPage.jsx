@@ -3,7 +3,7 @@ import { useContext } from "react"
 import globalContext from "../context.js"
 
 const  GuestPage = ({isLoggedIn}) => {
-    const {setIsModalOpen, setClientAction} = useContext(globalContext)
+    const {setIsModalOpen, setForm} = useContext(globalContext)
 
     if (isLoggedIn) {
         return null 
@@ -11,12 +11,12 @@ const  GuestPage = ({isLoggedIn}) => {
 
     const handleSignUp = () => {
         setIsModalOpen(true)
-        setClientAction("sign-up")
+        setForm("sign-up")
     }
 
     const handleLogin = () => {
         setIsModalOpen(true)
-        setClientAction("login")
+        setForm("login")
     }
     
     return (

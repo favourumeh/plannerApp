@@ -2,8 +2,8 @@ import "./taskCard.css"
 import { useState, useEffect, useContext} from "react"
 import globalContext from "../context"
 
-function TaskCard ({task, handleDeleteTask}) {
-    const {setClientAction, setIsModalOpen, objectives, projects, setCurrentTask} = useContext(globalContext)
+function TaskCard ({task, handleDeleteEntity}) {
+    const {setForm, setIsModalOpen, objectives, projects, setCurrentTask} = useContext(globalContext)
     const [projectNumber, setProjectNumber] = useState()
     const [objectiveNumber, setObjectiveNumber] = useState()
 
@@ -15,7 +15,7 @@ function TaskCard ({task, handleDeleteTask}) {
 
     const handleEditTask = (e) => {
         e.stopPropagation()
-        setClientAction("edit-task")
+        setForm("edit-task")
         setCurrentTask(task)
         setIsModalOpen(true)
     }
@@ -29,7 +29,7 @@ function TaskCard ({task, handleDeleteTask}) {
                     <span id={`task-identifier-id-${task.id}`} className="task-identifier"> Task {projectNumber}.{objectiveNumber}.{task.taskNumber} </span> 
                     {task.description}
                 </div>
-                <button id={`delete-task-id-${task.id}`} className="task-delete-btn" onClick={(e) => handleDeleteTask(e, task.id)}>&times;</button>
+                <button id={`delete-task-id-${task.id}`} className="task-delete-btn" onClick={(e) => handleDeleteEntity(e, "task", task.id)}>&times;</button>
             </div>
         </div>
 

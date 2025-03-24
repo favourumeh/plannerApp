@@ -6,14 +6,14 @@ import SearchResult from "./searchResult"
 
 function TaskForm () {
     const {
-        setIsModalOpen, clientAction, handleNotification, 
+        setIsModalOpen, clientAction, form, setClientAction, handleNotification, 
         currentTask, setCurrentTask, handleRefresh,
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
         defaultProject, defaultProjectObjective,
         projects, objectives, handleLogout} = useContext(globalContext)
 
-    if (!["create-task", "edit-task"].includes(clientAction)) {
+    if (!["create-task", "edit-task"].includes(form)) {
         return null
     }
 
@@ -21,8 +21,8 @@ function TaskForm () {
     const findTaskProject = (objective) => projects.find( (project)=> project.id===objective.projectId) || {"title":""}
 
     const projectTitles = useRef(projects.map(project=>project.title))
-    const [taskProject, setTaskProject] = useState(clientAction=="create-task"? defaultProject:findTaskProject(findTaskObjective()))
-    const [taskObjective, setTaskObjective] = useState(clientAction=="create-task"? defaultProjectObjective:findTaskObjective())
+    const [taskProject, setTaskProject] = useState(form=="create-task"? defaultProject:findTaskProject(findTaskObjective()))
+    const [taskObjective, setTaskObjective] = useState(form=="create-task"? defaultProjectObjective:findTaskObjective())
 
     const [projectQuery, setProjectQuery] = useState(taskProject.title)
     const [relevantObjectives, setRelevantObjetives] = useState(objectives.filter(objective=> objective.projectId == taskProject.id))
@@ -59,9 +59,9 @@ function TaskForm () {
 
     const onSubmit = async(e) =>{
         e.preventDefault()
-        const url = `${backendBaseUrl}/${clientAction=="create-task"? "create-task": "update-task/"+currentTask.id}`
+        const url = `${backendBaseUrl}/${form=="create-task"? "create-task": "update-task/"+currentTask.id}`
         const options = {
-            method:clientAction=="create-task"? "POST":"PATCH",
+            method:form=="create-task"? "POST":"PATCH",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify(currentTask),
             credentials:"include"
@@ -73,6 +73,7 @@ function TaskForm () {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "success")
             setIsModalOpen(false)
+            setClientAction("view-homepage")
             handleRefresh()
         } else {
             console.log(resp_json.message)
@@ -153,7 +154,7 @@ function TaskForm () {
         <>
         <div className="form-overlay" onClick={closeSearchResult}>
             <div className="form-header-overlay">
-                <div className="form-title"> {clientAction.split("-").join(" ").toUpperCase()} </div>
+                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
                 <div className="form-header-buttons">
                     <button 
                         style={{"color":currentTask.isCompleted?"rgb(0, 128, 0)":"rgb(255, 0, 0)"}} 
@@ -184,7 +185,7 @@ function TaskForm () {
                             className="submit-btn" 
                             onClick={(e)=>onSubmit(e)}
                             disabled ={!taskProject.title || !taskObjective || !currentTask.description || !(currentTask.duration >=  10) ? true:false}>
-                            {clientAction == "create-task"? "Create":"Update"}
+                            {form == "create-task"? "Create":"Update"}
                         </button>
                     </div>
                 </form>

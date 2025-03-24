@@ -6,19 +6,19 @@ import globalContext from "../context"
 function ProjectForm () {
 
     const {
-        setIsModalOpen, clientAction, handleNotification, 
+        setIsModalOpen, clientAction, form, handleNotification, 
         currentProject, setCurrentProject, handleRefresh,
         handleLogout} = useContext(globalContext)
 
-    if (!["create-project", "edit-project"].includes(clientAction)) {
+    if (!["create-project", "edit-project"].includes(form)) {
         return null
     }
 
     const onSubmit = async(e) =>{
         e.preventDefault()
-        const url = `${backendBaseUrl}/${clientAction=="create-project"? "create-project": "update-project/"+currentProject.id}`
+        const url = `${backendBaseUrl}/${form=="create-project"? "create-project": "update-project/"+currentProject.id}`
         const options = {
-            method:clientAction=="create-project"? "POST":"PATCH",
+            method:form=="create-project"? "POST":"PATCH",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify(currentProject),
             credentials:"include"
@@ -74,7 +74,7 @@ function ProjectForm () {
         <>
         <div className="form-overlay">
             <div className="form-header-overlay">
-                <div className="form-title"> {clientAction.split("-").join(" ").toUpperCase()} </div>
+                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
                 <div className="form-header-buttons">
                     <button 
                         style={{"color":currentProject.isCompleted?"rgb(0, 128, 0)":"rgb(255, 0, 0)"}} 
@@ -94,7 +94,7 @@ function ProjectForm () {
                             className="submit-btn" 
                             onClick={(e)=>onSubmit(e)}
                             disabled ={!currentProject.description? true:false}>
-                            {clientAction == "create-project"? "Create":"Update"}
+                            {form == "create-project"? "Create":"Update"}
                         </button>
                     </div>
                 </form>

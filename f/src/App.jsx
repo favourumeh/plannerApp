@@ -11,6 +11,7 @@ import NotificationBar from './c/notificationBar.jsx'
 import HomePage from './c/homePage.jsx'
 import TaskForm from "./c/taskForm.jsx"
 import ProjectForm from "./c/projectForm.jsx"
+import EntityPage from './c/EntityPage.jsx'
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -20,7 +21,8 @@ const persistState = (sessionName, default_) => {
 function App() {
     const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",false))
     const [isLoggedIn, setIsLoggedIn] = useState(() => persistState("isLoggedIn",false))
-    const [clientAction, setClientAction] = useState(() => persistState("clientAction","")) //sign-up, login
+    const [clientAction, setClientAction] = useState(() => persistState("clientAction","")) // view-guest-page, view-webpage, view-projects, view-objectives, view-tasks
+    const [form, setForm]  = useState("") //sign-up, login, create/edit-task, create/edit-objective, create/edit-project
     const [currentUser, setCurrentUser] = useState(() => persistState("currentUser",{}))
     const [notificationMessage, setNotificationMessage] = useState("")
     const [isNotiBarVisible, setIsNotiBarVisible] = useState(false)
@@ -35,7 +37,6 @@ function App() {
     const [currentProject, setCurrentProject] = useState({})
     const [showProjectQueryResult, setShowProjectQueryResult] = useState(false)
     const [showObjectiveQueryResult, setShowObjectiveQueryResult] = useState(false)
-
     const requestAmount = useRef(0)
     const notiBarTimerRef = useRef()
 
@@ -43,6 +44,7 @@ function App() {
     useEffect(() => sessionStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn)), [isLoggedIn])
     useEffect(() => sessionStorage.setItem("isModalOpen", JSON.stringify(isModalOpen)), [isModalOpen])
     useEffect(() => sessionStorage.setItem("clientAction", JSON.stringify(clientAction)), [clientAction])
+    useEffect(() => sessionStorage.setItem("form", JSON.stringify(form)), [form])
     useEffect(() => sessionStorage.setItem("currentUser", JSON.stringify(currentUser)), [currentUser])
     useEffect(() => sessionStorage.setItem("tasks", JSON.stringify(tasks)), [tasks])
     useEffect(() => sessionStorage.setItem("objectives", JSON.stringify(objectives)), [objectives])
@@ -85,6 +87,7 @@ function App() {
         setCurrentUser({})
         setIsLoggedIn(false)
         setClientAction("logout")
+        setForm("") 
         isModalOpen && setIsModalOpen(false) // && returns first falsey value. if both falsey then return last value
         clearContent()
     }
@@ -94,6 +97,7 @@ function App() {
             fetchAllContent()
             hideNoti || handleNotification("User content refreshed", "success")
         } catch {
+            handleLogout()
             handleNotification("Could not refresh User Content", "failure")
         }
     }
@@ -116,6 +120,39 @@ function App() {
         }
     }
 
+    const handleDeleteEntity = async (e, entityName, id) => {
+        e.preventDefault()
+
+        const url = `${backendBaseUrl}/delete-${entityName}/${id}`
+        const options = {
+            method:"DELETE",
+            headers:{"content-type":"application/json"},
+            credentials:"include"
+        }
+        const resp = await fetch(url,options)
+        const resp_json = await resp.json()
+
+        if (resp.status==200){
+            console.log(resp_json.message)
+            handleNotification(resp_json.message, "success")
+            handleRefresh()
+        } else {
+            console.log(resp_json.message)
+            const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
+            const resp_ref_json = await resp_ref.json()
+
+            if (resp_ref.status !=200) {
+                console.log(resp_ref_json.message)
+                handleLogout()
+                handleNotification(resp_ref_json.message, "failure")
+            } else {
+                console.log(resp_ref_json.message)
+                handleDeleteEntity(e, id)
+            }
+        }
+
+    }
+    
     // create global prop object
     const globalProps = {
         isModalOpen, setIsModalOpen,
@@ -134,7 +171,8 @@ function App() {
         currentProject, setCurrentProject,
         currentObjective, setCurrentObjective,
         showProjectQueryResult, setShowProjectQueryResult,
-        showObjectiveQueryResult, setShowObjectiveQueryResult
+        showObjectiveQueryResult, setShowObjectiveQueryResult,
+        handleDeleteEntity, form, setForm
     }
 
     return (
@@ -149,6 +187,7 @@ function App() {
                 <ProjectForm/>
             </Modal>
             <HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
+            <EntityPage/>
         </globalContext.Provider>
         </>
     )
