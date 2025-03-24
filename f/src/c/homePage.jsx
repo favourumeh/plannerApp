@@ -2,7 +2,6 @@ import "./homePage.css"
 import { useState, useContext, useEffect } from "react"
 import globalContext from "../context"
 import { backendBaseUrl } from "../project_config"
-import Clock from "./clock"
 import TaskCard from "./taskCard"
 import Dropdown from "./Dropdown"
 import Header from "./header"
@@ -13,51 +12,18 @@ let currentDay = daysOfWeek[current_date.getDay()]
 
 function HomePage ({isLoggedIn}) {
     const {
-        clientAction, setClientAction, 
-        handleNotification, handleLogout, 
+        clientAction, setClientAction, setForm, handleDeleteEntity,
         setIsModalOpen, tasks, handleRefresh} = useContext(globalContext)
 
-    if (!isLoggedIn) {
+    if (!isLoggedIn || clientAction!=="view-homepage") {
         return null
     }
 
     const handleCreateContent = (content) => {
-        setClientAction(`create-${content}`)
+        setForm(`create-${content}`)
         setIsModalOpen(true)
     }
 
-    const handleDeleteTask = async (e, id) => {
-        e.preventDefault()
-
-        const url = `${backendBaseUrl}/delete-task/${id}`
-        const options = {
-            method:"DELETE",
-            headers:{"content-type":"application/json"},
-            credentials:"include"
-        }
-        const resp = await fetch(url,options)
-        const resp_json = await resp.json()
-
-        if (resp.status==200){
-            console.log(resp_json.message)
-            handleNotification(resp_json.message, "success")
-            handleRefresh()
-        } else {
-            console.log(resp_json.message)
-            const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
-            const resp_ref_json = await resp_ref.json()
-
-            if (resp_ref.status !=200) {
-                console.log(resp_ref_json.message)
-                handleLogout()
-                handleNotification(resp_ref_json.message, "failure")
-            } else {
-                console.log(resp_ref_json.message)
-                handleDeleteTask(e, id)
-            }
-        }
-
-    }
 
     return (
         <div className="homepage">
@@ -78,10 +44,10 @@ function HomePage ({isLoggedIn}) {
                         <div onClick={() => handleCreateContent("objective")}> Create Objective</div>
                         <div onClick={() => handleCreateContent("project")}> Create Project</div>
                     </Dropdown>
-                    <Dropdown buttonContent={<i class="fa fa-eye" aria-hidden="true"></i>}>
-                        <div> view projects </div>
-                        <div> view objectives </div>
-                        <div> view tasks </div>
+                    <Dropdown buttonContent={<i className="fa fa-eye" aria-hidden="true"></i>}>
+                        <div onClick={() => setClientAction("view-projects")}> view projects </div>
+                        <div onClick={() => setClientAction("view-objectives")}> view objectives </div>
+                        <div onClick={() => setClientAction("view-tasks")}> view tasks </div>
                     </Dropdown>
                     <button type="button" className="refresh-btn" onClick={() => handleRefresh(false)} > <i className="fa fa-refresh" aria-hidden="true"></i> </button>
                     <Dropdown buttonContent={<i className="fa fa-filter" aria-hidden="true"></i>}>
@@ -98,7 +64,7 @@ function HomePage ({isLoggedIn}) {
                 <ol id="task-list" className="task-list">
                     {tasks.length==0? null:tasks.map((task)=> 
                         <li align="left" key={task.id}>
-                            <TaskCard task={task} handleDeleteTask={handleDeleteTask}/>
+                            <TaskCard task={task} handleDeleteEntity={handleDeleteEntity}/>
                         </li>
                     )}
                 </ol>
