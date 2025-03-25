@@ -108,7 +108,15 @@ def generate_all_user_content(user_id:int) -> Tuple[List[Refresh_Token|None], Li
     tasks: List[List[Task]] =  [Task.query.filter_by(objective_id=id).all() for id in objective_ids]
     tasks_flattened: List[Task] = flatten_2d_list(tasks)
     return refresh_tokens, projects, objectives_flattened, tasks_flattened
-    
+
+def generate_all_project_content(project_id:int) -> Tuple[List[Objective|None], List[Task|None]]:
+    """Generates a projects's, objectives AND tasks"""
+    objectives: List[Objective] = Objective.query.filter_by(project_id=project_id).all()
+    objective_ids: List[int] = [objective.id for objective in objectives]
+    tasks: List[List[Task]] =  [Task.query.filter_by(objective_id=id).all() for id in objective_ids]
+    tasks_flattened: List[Task] = flatten_2d_list(tasks)
+    return objectives, tasks_flattened
+
 def generate_user_content(user_id:int, content:str)-> List[Refresh_Token] | List[Project]| List[Objective]| List[Task] | List[None]:
     """Generates a user's refresh tokens or projects, OR objectives or tasks.
     Args:
