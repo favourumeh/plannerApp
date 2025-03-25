@@ -2,10 +2,10 @@
 import os 
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
-from models import Project, Objective
+from models import Project, Objective, Task
 from plannerPackage import login_required, token_required, flatten_2d_list, generate_entity_number
 from config import db, app, serializer
-from typing import Tuple
+from typing import Tuple, List
 from datetime import datetime, timezone
 
 #create blueprint
@@ -161,8 +161,15 @@ def delete_objective(objective_id: int) -> Tuple[Response, int]:
         resp_dict["message"] = "Failure: The objective selected does not belong to the user."
         return jsonify(resp_dict), 403
 
+    if objective.type in ["default user project objective", "default project objective"]:
+        resp_dict["message"] = "Failure: User is attempting to delete a default objective which is not allowed."
+        return jsonify(resp_dict),  403
+    
+    tasks: List[Task] = Task.query.filter_by(objective_id=objective_id).all()
     try:
         db.session.delete(objective)
+        for task in tasks:
+            db.session.delete(task)
         db.session.commit()
         resp_dict["message"] = "Success: The objective was successfully deleted!"
         return jsonify(resp_dict), 200
