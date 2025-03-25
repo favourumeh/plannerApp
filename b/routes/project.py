@@ -2,10 +2,10 @@
 import os 
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
-from models import Project, Objective
-from plannerPackage import login_required, token_required, generate_entity_number
+from models import Project, Objective, Task
+from plannerPackage import login_required, token_required, generate_entity_number, generate_all_project_content
 from config import db, app, serializer
-from typing import Tuple
+from typing import Tuple, List
 from datetime import datetime, timezone
 
 #create blueprint
@@ -130,11 +130,15 @@ def delete_project(project_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 404
     
     if project.type == "default project":
-        resp_dict["message"] = "Failure: User is attempting to delete the default project which is not allowed."
+        resp_dict["message"] = "Failure: User is attempting to delete a default project which is not allowed."
         return jsonify(resp_dict), 403
     
+    objectives, tasks = generate_all_project_content(project_id)
+    content_to_delete: List[Objective, Task] = [project] + objectives + tasks
+    
     try:
-        db.session.delete(project)
+        for instance in content_to_delete:
+            db.session.delete(instance)
         db.session.commit()
         resp_dict["message"] = "Success: The project was successfully deleted!"
         return jsonify(resp_dict), 200
