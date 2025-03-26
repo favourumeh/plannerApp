@@ -1,4 +1,4 @@
-import "./taskForm.css"
+import "./entityForm.css"
 import { backendBaseUrl} from "../project_config"
 import {useContext} from "react"
 import globalContext from "../context"
