@@ -108,6 +108,10 @@ def update_project(project_id: int) -> Tuple[Response, int]:
     
     if isinstance(deadline, str):
         project.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M')
+        
+    if project.type in ["default project"]:
+        resp_dict["message"] = "Failure: User is attempting to update a default project which is not allowed."
+        return jsonify(resp_dict),  403
     
     try:
         db.session.commit()

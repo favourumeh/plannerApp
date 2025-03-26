@@ -119,8 +119,8 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     objective.description = content.get("description", objective.description)
     objective.duration = content.get("duration", objective.duration) # hours
     objective.scheduled_start = content.get("scheduledStart", objective.scheduled_start)
-    objective.scheduled_finish = content.get("scheduledFinish", None)
-    objective.is_completed = content.get("isCompleted", None)
+    objective.scheduled_finish = content.get("scheduledFinish", objective.scheduled_finish)
+    objective.is_completed = content.get("isCompleted", objective.is_completed)
     objective.last_updated = datetime.now(tz=timezone.utc)
     objective.tag = content.get("tag", objective.tag)
     objective.project_id = content.get("projectId", objective.project_id)
@@ -135,6 +135,10 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     if isinstance(objective.scheduled_finish, str):
         objective.scheduled_finish = datetime.strptime(objective.scheduled_finish, '%Y-%m-%dT%H:%M:%S.%fZ')  
 
+    if objective.type in ["default user project objective", "default project objective"]:
+        resp_dict["message"] = "Failure: User is attempting to update a default objective which is not allowed."
+        return jsonify(resp_dict),  403
+    
     try:
         db.session.commit()
         resp_dict["message"] = "Success: Objective has been updated."
