@@ -11,7 +11,7 @@ import NotificationBar from './c/notificationBar.jsx'
 import HomePage from './c/homePage.jsx'
 import TaskForm from "./c/taskForm.jsx"
 import ProjectForm from "./c/projectForm.jsx"
-import EntityPage from './c/EntityPage.jsx'
+import EntityPage from './c/entityPage.jsx'
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -136,6 +136,10 @@ function App() {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "success")
             handleRefresh()
+        } else if (resp_json.message.includes(`attempting to delete a default ${entityName}`)) {
+            console.log(resp_json.message)
+            handleNotification(resp_json.message, "failure")
+
         } else {
             console.log(resp_json.message)
             const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
