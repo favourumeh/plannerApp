@@ -1,0 +1,68 @@
+div.task-row{
+    /* border: 1px solid; */
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+i.fa-plus:hover{
+    cursor: pointer;
+}
+div.task-card {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid rgba(255, 255, 255, 0.274);
+    border-radius: 4px;
+    margin-bottom: 2px;
+    height: 15px;
+    max-width: 355px;
+    width: 100%;
+}
+
+div.task-card:hover{
+    color: grey;
+    cursor: pointer;
+}
+
+#task-list button:hover{
+    color: grey;
+    cursor: pointer;
+    border-color: rgba(0, 0, 0, 0);
+}
+
+
+div.task-content{
+    font-size: 0.7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow: hidden; 
+    white-space: nowrap;
+    /* border: 1px solid red; */
+    width: 100%;
+}
+
+
+button.task-delete-btn{
+    position: relative;
+    background: none;
+    right:1px;
+    font-size: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0px 0px;
+    height: 15px;
+    min-width: 15px;
+    border-radius: 0px;
+    margin: 0px;
+}
+
+span.task-identifier{
+    border-right: 1px solid;
+    margin-right: 3px;
+    margin-left: 3px;
+}
+
+
+
+
+
