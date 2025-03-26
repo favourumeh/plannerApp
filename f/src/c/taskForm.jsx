@@ -6,12 +6,11 @@ import SearchResult from "./searchResult"
 
 function TaskForm () {
     const {
-        setIsModalOpen, sitePage, form, setSitePage, handleNotification, 
-        currentTask, setCurrentTask, handleRefresh,
+        form, currentTask, setCurrentTask, 
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
         defaultProject, defaultProjectObjective,
-        projects, objectives, handleLogout} = useContext(globalContext)
+        projects, objectives, handleEntityFormSubmit} = useContext(globalContext)
 
     if (!["create-task", "edit-task"].includes(form)) {
         return null
@@ -56,40 +55,6 @@ function TaskForm () {
     , [taskObjective])
     //#endregion
 
-
-    const onSubmit = async(e) =>{
-        e.preventDefault()
-        const url = `${backendBaseUrl}/${form=="create-task"? "create-task": "update-task/"+currentTask.id}`
-        const options = {
-            method:form=="create-task"? "POST":"PATCH",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(currentTask),
-            credentials:"include"
-        }
-        const resp = await fetch(url, options)
-        const resp_json = await resp.json()
-
-        if ([200, 201].includes(resp.status)){
-            console.log(resp_json.message)
-            handleNotification(resp_json.message, "success")
-            setIsModalOpen(false)
-            setSitePage("view-homepage")
-            handleRefresh()
-        } else {
-            console.log(resp_json.message)
-            const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
-            const resp_ref_json = await resp_ref.json()
-            if (resp_ref.status !=200) {
-                console.log(resp_ref_json.message)
-                handleLogout()
-                handleNotification(resp_ref_json.message, "failure")
-            } else {
-                console.log(resp_ref_json.message)
-                onSubmit(e)
-            }
-        }
-    }
-
     const mandatoryIndicator = (fieldStateVar, indicator) => {
         return (typeof fieldStateVar==="undefined" || fieldStateVar==="")? <span className="required-asterisk">{indicator}</span>: undefined
     }
@@ -131,7 +96,7 @@ function TaskForm () {
 
     const formSearchField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
-        const { labelName, inputName, queryField, setQueryField, entityArray, toggleResultOverlay} = params
+        const { labelName, inputName, queryField, setQueryField, entityArray} = params
         return (
             <div className="form-group">
                 <label htmlFor={inputName}> {labelName}{mandatoryIndicator(queryField,"*")}:</label>
@@ -168,7 +133,7 @@ function TaskForm () {
 
             <div className="form-body">
                 <form className="form">
-                    {formSearchField({labelName:"Project", inputName:"project", queryField:projectQuery, setQueryField:setProjectQuery, entityArray:projects, })}
+                    {formSearchField({labelName:"Project", inputName:"project", queryField:projectQuery, setQueryField:setProjectQuery, entityArray:projects})}
                     {formSearchField({labelName:"Objective", inputName:"objective", queryField:objectiveQuery, setQueryField:setObjectiveQuery, entityArray:relevantObjectives})}
                     {formField({labelName:"Description", inputName:"description", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
                     {formField({labelName:"Duration", inputName:"duration", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
@@ -183,7 +148,7 @@ function TaskForm () {
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 
-                            onClick={(e)=>onSubmit(e)}
+                            onClick={(e)=>handleEntityFormSubmit(e, form, currentTask)}
                             disabled ={!taskProject.title || !taskObjective || !currentTask.description || !(currentTask.duration >=  10) ? true:false}>
                             {form == "create-task"? "Create":"Update"}
                         </button>

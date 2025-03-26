@@ -1,50 +1,13 @@
 import "./entityForm.css"
-import { backendBaseUrl} from "../project_config"
 import {useContext} from "react"
 import globalContext from "../context"
 
 function ProjectForm () {
 
-    const {
-        setIsModalOpen, sitePage, form, handleNotification, 
-        currentProject, setCurrentProject, handleRefresh,
-        handleLogout} = useContext(globalContext)
+    const {form,currentProject, setCurrentProject, handleEntityFormSubmit} = useContext(globalContext)
 
     if (!["create-project", "edit-project"].includes(form)) {
         return null
-    }
-
-    const onSubmit = async(e) =>{
-        e.preventDefault()
-        const url = `${backendBaseUrl}/${form=="create-project"? "create-project": "update-project/"+currentProject.id}`
-        const options = {
-            method:form=="create-project"? "POST":"PATCH",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(currentProject),
-            credentials:"include"
-        }
-        const resp = await fetch(url, options)
-        const resp_json = await resp.json()
-
-        if ([200, 201].includes(resp.status)){
-            console.log(resp_json.message)
-            handleNotification(resp_json.message, "success")
-            setIsModalOpen(false)
-            setCurrentProject({})
-            handleRefresh()
-        } else {
-            console.log(resp_json.message)
-            const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
-            const resp_ref_json = await resp_ref.json()
-            if (resp_ref.status !=200) {
-                console.log(resp_ref_json.message)
-                handleLogout()
-                handleNotification(resp_ref_json.message, "failure")
-            } else {
-                console.log(resp_ref_json.message)
-                onSubmit(e)
-            }
-        }
     }
 
     const mandatoryIndicator = (fieldStateVar, indicator) => {
@@ -92,7 +55,7 @@ function ProjectForm () {
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 
-                            onClick={(e)=>onSubmit(e)}
+                            onClick={(e)=>handleEntityFormSubmit(e, form, currentProject)}
                             disabled ={!currentProject.description? true:false}>
                             {form == "create-project"? "Create":"Update"}
                         </button>

@@ -12,6 +12,7 @@ import HomePage from './c/homePage.jsx'
 import TaskForm from "./c/taskForm.jsx"
 import ProjectForm from "./c/projectForm.jsx"
 import EntityPage from './c/entityPage.jsx'
+import ObjectiveForm from './c/objectiveForm.jsx'
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -156,6 +157,45 @@ function App() {
         }
 
     }
+
+    const handleEntityFormSubmit = async(e, form, currentEntity) =>{
+        //Makes a (POST or PATCH) request to the backend to to create or update an entity
+            //form: create-task, create-project, create-objective, update-task, update-project, update-objective
+            //id: id of entity to be updated
+        e.preventDefault()
+        const [action, entityName]  = form.split("-")
+        const url = `${backendBaseUrl}/${action=="create"? form: form.replace("edit", "update") +"/"+currentEntity.id}`
+        const options = {
+            method:action=="create"? "POST":"PATCH",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(currentEntity),
+            credentials:"include"
+        }
+        const resp = await fetch(url, options)
+        const resp_json = await resp.json()
+
+        if ([200, 201].includes(resp.status)){
+            console.log(resp_json.message)
+            handleNotification(resp_json.message, "success")
+            setIsModalOpen(false)
+            handleRefresh()
+        } else if (resp_json.message.includes(`attempting to update a default ${entityName}`)) {
+            console.log(resp_json.message)
+            handleNotification(resp_json.message, "failure")
+        } else {
+            console.log(resp_json.message)
+            const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
+            const resp_ref_json = await resp_ref.json()
+            if (resp_ref.status !=200) {
+                console.log(resp_ref_json.message)
+                handleLogout()
+                handleNotification(resp_ref_json.message, "failure")
+            } else {
+                console.log(resp_ref_json.message)
+                handleEntityFormSubmit(e)
+            }
+        }
+    }
     
     // create global prop object
     const globalProps = {
@@ -176,7 +216,7 @@ function App() {
         currentObjective, setCurrentObjective,
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
-        handleDeleteEntity, form, setForm
+        handleDeleteEntity, form, setForm, handleEntityFormSubmit
     }
 
     return (
@@ -189,6 +229,7 @@ function App() {
                 <Login isLoggedIn={isLoggedIn}/>
                 <TaskForm/>
                 <ProjectForm/>
+                <ObjectiveForm/>
             </Modal>
             <HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
             <EntityPage/>
