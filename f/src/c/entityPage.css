@@ -1,0 +1,67 @@
+div.entity-page button:hover{
+    color:rgb(0, 230, 0);
+    border-color: rgba(0, 0, 0, 0);
+}
+
+div.entity-page button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+div.entity-page-header{
+    /* border: 1px solid white; */
+}
+
+.entity-page-header-row2{
+    display: flex;
+    justify-content: space-around;
+    margin: 4px 0px;
+    background-color: rgba(48, 48, 100, 0.137);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0);
+}
+
+.entity-page-header-row2:hover{
+    border: 1px solid;
+}
+
+
+div.entity-page-header-row3{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 0px;
+    background-color: rgba(48, 48, 100, 0.137);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0);
+
+}
+
+div.entity-page-header-row3 button{
+    background: none;
+}
+.entity-page-header-row3:hover{
+    border: 1px solid;
+}
+
+div.entity-page-body {
+    /* border: 1px solid white ; */
+    border-radius: 10px;
+    background-color: rgb(30, 23, 36);
+    display: flex;
+    justify-content: center;
+    align-content: flex-start;
+    height: 900px;
+}
+
+ol.entity-list{
+    list-style-type: none;
+    padding-left:0px;
+    width: 100%;
+
+}
+
+#entity-list div.task-card:hover{
+    color: grey;
+    cursor: pointer;
+}
