@@ -10,8 +10,8 @@ from werkzeug.test import TestResponse
 from typing import List, Dict
 #Record test execution time
 now: datetime = datetime.now(tz=timezone.utc)
-now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M:%S.%fZ')
-now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:%S %Z").replace("UTC", "GMT")
+now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M')
+now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:00 GMT")
 
 #load env vars
 load_dotenv()
@@ -124,7 +124,7 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         response_read_projects = self.client.get("/read-projects")
         default_project_id = list(filter(lambda project: project["type"] == "default project", response_read_projects.json["projects"]))[0]["id"]
         response = self.client.delete(f"/delete-project/{default_project_id}")
-        self.assertEqual(response.json["message"], "Failure: User is attempting to delete the default project which is not allowed.")
+        self.assertEqual(response.json["message"], "Failure: User is attempting to delete a default project which is not allowed.")
 
         print("         Test request to delete a user project succeeds")
         self.client.post("/create-project", json={"description":"test user project"}) #create a user project
