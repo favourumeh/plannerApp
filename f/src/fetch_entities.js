@@ -15,19 +15,25 @@ const fetchAllUserContent = async (setProjects, setDefaultProject, setObjectives
         const projects = resp_json.projects
         const objectives = resp_json.objectives
         const tasks = resp_json.tasks
-
         setProjects(projects)
         setDefaultProject(projects.filter((project)=> project["type"]=="default project")[0])
         setObjectives(objectives)
         setDefaultProjectObjective(objectives.filter((objective) => objective["type"]=="default project objective")[0])
         setTasks(tasks)
-    // console.log(resp_json.projects)
     } else {
-    console.log(resp_json.message)
-    handleNotification(resp_json.message, "failure")
+        console.log(resp_json.message)
+        const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {credentials:"include"})
+        const resp_ref_json = await resp_ref.json()
+        if (resp_ref.status == 200){
+            console.log(resp_ref_json.message)
+            fetchAllUserContent(setProjects, setDefaultProject, setObjectives, setDefaultProjectObjective, setTasks, handleNotification)
+        } else {
+            console.log(resp_ref_json.message)
+            handleNotification(resp_ref_json.message, "failure")
+        }
     }
-
 }
+
 const fetchUserProjects = async (setProjects, handleNotification, setDefaultProject) => {
     const url = `${backendBaseUrl}/read-projects`
     const options = {
