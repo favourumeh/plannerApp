@@ -4,14 +4,11 @@ import unittest
 from . import app
 from . import db
 from . import plannerAppTestDependecies
+from . import now_str, now_str_long 
 from datetime import datetime, timezone
 from plannerPackage import filter_dict
 from werkzeug.test import TestResponse
 from typing import List, Dict
-#Record test execution time
-now: datetime = datetime.now(tz=timezone.utc)
-now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M')
-now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:00 GMT")
 
 #load env vars
 load_dotenv()

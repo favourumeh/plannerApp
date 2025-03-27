@@ -7,6 +7,12 @@ from plannerPackage import login_required, token_required, filter_dict, filter_l
 from flask import jsonify, Response
 from typing import Tuple, Dict, List
 from werkzeug.test import TestResponse
+from datetime import datetime, timezone
+
+#Record test execution time
+now: datetime = datetime.now(tz=timezone.utc)
+now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M')
+now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:00 GMT")
 
 #configure app for testing #1
 app.config["TESTING"] = True # set to true so Exceptions can propagate to the test client (i.e. so we get HTTP status codes other than 500 when something goes wrong with client request)

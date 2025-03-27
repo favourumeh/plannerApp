@@ -5,15 +5,11 @@ from . import app
 from . import db
 from . import Project, Objective, Task
 from . import plannerAppTestDependecies, snake_to_camel_dict
+from . import now_str, now_str_long 
 from datetime import datetime, timezone
 from plannerPackage import filter_list_of_dicts
 from werkzeug.test import TestResponse
 from typing import List, Dict
-
-#Record test execution time
-now: datetime = datetime.now(tz=timezone.utc)
-now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M:%S.%fZ')
-now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:%S %Z").replace("UTC", "GMT")
 
 #load env vars
 load_dotenv()
