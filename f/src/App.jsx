@@ -232,7 +232,7 @@ function App() {
                 <ObjectiveForm/>
             </Modal>
             <HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
-            <EntityPage/>
+            <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
         </globalContext.Provider>
         </>
     )

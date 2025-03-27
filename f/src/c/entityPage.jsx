@@ -5,16 +5,17 @@ import Dropdown from "./Dropdown"
 import Header from "./header"
 import EntityCard from "./EntityCard"
 
-function EntityPage () {
-
-    const {
-        sitePage, setSitePage, setForm, 
-        setIsModalOpen, handleRefresh,
-        tasks, projects, objectives} = useContext(globalContext)
+function EntityPage ({sitePage, setSitePage}) {
 
     if (!["view-projects", "view-objectives", "view-tasks"].includes(sitePage)) {
         return null
     }
+
+    const {
+         setForm, setIsModalOpen, handleRefresh,
+        tasks, projects, objectives} = useContext(globalContext)
+
+ 
 
     const [entityName, setEntityName] = useState(sitePage==="view-projects"? "project": sitePage==="view-objectives"? "objective":"task")
     const [entity, setEntity] = useState(sitePage==="view-projects"? projects: sitePage==="view-objectives"? objectives:tasks)
