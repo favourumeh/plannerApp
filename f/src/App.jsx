@@ -38,8 +38,12 @@ function App() {
     const [currentProject, setCurrentProject] = useState(() => persistState("currentProject",{}))
     const [showProjectQueryResult, setShowProjectQueryResult] = useState(false)
     const [showObjectiveQueryResult, setShowObjectiveQueryResult] = useState(false)
+    const [homePageTasks, setHomePageTasks] = useState(()=>persistState("homePageTasks",[]))
+    const [currentDate, setCurrentDate] = useState(() => persistState("currentDate", new Date()))
+
     const requestAmount = useRef(0)
     const notiBarTimerRef = useRef()
+
 
     //Update session storage object when state variable changes
     useEffect(() => sessionStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn)), [isLoggedIn])
@@ -55,7 +59,8 @@ function App() {
     useEffect(() => sessionStorage.setItem("currentTask", JSON.stringify(currentTask)), [currentTask])
     useEffect(() => sessionStorage.setItem("currentProject", JSON.stringify(currentProject)), [currentProject])
     useEffect(() => sessionStorage.setItem("currentObjective", JSON.stringify(currentObjective)), [currentObjective])
-
+    useEffect(() => sessionStorage.setItem("homePageTasks", JSON.stringify(homePageTasks)), [homePageTasks])
+    useEffect(() => sessionStorage.setItem("currentDate", JSON.stringify(currentDate)), [currentDate])
 
     const handleNotification = (message, category) => {
         setIsNotiBarVisible(true)
@@ -81,6 +86,7 @@ function App() {
         setObjectives([])
         setDefaultProject({})
         setDefaultProjectObjective({})
+        setHomePageTasks([])
     }
 
     const handleLogout = () => {
@@ -140,7 +146,6 @@ function App() {
         } else if (resp.status == 403) {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "failure")
-
         } else {
             console.log(resp_json.message)
             const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
@@ -161,7 +166,7 @@ function App() {
     const handleEntityFormSubmit = async(e, form, currentEntity) =>{
         //Makes a (POST or PATCH) request to the backend to to create or update an entity
             //form: create-task, create-project, create-objective, update-task, update-project, update-objective
-            //id: id of entity to be updated
+            //currentEntity: one of currentTask, currentProject or currentObjective
         e.preventDefault()
         const [action, entityName]  = form.split("-")
         const url = `${backendBaseUrl}/${action=="create"? form: form.replace("edit", "update") +"/"+currentEntity.id}`
@@ -216,7 +221,8 @@ function App() {
         currentObjective, setCurrentObjective,
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
-        handleDeleteEntity, form, setForm, handleEntityFormSubmit
+        handleDeleteEntity, form, setForm, handleEntityFormSubmit,
+        currentDate, setCurrentDate
     }
 
     return (
@@ -231,7 +237,7 @@ function App() {
                 <ProjectForm/>
                 <ObjectiveForm/>
             </Modal>
-            <HomePage isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
+            <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage} homePageTasks={homePageTasks} setHomePageTasks={setHomePageTasks}/>
             <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
         </globalContext.Provider>
         </>
