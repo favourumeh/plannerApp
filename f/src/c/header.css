@@ -13,6 +13,11 @@ div.header-overlay{
     /* border: 1px solid; */
 }
 
+span.header-title:hover{
+    cursor: pointer;
+    color: rgb(0, 230, 0);
+}
+
 div.clock{
     /* border-bottom: 1px solid; */
     width: 200px;

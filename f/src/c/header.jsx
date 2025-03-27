@@ -4,12 +4,17 @@ import globalContext from "../context.js";
 import {useContext} from "react"
 
 const Header = () => {
-    const {handleLogout} = useContext(globalContext)
+    const {setSitePage, setCurrentDate, handleLogout} = useContext(globalContext)
+    const onClickTitle = () => {
+        setSitePage("view-homepage")
+        setCurrentDate(new Date())
+    }
+
     return (
         <header>
             <div className="header-overlay">
                 <button type="button" className="settings-btn" > <i className="fa fa-bars" aria-hidden="true"></i> </button>
-                Task Manager <Clock/>
+                <span className="header-title" onClick={onClickTitle}>Task Manager</span> <Clock/>
                 <button type="button" className="logout-btn" onClick={handleLogout}> Logout </button>
             </div>
         </header>
