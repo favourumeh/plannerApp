@@ -34,8 +34,8 @@ function App() {
     const [defaultProject, setDefaultProject] = useState(() => persistState("defaultProject",{})) 
     const [defaultProjectObjective, setDefaultProjectObjective] = useState(() => persistState("defaultProjectObjective",{}))
     const [currentTask, setCurrentTask] = useState(() => persistState("currentTask", {isCompleted:true, isRecurring:false, priorityScore:1, projectTitle:"", objectiveTitle:""})) //useState({isCompleted:false, isRecurring:false})
-    const [currentObjective, setCurrentObjective] = useState({})
-    const [currentProject, setCurrentProject] = useState({})
+    const [currentObjective, setCurrentObjective] = useState(() => persistState("currentObjective",{}))
+    const [currentProject, setCurrentProject] = useState(() => persistState("currentProject",{}))
     const [showProjectQueryResult, setShowProjectQueryResult] = useState(false)
     const [showObjectiveQueryResult, setShowObjectiveQueryResult] = useState(false)
     const requestAmount = useRef(0)
@@ -137,7 +137,7 @@ function App() {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "success")
             handleRefresh()
-        } else if (resp_json.message.includes(`attempting to delete a default ${entityName}`)) {
+        } else if (resp.status == 403) {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "failure")
 
@@ -179,7 +179,7 @@ function App() {
             handleNotification(resp_json.message, "success")
             setIsModalOpen(false)
             handleRefresh()
-        } else if (resp_json.message.includes(`attempting to update a default ${entityName}`)) {
+        } else if (resp.status == 403) {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "failure")
         } else {
