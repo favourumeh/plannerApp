@@ -59,10 +59,10 @@ def create_objective() -> Tuple[Response, int]:
     objective_number = generate_entity_number(entity_number=objective_number, parent_entity_id=project_id, parent_entity_name="project", entity_name="objective", entity=Objective)
 
     if isinstance(scheduled_start, str):
-        scheduled_start = datetime.strptime(scheduled_start, '%Y-%m-%dT%H:%M:%S.%fZ')
+        scheduled_start = datetime.strptime(scheduled_start, '%Y-%m-%dT%H:%M')
 
     if isinstance(scheduled_finish, str):
-        scheduled_finish = datetime.strptime(scheduled_finish, '%Y-%m-%dT%H:%M:%S.%fZ')  
+        scheduled_finish = datetime.strptime(scheduled_finish, '%Y-%m-%dT%H:%M')  
     
     try:
         objective: Objective = Objective(objective_number=objective_number, type=type, title=title, description=description, duration=duration, 
@@ -130,10 +130,10 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 400
 
     if isinstance(objective.scheduled_start, str):
-        objective.scheduled_start = datetime.strptime(objective.scheduled_start, '%Y-%m-%dT%H:%M:%S.%fZ')
+        objective.scheduled_start = datetime.strptime(objective.scheduled_start, '%Y-%m-%dT%H:%M')
 
     if isinstance(objective.scheduled_finish, str):
-        objective.scheduled_finish = datetime.strptime(objective.scheduled_finish, '%Y-%m-%dT%H:%M:%S.%fZ')  
+        objective.scheduled_finish = datetime.strptime(objective.scheduled_finish, '%Y-%m-%dT%H:%M')  
 
     if objective.type in ["default user project objective", "default project objective"]:
         resp_dict["message"] = "Failure: User is attempting to update a default objective which is not allowed."

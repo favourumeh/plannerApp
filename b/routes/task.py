@@ -69,10 +69,10 @@ def create_task() -> Tuple[Response, int]:
         return jsonify(resp_dict), 400
 
     if isinstance(scheduled_start, str):
-        scheduled_start = datetime.strptime(scheduled_start, '%Y-%m-%dT%H:%M:%S.%fZ')
+        scheduled_start = datetime.strptime(scheduled_start, '%Y-%m-%dT%H:%M')
 
     if isinstance(scheduled_finish, str):
-        scheduled_finish = datetime.strptime(scheduled_finish, '%Y-%m-%dT%H:%M:%S.%fZ')  
+        scheduled_finish = datetime.strptime(scheduled_finish, '%Y-%m-%dT%H:%M')  
         
     task_number = generate_entity_number(entity_number=task_number, parent_entity_id=objective_id, parent_entity_name="objective", entity_name="task", entity=Task)
 
@@ -167,10 +167,10 @@ def update_task(task_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 400
 
     if isinstance(task.scheduled_start, str):
-        task.scheduled_start = datetime.strptime(task.scheduled_start, '%Y-%m-%dT%H:%M:%S.%fZ')
+        task.scheduled_start = datetime.strptime(task.scheduled_start, '%Y-%m-%dT%H:%M')
 
     if isinstance(task.scheduled_finish, str):
-        task.scheduled_finish = datetime.strptime(task.scheduled_finish, '%Y-%m-%dT%H:%M:%S.%fZ')  
+        task.scheduled_finish = datetime.strptime(task.scheduled_finish, '%Y-%m-%dT%H:%M')
 
     try:
         db.session.commit()
