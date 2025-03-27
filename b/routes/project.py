@@ -134,7 +134,7 @@ def delete_project(project_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 404
     
     if project.type == "default project":
-        resp_dict["message"] = "Failure: User is attempting to delete a default project which is not allowed."
+        resp_dict["message"] = "Failure: User is attempting to delete the default project which is not allowed."
         return jsonify(resp_dict), 403
     
     objectives, tasks = generate_all_project_content(project_id)

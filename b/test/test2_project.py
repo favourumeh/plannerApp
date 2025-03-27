@@ -6,7 +6,7 @@ from . import db
 from . import plannerAppTestDependecies
 from . import now_str, now_str_long 
 from datetime import datetime, timezone
-from plannerPackage import filter_dict
+from plannerPackage import filter_dict, filter_list_of_dicts
 from werkzeug.test import TestResponse
 from typing import List, Dict
 
@@ -90,6 +90,12 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         response = self.client.patch("/update-project/5", json={"description":"blah"})
         self.assertEqual(response.json["message"], "Failure: Could not find the selected project in the db. Please choose another project id.")
         
+        print("         Test attempting to update the default project fails")
+        projects  = self.client.get("/read-projects").json["projects"]
+        default_project_id: int = filter_list_of_dicts(projects, "type", "default project")["id"]
+        response = self.client.patch(f"/update-project/{default_project_id}", json={"title":"blah", "description":"blah"})
+        self.assertEqual(response.json["message"], "Failure: User is attempting to edit the default project which is not allowed.")
+        
         #create a user project then edit it
         print("         Test request to update a user project succeeds")
         data = {"title":"title1", "description":"blah1"}
@@ -121,7 +127,7 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         response_read_projects = self.client.get("/read-projects")
         default_project_id = list(filter(lambda project: project["type"] == "default project", response_read_projects.json["projects"]))[0]["id"]
         response = self.client.delete(f"/delete-project/{default_project_id}")
-        self.assertEqual(response.json["message"], "Failure: User is attempting to delete a default project which is not allowed.")
+        self.assertEqual(response.json["message"], "Failure: User is attempting to delete the default project which is not allowed.")
 
         print("         Test request to delete a user project succeeds")
         self.client.post("/create-project", json={"description":"test user project"}) #create a user project
