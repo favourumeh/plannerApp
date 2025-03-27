@@ -23,7 +23,7 @@ function App() {
     const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",false))
     const [isLoggedIn, setIsLoggedIn] = useState(() => persistState("isLoggedIn",false))
     const [sitePage, setSitePage] = useState(() => persistState("sitePage","")) // view-guest-page, view-webpage, view-projects, view-objectives, view-tasks
-    const [form, setForm]  = useState("") //sign-up, login, create/edit-task, create/edit-objective, create/edit-project
+    const [form, setForm]  = useState(() => persistState("form", "")) //sign-up, login, create/edit-task, create/edit-objective, create/edit-project
     const [currentUser, setCurrentUser] = useState(() => persistState("currentUser",{}))
     const [notificationMessage, setNotificationMessage] = useState("")
     const [isNotiBarVisible, setIsNotiBarVisible] = useState(false)
