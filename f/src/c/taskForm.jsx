@@ -75,6 +75,19 @@ function TaskForm () {
         setShowObjectiveQueryResult(false)
     }
 
+    const formatDateTime = (dateField) => {
+        // Formats datetime string: Thu, 27 Mar 2025 09:09:00 GMT ==> 2025-03-27T09:00 
+        if (!currentTask[dateField]) {
+            return
+        }
+        const formatedDateTime = new Date(currentTask[dateField]).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
+        setCurrentTask((prev) => ({...prev, [dateField]:formatedDateTime})) //#1
+    }
+
+    useEffect(() => {
+        ["scheduledStart", "scheduledFinish"].forEach(field => formatDateTime(field)) //#2
+      }, []);
+
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
         const { labelName, inputName, inputType, currentTask, setCurrentTask, mandatoryField} = params
@@ -138,8 +151,8 @@ function TaskForm () {
                     {formField({labelName:"Description", inputName:"description", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
                     {formField({labelName:"Duration", inputName:"duration", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
                     {formField({labelName:"Priority", inputName:"priorityScore", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-                    {formField({labelName:"Start", inputName:"sheduledStart", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-                    {formField({labelName:"Finish", inputName:"sheduledFinish", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
+                    {formField({labelName:"Start", inputName:"scheduledStart", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
+                    {formField({labelName:"Finish", inputName:"scheduledFinish", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Previous Task", inputName:"previousTaskNumber", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Next Task", inputName:"nextTaskNumber", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Dependencies", inputName:"dependencies", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
@@ -166,17 +179,8 @@ export default TaskForm
 
 // Notes
 
-    //#1 : Console prints
-    //#region : console prints
-    // useEffect(() => {
-    //     console.log("projectTitles", projectTitles)
-    //     console.log("projectId", taskProject.id)
-    //     }, [taskProject])
-
-    // useEffect(() => {
-    //     console.log("objective", objectives)
-    //     console.log("relevantObjectives", relevantObjectives)
-    //     }, [relevantObjectives])
-
-    // useEffect(() => {console.log("objectiveTitles", objectiveTitles)}, [objectiveTitles])
-    //#endregion
+    /*
+        #1:prev enfornces the use of previous currentTask state. (without this the currentTask state will be the initial state)
+        #2: the use of the for loop to update currentTask is only possible because of the use of (prev) => ({...prev }) to update the state of currentTask in formatDateTime.
+            prev => ({ ...prev }) ensures each update uses the latest state, even if other updates are pending. Without this, all updates in the loop reference the same initial state, leading to overwrites.
+    */
