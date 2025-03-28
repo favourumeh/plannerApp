@@ -34,22 +34,6 @@ div.homepage-header-row2 button{
     border: 1px solid;
 }
 
-.homepage-header-row3{
-    display: flex;
-    justify-content: space-around;
-    margin: 4px 0px;
-    background-color: rgba(48, 48, 100, 0.137);
-    border-radius: 10px;
-    border: 1px solid rgba(0, 0, 0, 0);
-}
-
-.homepage-header-row3:hover{
-    border: 1px solid;
-}
-
-.homepage-header-row3 button{
-    background:none;
-}
 
 div.homepage-body {
     border: 1px solid white ;

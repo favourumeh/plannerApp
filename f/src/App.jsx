@@ -40,6 +40,8 @@ function App() {
     const [showObjectiveQueryResult, setShowObjectiveQueryResult] = useState(false)
     const [homePageTasks, setHomePageTasks] = useState(()=>persistState("homePageTasks",[]))
     const [currentDate, setCurrentDate] = useState(() => persistState("currentDate", new Date()))
+    const [entityName, setEntityName] = useState(sitePage==="view-projects"? "project": sitePage==="view-objectives"? "objective":"task")
+    const [entity, setEntity] = useState(sitePage==="view-projects"? projects: sitePage==="view-objectives"? objectives:tasks)
 
     const requestAmount = useRef(0)
     const notiBarTimerRef = useRef()
@@ -222,7 +224,7 @@ function App() {
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
         handleDeleteEntity, form, setForm, handleEntityFormSubmit,
-        currentDate, setCurrentDate
+        currentDate, setCurrentDate, entityName, setEntityName, entity, setEntity
     }
 
     return (

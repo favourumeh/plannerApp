@@ -2,8 +2,8 @@ import "./homePage.css"
 import { useState, useContext, useEffect } from "react"
 import globalContext from "../context"
 import TaskCard from "./taskCard"
-import Dropdown from "./Dropdown"
 import Header from "./header"
+import ToolBar from "./toolbar"
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todaysDate = new Date().toDateString()
@@ -13,7 +13,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
         return null
     }
 
-    const {currentDate, setCurrentDate, setSitePage, setForm, handleDeleteEntity, setIsModalOpen, tasks, objectives, projects, handleRefresh} = useContext(globalContext)
+    const {currentDate, setCurrentDate,  handleDeleteEntity, tasks, objectives, projects} = useContext(globalContext)
     const [currentDay, setCurrentDay] = useState(null)
 
     useEffect(() => {setCurrentDay(daysOfWeek[new Date(currentDate).getDay()])}, [currentDate])
@@ -21,11 +21,6 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
    useEffect(() => {
         setHomePageTasks(tasks.filter(task => new Date(task.scheduledStart).toDateString() ===  new Date(currentDate).toDateString()))
     }, [currentDate, tasks, objectives, projects])
-
-    const handleCreateContent = (content) => {
-        setForm(`create-${content}`)
-        setIsModalOpen(true)
-    }
 
     const handleDayNavigation = (direction) => {
         switch (direction) {
@@ -56,22 +51,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
                 </div>
 
                 <div className="homepage-header-row3">
-                    <Dropdown buttonContent={<i className="fa fa-plus" aria-hidden="true"></i>}>
-                        <div onClick={() => handleCreateContent("task")}> Create Task</div>
-                        <div onClick={() => handleCreateContent("objective")}> Create Objective</div>
-                        <div onClick={() => handleCreateContent("project")}> Create Project</div>
-                    </Dropdown>
-                    <Dropdown buttonContent={<i className="fa fa-eye" aria-hidden="true"></i>}>
-                        <div onClick={() => setSitePage("view-projects")}> view projects </div>
-                        <div onClick={() => setSitePage("view-objectives")}> view objectives </div>
-                        <div onClick={() => setSitePage("view-tasks")}> view tasks </div>
-                    </Dropdown>
-                    <button type="button" className="refresh-btn" onClick={() => handleRefresh(false)} > <i className="fa fa-refresh" aria-hidden="true"></i> </button>
-                    <Dropdown buttonContent={<i className="fa fa-filter" aria-hidden="true"></i>}>
-                        <div> by project </div>
-                        <div> by objective</div>
-                        <div> by task </div>
-                    </Dropdown>
+                    <ToolBar/>
                 </div>
 
             </div>
