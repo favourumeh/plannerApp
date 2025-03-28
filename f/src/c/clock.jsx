@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
+import globalContext from "../context"
 
 const Clock = () => {
-  const [time, setTime] = useState(new Date())
-
+  const [todayDateTime, setTodayDateTime] = useState(new Date())
+  const {currentDate} = useContext(globalContext)
   // Update the time every second
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setTime(new Date())
+      setTodayDateTime(new Date())
     }, 1000)
 
     // Cleanup the interval on component unmount
@@ -21,9 +22,13 @@ const Clock = () => {
   const fromatDate = (date) => {
     return date.toJSON().slice(0, 10)
   }
+  const todayIndicator = () => {
+    return todayDateTime.toDateString() === new Date(currentDate).toDateString()? "white" : "red"
+}
+
 
   return (
-      <div className="clock">{fromatDate(time)} | {formatTime(time)}</div>
+      <div className="clock"> <span style={{color:todayIndicator()}}>{fromatDate(new Date(currentDate))} </span>| {formatTime(todayDateTime)}</div>
   )
 }
 
