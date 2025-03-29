@@ -3,7 +3,7 @@ import globalContext from "../context"
 import { useState, useRef, useEffect, useContext } from "react"
 
 function NotificationBar () {
-    const {notificationMessage, setNotificationMessage, isNotiBarVisible, setIsNotiBarVisible, isNotiMessageError, requestAmount, notiBarTimerRef} = useContext(globalContext)
+    const {notificationMessage, setNotificationMessage, isNotiBarVisible, setIsNotiBarVisible, isNotiMessageError, notiBarTimerRef} = useContext(globalContext)
     const [isNotiBarExpanded, setIsNotiBarExpanded] = useState(false)
     const [isHoverNotificationBar, setIsHoverNotificationBar] = useState(false)
 
