@@ -1,0 +1,17 @@
+div.timeslot {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 900px;
+    background-color: rgba(99, 99, 99, 0.377);
+    border: 1px solid;
+    border-top: none;
+    border-left: none;
+    margin-left: 0px;
+}
+
+div#timeslot-0{
+    border-top-left-radius: 7px;
+}
