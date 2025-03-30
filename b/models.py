@@ -114,16 +114,19 @@ class Objective(db.Model):
 
 
 class Task(db.Model):
-    """Defines the properties of the 'Task' entity: id, task_number, type, description, duration, priorityScore, scheduled_start/finish, is_completed, 
-    previous/next_task_id, is_recurring, is_cancelled, dependencies, tag, objective_id"""
+    """Defines the properties of the 'Task' entity: id, task_number, type, status, description, duration, priorityScore, scheduled_start/finish, start/finish is_completed, 
+    previous/next_task_id, is_recurring, is_cancelled, dependencies, was_paused, tag, objective_id"""
     id = db.Column(db.Integer, primary_key=True)
     task_number = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(12), default="project task") # 2 types: "free task" and "project task"
+    status = db.Column(db.String(50), default="To Do") #4 status: To Do, In Progress, Paused and Completed
     description = db.Column(db.String(100))
     duration = db.Column(db.Integer, nullable=False) # minutes
     priority_score = db.Column(db.Integer, default=1)
     scheduled_start = db.Column(db.DateTime(timezone=True))
     scheduled_finish = db.Column(db.DateTime(timezone=True))
+    start = db.Column(db.DateTime(timezone=True))
+    finish = db.Column(db.DateTime(timezone=True))
     is_completed = db.Column(db.Boolean, default=False)
     previous_task_id = db.Column(db.Integer)
     next_task_id = db.Column(db.Integer)
@@ -132,6 +135,7 @@ class Task(db.Model):
     dependencies = db.Column(db.Text)
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
     last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
+    was_paused = db.Column(db.Boolean, default=False)
     tag = db.Column(db.String(40))
     objective_id = db.Column(db.Integer, db.ForeignKey("objective.id"), nullable=False)
 
@@ -142,11 +146,14 @@ class Task(db.Model):
         return {"id": cls.id,
                 "taskNumber": cls.task_number,
                 "type": cls.type,
+                "status": cls.status,
                 "description": cls.description,
                 "duration": cls.duration,
                 "priorityScore": cls.priority_score,
                 "scheduledStart": cls.scheduled_start,
                 "scheduledFinish": cls.scheduled_finish,
+                "start": cls.start,
+                "finish": cls.finish,
                 "isCompleted": cls.is_completed,
                 "previousTaskId":cls.previous_task_id,
                 "nextTaskId":cls.next_task_id,
@@ -155,5 +162,6 @@ class Task(db.Model):
                 "dependencies":cls.dependencies,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
+                "wasPaused": cls.was_paused,
                 "tag": cls.tag,
                 "objectiveId": cls.objective_id}
