@@ -42,10 +42,8 @@ function App() {
     const [currentDate, setCurrentDate] = useState(() => persistState("currentDate", new Date()))
     const [entityName, setEntityName] = useState(sitePage==="view-projects"? "project": sitePage==="view-objectives"? "objective":"task")
     const [entity, setEntity] = useState(sitePage==="view-projects"? projects: sitePage==="view-objectives"? objectives:tasks)
-
-    const requestAmount = useRef(0)
+    const [userSettings, setUserSettings] = useState({"dayStartTime":"08:00", "dayEndTime":"20:30", "timeIntervalInMinutes":50})
     const notiBarTimerRef = useRef()
-
 
     //Update session storage object when state variable changes
     useEffect(() => sessionStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn)), [isLoggedIn])
@@ -68,7 +66,6 @@ function App() {
         setIsNotiBarVisible(true)
         setNotificationMessage(message)
         setIsNotiMessageError(category=="success"? false:true)
-        requestAmount.current += 1
     } 
 
     // create fetch functions that interact with app's state
@@ -215,7 +212,7 @@ function App() {
         tasks, setTasks, 
         objectives, setObjectives,
         projects, setProjects,
-        handleNotification, requestAmount, notiBarTimerRef,
+        handleNotification, notiBarTimerRef,
         handleLogin, handleLogout,
         fetchAllContent, handleRefresh, defaultProject, defaultProjectObjective,
         currentTask, setCurrentTask,
@@ -223,8 +220,11 @@ function App() {
         currentObjective, setCurrentObjective,
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
-        handleDeleteEntity, form, setForm, handleEntityFormSubmit,
-        currentDate, setCurrentDate, entityName, setEntityName, entity, setEntity
+        handleDeleteEntity, 
+        form, setForm, handleEntityFormSubmit,
+        currentDate, setCurrentDate, 
+        entityName, setEntityName, entity, setEntity,
+        userSettings, setUserSettings
     }
 
     return (
