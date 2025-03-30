@@ -40,7 +40,7 @@ function EntityPage ({sitePage}) {
 
             <div className="entity-page-body"> 
                 <ol id="entity-list" className="entity-list">
-                    {entity.length==0? null:entity.map((item)=> 
+                    {entity?.map((item)=> 
                         <li align="left" key={item.id}>
                             <EntityCard entity={item} entityName={entityName}/>
                         </li>

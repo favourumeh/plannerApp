@@ -59,7 +59,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
             <div className="homepage-body"> 
                 <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
                 <ol id="task-list" className="task-list">
-                    {homePageTasks.length==0? null:homePageTasks.map((task)=> 
+                    {homePageTasks?.map((task)=> 
                         <li align="left" key={task.id}>
                             <TaskCard task={task} handleDeleteEntity={handleDeleteEntity}/>
                         </li>
