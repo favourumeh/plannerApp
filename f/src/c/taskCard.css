@@ -13,10 +13,10 @@ div.task-card {
     justify-content: space-between;
     border: 1px solid rgba(255, 255, 255, 0.274);
     border-radius: 4px;
-    margin-bottom: 2px;
     height: 15px;
     max-width: 355px;
     width: 100%;
+    margin-right: 5px;
 }
 
 div.task-card:hover{
