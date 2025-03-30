@@ -4,6 +4,7 @@ import globalContext from "../context"
 import TaskCard from "./taskCard"
 import Header from "./header"
 import ToolBar from "./toolbar"
+import TimeslotCards from "./timeslotCards"
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todaysDate = new Date().toDateString()
@@ -13,7 +14,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
         return null
     }
 
-    const {currentDate, setCurrentDate,  handleDeleteEntity, tasks, objectives, projects} = useContext(globalContext)
+    const {currentDate, setCurrentDate,  handleDeleteEntity, tasks, objectives, projects, userSettings} = useContext(globalContext)
     const [currentDay, setCurrentDay] = useState(null)
 
     useEffect(() => {setCurrentDay(daysOfWeek[new Date(currentDate).getDay()])}, [currentDate])
@@ -53,11 +54,10 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
                 <div className="homepage-header-row3">
                     <ToolBar/>
                 </div>
-
             </div>
 
             <div className="homepage-body"> 
-                <div className="timeslots"> </div>
+                <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
                 <ol id="task-list" className="task-list">
                     {homePageTasks.length==0? null:homePageTasks.map((task)=> 
                         <li align="left" key={task.id}>
