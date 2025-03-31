@@ -135,8 +135,8 @@ function TaskForm () {
                 <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
                 <div className="form-header-buttons">
                     <Dropdown buttonContent={`Status: ${currentTask.status}`} translate={"0% 34%"}>
-                        <div onClick={() => setCurrentTask({...currentTask, "status":"To Do"})}> To Do</div>
-                        <div onClick={() => setCurrentTask({...currentTask, "status":"In Progress"})}> In Progress</div>
+                        <div onClick={() => setCurrentTask({...currentTask, "status":"To-Do"})}> To-Do</div>
+                        <div onClick={() => setCurrentTask({...currentTask, "status":"In-Progress"})}> In-Progress</div>
                         <div onClick={() => setCurrentTask({...currentTask, "status":"Paused"})}> Paused</div>
                         <div onClick={() => setCurrentTask({...currentTask, "status":"Completed"})}> Completed</div>
                     </Dropdown>

@@ -90,7 +90,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
         print("         Test request to create an objective (filled in all fields) succeeds")
         data = {"title":"Test User Project", "description":"test description", 
                 "duration":10, "scheduledStart":now_str, "scheduledFinish":now_str, 
-                "status":"To Do", "tag":"test", "projectId":1}
+                "status":"To-Do", "tag":"test", "projectId":1}
         
         response = self.client.post(f"/create-objective", json=data)
         self.assertEqual(response.status_code, 201)
@@ -197,7 +197,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
         user_objective: Dict = filter_list_of_dicts(objectives, "title", "User Objective for updating")
         data = {"title":"Test User Project", "description":"test description", 
                 "duration":10, "scheduledStart":now_str, "scheduledFinish":now_str, 
-                "status":"To Do", "tag":"test"}
+                "status":"To-Do", "tag":"test"}
         response: TestResponse = self.client.patch(f"/update-objective/{user_objective["id"]}", json=data)
         self.assertEqual(response.json["message"], "Success: Objective has been updated.")
         response_read_projects: TestResponse = self.client.get("/read-objectives")

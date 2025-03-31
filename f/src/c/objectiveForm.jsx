@@ -100,8 +100,8 @@ function ObjectiveForm () {
                 <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
                 <div className="form-header-buttons">
                 <Dropdown buttonContent={`Status: ${currentObjective.status}`} translate={"0% 34%"}>
-                    <div onClick={() => setCurrentObjective({...currentObjective, "status":"To Do"})}> To Do</div>
-                    <div onClick={() => setCurrentObjective({...currentObjective, "status":"In Progress"})}> In Progress</div>
+                    <div onClick={() => setCurrentObjective({...currentObjective, "status":"To-Do"})}> To-Do</div>
+                    <div onClick={() => setCurrentObjective({...currentObjective, "status":"In-Progress"})}> In-Progress</div>
                     <div onClick={() => setCurrentObjective({...currentObjective, "status":"Paused"})}> Paused</div>
                     <div onClick={() => setCurrentObjective({...currentObjective, "status":"Completed"})}> Completed</div>
                 </Dropdown>

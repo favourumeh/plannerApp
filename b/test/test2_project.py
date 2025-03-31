@@ -53,7 +53,7 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.standard_login_and_auth_test(httpmethod="post", endpoint="/create-project", json_data={"description":"blah"} , username=username, pwd=pwd)
 
         print("         Test creating a project after login is successfull")
-        data = {"title":"Test User Project", "description":"test description", "status":"To Do", "tag":"test", "deadline":now_str}
+        data = {"title":"Test User Project", "description":"test description", "status":"To-Do", "tag":"test", "deadline":now_str}
         response = self.client.post("/create-project", json=data)
         response_get_project = self.client.get("/read-projects")
         user_project = list(filter(lambda project: project["type"]=="user project", response_get_project.json["projects"]))[0]
@@ -63,12 +63,12 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertDictEqual(data, filtered_project)
 
         print("         Test creating a project with no description fails")
-        data = {"title":"Test User Project", "status":"To Do", "tag":"test"}
+        data = {"title":"Test User Project", "status":"To-Do", "tag":"test"}
         response = self.client.post("/create-project", json=data)
         self.assertEqual(response.json["message"], "Failure: Project is missing a description. Please add one.")
         
         print(f"         Test making a request with title is > {project_title_limit} chars fails")
-        data = {"title":"1"*(project_title_limit+1), "description":"blah", "status":"To Do", "tag":"test"}
+        data = {"title":"1"*(project_title_limit+1), "description":"blah", "status":"To-Do", "tag":"test"}
         response = self.client.post("/create-project", json=data)
         self.assertEqual(response.json["message"], f"Failure: The title has over {project_title_limit} chars")
 
@@ -102,7 +102,7 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.client.post("/create-project", json=data)
         response_read_projects = self.client.get("/read-projects")
         user_project_id: int = list(filter(lambda project: project["type"]=="user project", response_read_projects.json["projects"]))[0]["id"]
-        data = {"title":"Test User Project", "description":"test description", "status":"In Progress", "tag":"test", "deadline":now_str}
+        data = {"title":"Test User Project", "description":"test description", "status":"In-Progress", "tag":"test", "deadline":now_str}
         response = self.client.patch(f"/update-project/{user_project_id}", json=data)
         self.assertEqual(response.json["message"], "Success: Project has been updated.")
         response_read_projects = self.client.get("/read-projects")

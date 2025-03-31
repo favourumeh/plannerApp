@@ -25,7 +25,7 @@ def create_objective() -> Tuple[Response, int]:
     resp_dict = {"message":""}
     content: dict = request.json
     objective_number: int = content.get("objectiveNumber", None)
-    status: str = content.get("status", "To Do")
+    status: str = content.get("status", "To-Do")
     title: str = content.get("title", None)
     description: str = content.get("description", None)
     duration: int = content.get("duration", None) # hours

@@ -26,7 +26,7 @@ def create_task() -> Tuple[Response, int]:
     user_id = session["userId"]
     content = request.json
     task_number = content.get("taskNumber", None)
-    status = content.get("status", "To do")
+    status = content.get("status", "To-Do")
     description = content.get("description", None)
     duration = content.get("duration", None)
     priority_score = content.get("priorityScore", 1)

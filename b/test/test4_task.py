@@ -146,7 +146,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         print("         Test requesting to update a task after login succeeds")
         create_task_input = {"description":"created user1 task", "duration":20, "priorityScore":2,
-                             "scheduledStart":now_str, "scheduledFinish":now_str, "status":"To Do",
+                             "scheduledStart":now_str, "scheduledFinish":now_str, "status":"To-Do",
                              "previousTaskId":2, "nextTaskId":4, "isRecurring":True, "dependencies":"1,2",
                              "tag":"test", "objectiveId":user1_objective_id}
         response = self.client.post(f"/create-task", json=create_task_input) 
@@ -275,7 +275,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         print("         Test requesting to update a task after login succeeds")
         task_update_input = {"description":"updated user2 task", "duration":20, "priorityScore":2,
-                             "scheduledStart":now_str, "scheduledFinish":now_str, "status":"In Progress",
+                             "scheduledStart":now_str, "scheduledFinish":now_str, "status":"In-Progress",
                              "previousTaskId":2, "nextTaskId":4, "isRecurring":True, "dependencies":"1;2", 
                              "tag":"test","objectiveId":user2_objective_id}
         response = self.client.patch(f"/update-task/{user2_task_id}", json=task_update_input) 

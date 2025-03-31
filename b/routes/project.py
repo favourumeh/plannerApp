@@ -28,7 +28,7 @@ def create_project() -> Tuple[Response, int]:
     resp_dict = {"message":""}
     content: dict = request.json
     project_number: int = content.get("projectNumber", None)
-    status: str = content.get("status", "To Do")
+    status: str = content.get("status", "To-Do")
     title: str = content.get("title", "Unnamed Project")
     description: str = content.get("description", None)
     deadline: datetime = content.get("deadline", None)
