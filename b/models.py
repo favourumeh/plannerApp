@@ -51,7 +51,7 @@ class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_number = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(20), default="user project") # 2 types: "default project" and "user project" 
-    status = db.Column(db.Boolean, default="To Do") # 3 types = To Do, In Progress and Completed
+    status = db.Column(db.String(50), default="To Do") # 3 types = To Do, In Progress and Completed
     title = db.Column(db.String(80), default="Unnamed Project")
     description = db.Column(db.Text, nullable=False)
     deadline = db.Column(db.DateTime(timezone=True))
@@ -82,7 +82,7 @@ class Objective(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     objective_number = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(40), default="project objective") # 4 types: "free objective" and "project objective", default project objective and "default user project objective"
-    status = db.Column(db.Boolean, default="To Do") # 3 types = To Do, In Progress and Completed
+    status = db.Column(db.String(50), default="To Do") # 3 types = To Do, In Progress and Completed
     title = db.Column(db.String(80), default=f"Project {id}")
     description = db.Column(db.Text)
     duration = db.Column(db.Integer)  #hours
@@ -119,7 +119,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_number = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(12), default="project task") # 2 types: "free task" and "project task"
-    status = db.Column(db.String(50), default="To Do") #4 status: To Do, In Progress, Paused and Completed
+    status = db.Column(db.String(50), default="To Do") #4 tpoes: To Do, In Progress, Paused and Completed
     description = db.Column(db.String(100))
     duration = db.Column(db.Integer, nullable=False) # minutes
     priority_score = db.Column(db.Integer, default=1)
