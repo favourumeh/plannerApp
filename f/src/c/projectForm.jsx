@@ -4,7 +4,7 @@ import globalContext from "../context"
 import Dropdown from "./Dropdown"
 function ProjectForm () {
 
-    const {form, currentProject, setCurrentProject, handleEntityFormSubmit} = useContext(globalContext)
+    const {form, currentProject, setCurrentProject, handleEntitySubmit} = useContext(globalContext)
 
     if (!["create-project", "edit-project"].includes(form)) {
         return null
@@ -70,7 +70,7 @@ function ProjectForm () {
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 
-                            onClick={(e)=>handleEntityFormSubmit(e, form, currentProject)}
+                            onClick={(e)=>handleEntitySubmit(e, form, currentProject)}
                             disabled ={!currentProject.description? true:false}>
                             {form == "create-project"? "Create":"Update"}
                         </button>

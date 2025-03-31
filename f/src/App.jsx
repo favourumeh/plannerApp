@@ -163,7 +163,7 @@ function App() {
 
     }
 
-    const handleEntityFormSubmit = async(e, form, currentEntity) =>{
+    const handleEntitySubmit = async(e, form, currentEntity) =>{
         //Makes a (POST or PATCH) request to the backend to to create or update an entity
             //form: create-task, create-project, create-objective, update-task, update-project, update-objective
             //currentEntity: one of currentTask, currentProject or currentObjective
@@ -197,7 +197,7 @@ function App() {
                 handleNotification(resp_ref_json.message, "failure")
             } else {
                 console.log(resp_ref_json.message)
-                handleEntityFormSubmit(e)
+                handleEntitySubmit(e)
             }
         }
     }
@@ -222,7 +222,7 @@ function App() {
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
         handleDeleteEntity, 
-        form, setForm, handleEntityFormSubmit,
+        form, setForm, handleEntitySubmit,
         currentDate, setCurrentDate, 
         entityName, setEntityName, entity, setEntity,
         userSettings, setUserSettings
