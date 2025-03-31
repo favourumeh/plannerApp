@@ -1,10 +1,10 @@
 import "./dropdown.css"
 
-const Dropdown = ({buttonContent, children}) => {
+const Dropdown = ({buttonContent, translate, children}) => {
     return (
         <div className="dropdown">
             <button className="dropbtn">{buttonContent}</button>
-            <div className="dropbtn-content">
+            <div style={{"translate": translate}} className="dropbtn-content">
                 {children}
             </div>
         </div>

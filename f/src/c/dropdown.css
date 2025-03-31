@@ -5,7 +5,6 @@ div.dropdown{
     align-items: center;
     /* border: 1px solid; */
     position: relative;
-    width: 50px;
 }
 
 div.dropbtn-content{
@@ -16,7 +15,8 @@ div.dropbtn-content{
     /* border: 1px solid; */
     width: 140px;
     z-index: 1;
-    translate: 0% 52%;
+    /* translate: 0% 52%; */
+    color: white;
 }
 
 div.dropdown:hover .dropbtn-content {display: block;}
