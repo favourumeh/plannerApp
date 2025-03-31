@@ -11,7 +11,7 @@ function ObjectiveForm () {
         showObjectiveQueryResult, setShowObjectiveQueryResult,
         defaultProject, projects, handleEntitySubmit} = useContext(globalContext)
 
-    if (!["create-objective", "edit-objective"].includes(form)) {
+    if (!["create-objective", "update-objective"].includes(form)) {
         return null
     }
 
@@ -118,7 +118,7 @@ function ObjectiveForm () {
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 
-                            onClick={(e)=>handleEntitySubmit(e, form, currentObjective)} 
+                            onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentObjective)} 
                             disabled ={!taskProject.title || !currentObjective.description ? true:false}>
                             {form == "create-objective"? "Create":"Update"}
                         </button>

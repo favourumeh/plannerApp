@@ -6,7 +6,7 @@ function ProjectForm () {
 
     const {form, currentProject, setCurrentProject, handleEntitySubmit} = useContext(globalContext)
 
-    if (!["create-project", "edit-project"].includes(form)) {
+    if (!["create-project", "update-project"].includes(form)) {
         return null
     }
 
@@ -70,7 +70,7 @@ function ProjectForm () {
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 
-                            onClick={(e)=>handleEntitySubmit(e, form, currentProject)}
+                            onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentProject)}
                             disabled ={!currentProject.description? true:false}>
                             {form == "create-project"? "Create":"Update"}
                         </button>

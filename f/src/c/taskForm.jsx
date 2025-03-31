@@ -13,7 +13,7 @@ function TaskForm () {
         defaultProject, defaultProjectObjective,
         projects, objectives, handleEntitySubmit} = useContext(globalContext)
 
-    if (!["create-task", "edit-task"].includes(form)) {
+    if (!["create-task", "update-task"].includes(form)) {
         return null
     }
 
@@ -167,7 +167,7 @@ function TaskForm () {
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 
-                            onClick={(e)=>handleEntitySubmit(e, form, currentTask)}
+                            onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentTask)}
                             disabled ={!taskProject.title || !taskObjective || !currentTask.description || !(currentTask.duration >=  10) ? true:false}>
                             {form == "create-task"? "Create":"Update"}
                         </button>

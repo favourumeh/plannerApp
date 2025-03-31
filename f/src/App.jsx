@@ -163,13 +163,13 @@ function App() {
 
     }
 
-    const handleEntitySubmit = async(e, form, currentEntity) =>{
+    const handleEntitySubmit = async(e, action, entityName, currentEntity) =>{
         //Makes a (POST or PATCH) request to the backend to to create or update an entity
-            //form: create-task, create-project, create-objective, update-task, update-project, update-objective
+            //action: one of: create or edit
+            //enityName: one of project, objective ortask
             //currentEntity: one of currentTask, currentProject or currentObjective
         e.preventDefault()
-        const [action, entityName]  = form.split("-")
-        const url = `${backendBaseUrl}/${action=="create"? form: form.replace("edit", "update") +"/"+currentEntity.id}`
+        const url = `${backendBaseUrl}/${ action + "-" + entityName + (action == "create"? "": "/" + currentEntity.id) }`
         const options = {
             method:action=="create"? "POST":"PATCH",
             headers:{"Content-Type":"application/json"},
