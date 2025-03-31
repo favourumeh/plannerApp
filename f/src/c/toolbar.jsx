@@ -30,18 +30,18 @@ const Toolbar = () => {
 
     return (
         <div className="toolbar">
-            <Dropdown buttonContent={<i className="fa fa-plus" aria-hidden="true"></i>}>
+            <Dropdown buttonContent={<i className="fa fa-plus" aria-hidden="true"></i>} translate={"0% 52%"}>
                 <div onClick={() => handleCreateContent("task")}> Create Task</div>
                 <div onClick={() => handleCreateContent("objective")}> Create Objective</div>
                 <div onClick={() => handleCreateContent("project")}> Create Project</div>
             </Dropdown>
-            <Dropdown buttonContent={<i className="fa fa-eye" aria-hidden="true"></i>}>
+            <Dropdown buttonContent={<i className="fa fa-eye" aria-hidden="true"></i>} translate={"0% 52%"}>
                 {sitePage=="view-projects"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>:<div onClick={onClickViewProjects}> view projects </div>}
                 {sitePage=="view-objectives"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>:<div onClick={onClickViewObjectives}> view objectives </div>}
                 {sitePage=="view-tasks"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>: <div onClick={onClickViewTasks}> view tasks </div>}
             </Dropdown>
             <button type="button" className="refresh-btn" onClick={() => handleRefresh(false)} > <i className="fa fa-refresh" aria-hidden="true"></i> </button>
-            <Dropdown buttonContent={<i className="fa fa-filter" aria-hidden="true"></i>}>
+            <Dropdown buttonContent={<i className="fa fa-filter" aria-hidden="true"></i>} translate={"0% 52%"}>
                 <div> by project </div>
                 <div> by objective</div>
                 <div> by task </div>
