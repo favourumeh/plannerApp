@@ -15,7 +15,7 @@ function TaskCard ({task, handleDeleteEntity}) {
 
     const handleEditTask = (e) => {
         e.stopPropagation()
-        setForm("edit-task")
+        setForm("update-task")
         setCurrentTask(task)
         setIsModalOpen(true)
     }

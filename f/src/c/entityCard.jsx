@@ -37,7 +37,7 @@ function EntityCard ({entity, entityName}) {
 
     const handleEditEntity = (e) => {
         e.stopPropagation()
-        setForm(`edit-${entityName}`)
+        setForm(`update-${entityName}`)
         entityName==="task"? setCurrentTask(entity): entityName==="objective"? setCurrentObjective(entity): setCurrentProject(entity)
         setIsModalOpen(true)
     }
