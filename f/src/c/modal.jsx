@@ -11,9 +11,9 @@ function Modal ({children}) {
     const handleModalClose = () => {
         setIsModalOpen(false)
         setForm("")
-        setCurrentTask({isCompleted:false, isRecurring:false, priorityScore:1, projectTitle:"", objectiveTitle:""})
-        setCurrentProject({})
-        setCurrentObjective({})
+        setCurrentTask({status:"To Do", isRecurring:false, priorityScore:1, projectTitle:"", objectiveTitle:""})
+        setCurrentProject({status:"To Do"})
+        setCurrentObjective({status:"To Do"})
         setShowProjectQueryResult(false)
         setShowObjectiveQueryResult(false)
     }
