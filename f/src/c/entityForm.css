@@ -24,7 +24,13 @@ div.form-title {
     font-weight: bold;
 }
 
+div.form-header-buttons {
+    display: flex;
+    justify-content: flex-start;
+}
+
 div.form-header-buttons button{
+
     background: white;
     border: 1px solid black;
     color: black;

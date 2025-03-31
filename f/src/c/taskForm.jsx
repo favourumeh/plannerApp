@@ -3,6 +3,7 @@ import { backendBaseUrl} from "../project_config"
 import {useState, useContext, useEffect, useRef} from "react"
 import globalContext from "../context"
 import SearchResult from "./searchResult"
+import Dropdown from "./Dropdown"
 
 function TaskForm () {
     const {
@@ -75,8 +76,7 @@ function TaskForm () {
         setShowObjectiveQueryResult(false)
     }
 
-    const formatDateTime = (dateField) => {
-        // Formats datetime string: Thu, 27 Mar 2025 09:09:00 GMT ==> 2025-03-27T09:00 
+    const formatDateTime = (dateField) => {// Formats datetime string: Thu, 27 Mar 2025 09:09:00 GMT ==> 2025-03-27T09:00 
         if (!currentTask[dateField]) {
             return
         }
@@ -85,7 +85,7 @@ function TaskForm () {
     }
 
     useEffect(() => {
-        ["scheduledStart", "scheduledFinish"].forEach(field => formatDateTime(field)) //#2
+        ["scheduledStart", "scheduledFinish", "start", "finish"].forEach(field => formatDateTime(field)) //#2
       }, []);
 
     const formField = (params) => {
@@ -134,13 +134,18 @@ function TaskForm () {
             <div className="form-header-overlay">
                 <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
                 <div className="form-header-buttons">
-                    <button 
-                        style={{"color":currentTask.isCompleted?"rgb(0, 128, 0)":"rgb(255, 0, 0)"}} 
-                        onClick={() => setCurrentTask({...currentTask, isCompleted:!currentTask.isCompleted})}>Completed?</button>
+                    <Dropdown buttonContent={`Status: ${currentTask.status}`} translate={"0% 34%"}>
+                        <div onClick={() => setCurrentTask({...currentTask, "status":"To Do"})}> To Do</div>
+                        <div onClick={() => setCurrentTask({...currentTask, "status":"In Progress"})}> In Progress</div>
+                        <div onClick={() => setCurrentTask({...currentTask, "status":"Paused"})}> Paused</div>
+                        <div onClick={() => setCurrentTask({...currentTask, "status":"Completed"})}> Completed</div>
+                    </Dropdown>
                     <button
                         style={{"color":currentTask.isRecurring?"rgb(0, 128, 0)":"rgb(255, 0, 0)"}} 
-                        onClick={() => setCurrentTask({...currentTask, isRecurring:!currentTask.isRecurring})}
-                    >Recurring?</button>
+                        onClick={() => setCurrentTask({...currentTask, isRecurring:!currentTask.isRecurring})}>
+                        Recurring?
+                    </button>
+
                 </div>
             </div>
 
@@ -151,13 +156,14 @@ function TaskForm () {
                     {formField({labelName:"Description", inputName:"description", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
                     {formField({labelName:"Duration", inputName:"duration", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
                     {formField({labelName:"Priority", inputName:"priorityScore", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-                    {formField({labelName:"Start", inputName:"scheduledStart", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-                    {formField({labelName:"Finish", inputName:"scheduledFinish", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
+                    {formField({labelName:"Start", inputName:"start", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
+                    {formField({labelName:"Finish", inputName:"finish", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
+                    {formField({labelName:"Scheduled Start", inputName:"scheduledStart", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
+                    {formField({labelName:"Scheduled Finish", inputName:"scheduledFinish", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Previous Task", inputName:"previousTaskNumber", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Next Task", inputName:"nextTaskNumber", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Dependencies", inputName:"dependencies", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Tag", inputName:"tag", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 

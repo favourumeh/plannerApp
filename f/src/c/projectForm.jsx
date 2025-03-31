@@ -1,7 +1,7 @@
 import "./entityForm.css"
 import {useContext} from "react"
 import globalContext from "../context"
-
+import Dropdown from "./Dropdown"
 function ProjectForm () {
 
     const {form,currentProject, setCurrentProject, handleEntityFormSubmit} = useContext(globalContext)
@@ -39,9 +39,12 @@ function ProjectForm () {
             <div className="form-header-overlay">
                 <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
                 <div className="form-header-buttons">
-                    <button 
-                        style={{"color":currentProject.isCompleted?"rgb(0, 128, 0)":"rgb(255, 0, 0)"}} 
-                        onClick={() => setCurrentProject({...currentProject, isCompleted:!currentProject.isCompleted})}>Completed?</button>
+                    <Dropdown buttonContent={`Status: ${currentProject.status}`} translate={"0% 34%"}>
+                        <div onClick={() => setCurrentProject({...currentProject, "status":"To Do"})}> To Do</div>
+                        <div onClick={() => setCurrentProject({...currentProject, "status":"In Progress"})}> In Progress</div>
+                        <div onClick={() => setCurrentProject({...currentProject, "status":"Paused"})}> Paused</div>
+                        <div onClick={() => setCurrentProject({...currentProject, "status":"Completed"})}> Completed</div>
+                    </Dropdown>
                 </div>
             </div>
 

@@ -2,6 +2,7 @@ import "./entityForm.css"
 import {useState, useContext, useEffect, useRef} from "react"
 import globalContext from "../context"
 import SearchResult from "./searchResult"
+import Dropdown from "./Dropdown"
 
 function ObjectiveForm () {
     const {
@@ -98,10 +99,12 @@ function ObjectiveForm () {
             <div className="form-header-overlay">
                 <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
                 <div className="form-header-buttons">
-                    <button 
-                        style={{"color":currentObjective.isCompleted?"rgb(0, 128, 0)":"rgb(255, 0, 0)"}} 
-                        onClick={() => setCurrentObjective({...currentObjective, isCompleted:!currentObjective.isCompleted})}>Completed?
-                    </button>
+                <Dropdown buttonContent={`Status: ${currentObjective.status}`} translate={"0% 34%"}>
+                    <div onClick={() => setCurrentObjective({...currentObjective, "status":"To Do"})}> To Do</div>
+                    <div onClick={() => setCurrentObjective({...currentObjective, "status":"In Progress"})}> In Progress</div>
+                    <div onClick={() => setCurrentObjective({...currentObjective, "status":"Paused"})}> Paused</div>
+                    <div onClick={() => setCurrentObjective({...currentObjective, "status":"Completed"})}> Completed</div>
+                </Dropdown>
                 </div>
             </div>
 
