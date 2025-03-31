@@ -13,6 +13,7 @@ import TaskForm from "./c/taskForm.jsx"
 import ProjectForm from "./c/projectForm.jsx"
 import EntityPage from './c/entityPage.jsx'
 import ObjectiveForm from './c/objectiveForm.jsx'
+import Kanban from './c/kanban.jsx'
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -241,6 +242,7 @@ function App() {
             </Modal>
             <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage} homePageTasks={homePageTasks} setHomePageTasks={setHomePageTasks}/>
             <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
+            <Kanban sitePage={sitePage}/>
         </globalContext.Provider>
         </>
     )
