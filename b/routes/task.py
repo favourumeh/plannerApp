@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
 from models import User, Project, Objective, Task
-from plannerPackage import login_required, token_required, generate_all_user_content, generate_user_content, generate_entity_number
+from plannerPackage import login_required, token_required, generate_all_user_content, generate_user_content, generate_entity_number, convert_date_str_to_datetime 
 from config import db, app, serializer
 from typing import Tuple, List
 from datetime import datetime, timezone, timedelta
@@ -26,30 +26,33 @@ def create_task() -> Tuple[Response, int]:
     user_id = session["userId"]
     content = request.json
     task_number = content.get("taskNumber", None)
+    status = content.get("status", "To do")
     description = content.get("description", None)
     duration = content.get("duration", None)
     priority_score = content.get("priorityScore", 1)
     scheduled_start = content.get("scheduledStart", None)
     scheduled_finish = content.get("scheduledFinish", None)
-    is_completed = content.get("isCompleted", False)
+    start = content.get("start", None)
+    finish = content.get("finish", None)
     previous_task_id = content.get("previousTaskId", None)
     next_task_id = content.get("nextTaskId", None)
     is_recurring = content.get("isRecurring", False)
     dependencies = content.get("dependencies", None)
     last_updated = datetime.now(tz=timezone.utc)
+    was_paused = content.get("wasPaused", False)
     tag = content.get("tag", None)
     objective_id = content.get("objectiveId", None)
-    
+
     if not objective_id:
         resp_dict["message"] = "Failure: Objective ID missing. The Task is not assigned any project."
         return jsonify(resp_dict), 400
 
     objective = Objective.query.filter_by(id=objective_id).first()
-    
+
     if not objective:
         resp_dict["message"] = "Failure: The Objective ID provided does not exist."
         return jsonify(resp_dict), 404
-    
+
     project = Project.query.filter_by(id=objective.project_id, user_id=user_id).first()
     
     if not project:
@@ -68,20 +71,22 @@ def create_task() -> Tuple[Response, int]:
         resp_dict["message"] = "Failure: Task is missing a duration (mins)."
         return jsonify(resp_dict), 400
 
-    if isinstance(scheduled_start, str):
-        scheduled_start = datetime.strptime(scheduled_start, '%Y-%m-%dT%H:%M')
+    scheduled_start = convert_date_str_to_datetime(scheduled_start, '%Y-%m-%dT%H:%M')
+    scheduled_finish = convert_date_str_to_datetime(scheduled_finish, '%Y-%m-%dT%H:%M')
+    start = convert_date_str_to_datetime(start, '%Y-%m-%dT%H:%M')
+    finish = convert_date_str_to_datetime(finish, '%Y-%m-%dT%H:%M')
 
-    if isinstance(scheduled_finish, str):
-        scheduled_finish = datetime.strptime(scheduled_finish, '%Y-%m-%dT%H:%M')  
-        
-    task_number = generate_entity_number(entity_number=task_number, parent_entity_id=objective_id, parent_entity_name="objective", entity_name="task", entity=Task)
+    if not was_paused:
+        task_number = generate_entity_number(entity_number=task_number, parent_entity_id=objective_id, parent_entity_name="objective", entity_name="task", entity=Task)
+    else:
+        task_number = content.get("taskNumber")
 
     try:
-        task = Task(task_number=task_number, description=description, 
+        task = Task(task_number=task_number, status=status, description=description, 
                     duration=duration, priority_score=priority_score, 
-                    scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, is_completed=is_completed, 
+                    scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, start=start, finish=finish,
                     previous_task_id=previous_task_id, next_task_id=next_task_id, is_recurring=is_recurring, 
-                    dependencies=dependencies, last_updated=last_updated, tag=tag, objective_id=objective_id)
+                    dependencies=dependencies, last_updated=last_updated, was_paused=was_paused, tag=tag, objective_id=objective_id)
         db.session.add(task)
         db.session.commit()
         resp_dict["message"] = "Success: Added Task to db!"
@@ -148,17 +153,20 @@ def update_task(task_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 403
 
     content = request.json
+    task.status = content.get("status", task.status)
     task.description = content.get("description", task.description)
     task.duration = content.get("duration", task.duration)
     task.priority_score = content.get("priorityScore", task.priority_score)
+    task.start = content.get("start", task.start)
+    task.finish = content.get("finish", task.finish)
     task.scheduled_start = content.get("scheduledStart", task.scheduled_start)
     task.scheduled_finish = content.get("scheduledFinish", task.scheduled_finish)
-    task.is_completed = content.get("isCompleted", task.is_completed)
     task.previous_task_id = content.get("previousTaskId", task.previous_task_id)
     task.next_task_id = content.get("nextTaskId", task.next_task_id)
     task.is_recurring = content.get("isRecurring", task.is_recurring)
     task.dependencies = content.get("dependencies", task.dependencies)
     task.last_updated = datetime.now(tz=timezone.utc)
+    task.was_paused = content.get("wasPaused", task.was_paused)
     task.tag = content.get("tag", task.tag)
     task.objective_id = content.get("objectiveId", task.objective_id)
 
@@ -166,12 +174,11 @@ def update_task(task_id: int) -> Tuple[Response, int]:
         resp_dict["message"] = f"Failure: The task description is over the {task_description_limit} char limit."
         return jsonify(resp_dict), 400
 
-    if isinstance(task.scheduled_start, str):
-        task.scheduled_start = datetime.strptime(task.scheduled_start, '%Y-%m-%dT%H:%M')
-
-    if isinstance(task.scheduled_finish, str):
-        task.scheduled_finish = datetime.strptime(task.scheduled_finish, '%Y-%m-%dT%H:%M')
-
+    task.scheduled_start = convert_date_str_to_datetime(task.scheduled_start, '%Y-%m-%dT%H:%M')
+    task.scheduled_finish = convert_date_str_to_datetime(task.scheduled_finish, '%Y-%m-%dT%H:%M')
+    task.start = convert_date_str_to_datetime(task.start, '%Y-%m-%dT%H:%M')
+    task.finish = convert_date_str_to_datetime(task.finish, '%Y-%m-%dT%H:%M')
+    
     try:
         db.session.commit()
         resp_dict["message"] = "Success: Task has been updated!"

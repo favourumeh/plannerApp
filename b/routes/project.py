@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
 from models import Project, Objective, Task
-from plannerPackage import login_required, token_required, generate_entity_number, generate_all_project_content
+from plannerPackage import login_required, token_required, generate_entity_number, generate_all_project_content, convert_date_str_to_datetime
 from config import db, app, serializer
 from typing import Tuple, List
 from datetime import datetime, timezone
@@ -28,9 +28,9 @@ def create_project() -> Tuple[Response, int]:
     resp_dict = {"message":""}
     content: dict = request.json
     project_number: int = content.get("projectNumber", None)
+    status: str = content.get("status", "To Do")
     title: str = content.get("title", "Unnamed Project")
     description: str = content.get("description", None)
-    is_completed: bool = content.get("isCompleted", False)
     deadline: datetime = content.get("deadline", None)
     last_updated: datetime = datetime.now(tz=timezone.utc) #keep: used to get the project id
     tag: str = content.get("tag", None)
@@ -44,13 +44,11 @@ def create_project() -> Tuple[Response, int]:
         resp_dict["message"] = f"Failure: The title has over {project_title_limit} chars"
         return jsonify(resp_dict), 400
 
-    if isinstance(deadline, str): #if string then value is from request otherwise its from db
-        deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M') #converts str date (format e.g., 2024-11-26T09:18:14.687Z) to dt
-
+    deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%dT%H:%M')
     project_number = generate_entity_number(entity_number=project_number, parent_entity_id=user_id, parent_entity_name="user", entity_name="project", entity=Project)
 
     try:
-        project = Project(project_number=project_number, title=title, description=description, is_completed=is_completed, deadline=deadline, last_updated=last_updated, tag=tag, user_id=user_id)
+        project = Project(project_number=project_number, status=status, title=title, description=description, deadline=deadline, last_updated=last_updated, tag=tag, user_id=user_id)
         db.session.add(project)
         project_id = Project.query.filter_by(title=title, description=description, last_updated=last_updated, user_id=user_id).first().id
         objective_desc = "Stores all project tasks that do not belong to an objective"
@@ -97,7 +95,7 @@ def update_project(project_id: int) -> Tuple[Response, int]:
     
     project.title = content.get("title", project.title)
     project.description = content.get("description", project.description)
-    project.is_completed = content.get("isCompleted", project.is_completed)
+    project.status = content.get("status", project.status)
     deadline = content.get("deadline", project.deadline)
     project.last_updated = datetime.now(tz=timezone.utc)
     project.tag = content.get("tag", project.tag)
@@ -105,10 +103,9 @@ def update_project(project_id: int) -> Tuple[Response, int]:
     if len(project.title) > project_title_limit:
         resp_dict["message"] = f"Failure: The title has over {project_title_limit} chars"
         return jsonify(resp_dict), 400
+
+    project.deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%dT%H:%M')
     
-    if isinstance(deadline, str):
-        project.deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M')
-        
     if project.type in ["default project"]:
         resp_dict["message"] = "Failure: User is attempting to update a default project which is not allowed."
         return jsonify(resp_dict),  403
