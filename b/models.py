@@ -47,13 +47,13 @@ class Refresh_Token(db.Model):
                "userId": cls.user_id}
                 
 class Project(db.Model):
-    """Defines the properties of the 'Project' entity: id, type, title, description, is_completed, deadline, tag, user_id"""
+    """Defines the properties of the 'Project' entity: id, type, status, title, description, deadline, tag, user_id"""
     id = db.Column(db.Integer, primary_key=True)
     project_number = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(20), default="user project") # 2 types: "default project" and "user project" 
+    status = db.Column(db.Boolean, default="To Do") # 3 types = To Do, In Progress and Completed
     title = db.Column(db.String(80), default="Unnamed Project")
     description = db.Column(db.Text, nullable=False)
-    is_completed = db.Column(db.Boolean, default=False)
     deadline = db.Column(db.DateTime(timezone=True))
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
     last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
@@ -68,9 +68,9 @@ class Project(db.Model):
         return {"id": cls.id,
                 "projectNumber": cls.project_number,
                 "type": cls.type,
+                "status": cls.status, 
                 "title": cls.title,
                 "description": cls.description,
-                "isCompleted": cls.is_completed,
                 "deadline": cls.deadline,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
@@ -78,16 +78,16 @@ class Project(db.Model):
                 "userId": cls.user_id}
 
 class Objective(db.Model):
-    """Defines the properties of the 'Objective' entity: id, objective_number, type, title, description, duration, scheduled_start/finish, is_completed, tag, project_id"""
+    """Defines the properties of the 'Objective' entity: id, objective_number, type, status, title, description, duration, scheduled_start/finish, tag, project_id"""
     id = db.Column(db.Integer, primary_key=True)
     objective_number = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(40), default="project objective") # 4 types: "free objective" and "project objective", default project objective and "default user project objective"
+    status = db.Column(db.Boolean, default="To Do") # 3 types = To Do, In Progress and Completed
     title = db.Column(db.String(80), default=f"Project {id}")
     description = db.Column(db.Text)
     duration = db.Column(db.Integer)  #hours
     scheduled_start = db.Column(db.DateTime(timezone=True))
     scheduled_finish = db.Column(db.DateTime(timezone=True))
-    is_completed = db.Column(db.Boolean, default=False)
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
     last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
     tag = db.Column(db.String(40))
@@ -101,12 +101,12 @@ class Objective(db.Model):
         return {"id": cls.id,
                 "objectiveNumber": cls.objective_number,
                 "type": cls.type,
+                "status": cls.status, 
                 "title": cls.title,
                 "description": cls.description,
                 "duration": cls.duration,
                 "scheduledStart": cls.scheduled_start,
                 "scheduledFinish": cls.scheduled_finish,
-                "isCompleted": cls.is_completed,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
                 "tag": cls.tag,
@@ -114,7 +114,7 @@ class Objective(db.Model):
 
 
 class Task(db.Model):
-    """Defines the properties of the 'Task' entity: id, task_number, type, status, description, duration, priorityScore, scheduled_start/finish, start/finish is_completed, 
+    """Defines the properties of the 'Task' entity: id, task_number, type, status, description, duration, priorityScore, scheduled_start/finish, start/finish, 
     previous/next_task_id, is_recurring, is_cancelled, dependencies, was_paused, tag, objective_id"""
     id = db.Column(db.Integer, primary_key=True)
     task_number = db.Column(db.Integer, nullable=False)
@@ -127,7 +127,6 @@ class Task(db.Model):
     scheduled_finish = db.Column(db.DateTime(timezone=True))
     start = db.Column(db.DateTime(timezone=True))
     finish = db.Column(db.DateTime(timezone=True))
-    is_completed = db.Column(db.Boolean, default=False)
     previous_task_id = db.Column(db.Integer)
     next_task_id = db.Column(db.Integer)
     is_recurring = db.Column(db.Boolean, default=False)
@@ -154,7 +153,6 @@ class Task(db.Model):
                 "scheduledFinish": cls.scheduled_finish,
                 "start": cls.start,
                 "finish": cls.finish,
-                "isCompleted": cls.is_completed,
                 "previousTaskId":cls.previous_task_id,
                 "nextTaskId":cls.next_task_id,
                 "isRecurring":cls.is_recurring,
