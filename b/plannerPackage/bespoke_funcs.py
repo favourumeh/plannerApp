@@ -4,6 +4,7 @@ from models import User, Refresh_Token, Project, Objective, Task
 import json
 from itsdangerous import URLSafeTimedSerializer
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
@@ -132,3 +133,10 @@ def generate_user_content(user_id:int, content:str)-> List[Refresh_Token] | List
         return tasks
     else:
         raise Exception("Content specified is not one of: 'refresh tokens', 'projects', 'objectives' or 'tasks' ")
+
+
+def convert_date_str_to_datetime(date:str|datetime|None, format:str) -> datetime|None:
+    if isinstance(date, str):
+        return datetime.strptime(date, format)
+    else:
+        return date
