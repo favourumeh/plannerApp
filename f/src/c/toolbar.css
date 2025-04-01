@@ -14,3 +14,12 @@ div.toolbar:hover{
 div.toolbar button{
     background:none;
 }
+
+div.toolbar button:hover {
+    border-color: rgba(0, 0, 0, 0);
+}
+
+div.toolbar button:focus,
+button:focus-visible {
+  outline: none;
+}
