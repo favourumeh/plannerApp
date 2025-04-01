@@ -28,6 +28,12 @@ const Toolbar = () => {
         setEntity(tasks)
     }
 
+    const onClickViewKanban = () => {
+        setSitePage("view-kanban")
+        setEntityName("task")
+        setEntity(tasks)
+    }
+
     return (
         <div className="toolbar">
             <Dropdown buttonContent={<i className="fa fa-plus" aria-hidden="true"></i>} translate={"0% 52%"}>
@@ -35,10 +41,11 @@ const Toolbar = () => {
                 <div onClick={() => handleCreateContent("objective")}> Create Objective</div>
                 <div onClick={() => handleCreateContent("project")}> Create Project</div>
             </Dropdown>
-            <Dropdown buttonContent={<i className="fa fa-eye" aria-hidden="true"></i>} translate={"0% 52%"}>
+            <Dropdown buttonContent={<i className="fa fa-eye" aria-hidden="true"></i>} translate={"0% 42%"}>
                 {sitePage=="view-projects"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>:<div onClick={onClickViewProjects}> view projects </div>}
                 {sitePage=="view-objectives"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>:<div onClick={onClickViewObjectives}> view objectives </div>}
                 {sitePage=="view-tasks"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>: <div onClick={onClickViewTasks}> view tasks </div>}
+                {sitePage=="view-kanban"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>: <div onClick={onClickViewKanban}> view kanban </div>}
             </Dropdown>
             <button type="button" className="refresh-btn" onClick={() => handleRefresh(false)} > <i className="fa fa-refresh" aria-hidden="true"></i> </button>
             <Dropdown buttonContent={<i className="fa fa-filter" aria-hidden="true"></i>} translate={"0% 52%"}>
