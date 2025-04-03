@@ -1,0 +1,13 @@
+div.kanban-column {
+    width: 220px;
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid;
+    background-color: rgb(30, 23, 36);
+}
+
+div.kanban-item-overlay {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}

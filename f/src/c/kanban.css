@@ -1,0 +1,35 @@
+div.kanban-page-header-2 {
+    margin-top:5px;
+    margin-bottom: 5px;
+    background-color: rgba(48, 48, 100, 0.137);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+div.kanban-page-header-2:hover {
+    /* border: 1px solid; */
+    border-radius: 5px;
+    background-color: rgba(48, 48, 100, 0.137);
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+div.kanban-page-body {
+    /* border: 1px solid; */
+    display: flex;
+    justify-content: space-around;
+}
+
+div.kanban-page-header-2 button.dropbtn {
+    background: none;
+    font-weight: 600;
+    border: rgba(0,0,0,0);
+
+}
+
+div.kanban-page-header-2 button.dropbtn:hover {
+    border: rgba(0,0,0,0);
+    color: rgb(0, 230, 0);
+
+}
+
+
