@@ -20,7 +20,7 @@ function TaskCard ({task, handleDeleteEntity}) {
         setIsModalOpen(true)
     }
 
-    useEffect(()=>handleEntityNumbers, [])
+    useEffect(()=>handleEntityNumbers, [task])
     return (
         <div id={`row-id-${task.id}`} className="task-row">
             <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"></i>
