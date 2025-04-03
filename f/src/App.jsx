@@ -157,7 +157,7 @@ function App() {
                 handleNotification(resp_ref_json.message, "failure")
             } else {
                 console.log(resp_ref_json.message)
-                handleDeleteEntity(e, id)
+                handleDeleteEntity(e, entityName, id)
             }
         }
 
@@ -183,6 +183,7 @@ function App() {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "success")
             setIsModalOpen(false)
+            setForm("")
             handleRefresh()
         } else if (resp.status == 403) {
             console.log(resp_json.message)
@@ -197,7 +198,7 @@ function App() {
                 handleNotification(resp_ref_json.message, "failure")
             } else {
                 console.log(resp_ref_json.message)
-                handleEntitySubmit(e)
+                handleEntitySubmit(e, action, entityName, currentEntity)
             }
         }
     }
