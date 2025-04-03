@@ -6,7 +6,6 @@ import globalContext from "../context"
 
 export default function KanbanColumn ({columnId, columnTitle, entityArr, entityName}) {
     const [columnEntityArr, setColumnEntityArr] = useState([])
-    const {setForm, setIsModalOpen, setCurrentProject, setCurrentObjective, setCurrentTask} = useContext(globalContext)
 
     useEffect ( () => {
         setColumnEntityArr(entityArr.filter((entity) => entity.status==columnId))
