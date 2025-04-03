@@ -168,7 +168,7 @@ function App() {
             //action: one of: create or edit
             //enityName: one of project, objective ortask
             //currentEntity: one of currentTask, currentProject or currentObjective
-        e.preventDefault()
+        e? e.preventDefault(): undefined
         const url = `${backendBaseUrl}/${ action + "-" + entityName + (action == "create"? "": "/" + currentEntity.id) }`
         const options = {
             method:action=="create"? "POST":"PATCH",
