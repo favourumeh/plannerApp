@@ -17,7 +17,7 @@ export default function KanbanColumn ({columnId, columnTitle, entityArr, entityN
 
     return (
         <>
-            <div ref = {setNodeRef} id={columnId} className="kanban-column"> {columnTitle} 
+            <div ref = {setNodeRef} id={columnId} className="kanban-column"> {`${columnTitle} [${columnEntityArr.length}]`} 
                 {columnEntityArr.map( 
                     (columnEntity) => 
                         <div className="kanban-item-overlay">

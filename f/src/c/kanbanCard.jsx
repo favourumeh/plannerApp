@@ -19,14 +19,9 @@ export default function KanbanCard ({entity, entityName}) {
         } 
     }
 
-    useEffect(()=>{ //stops the project or objective numbers from being undefined 
-        if (["task", "objective"].includes(entityName)){
-            projectNumber? null:handleEntityNumbers()
-        }
-        if (entityName == "task") {
-            objectiveNumber? null:handleEntityNumbers()
-        }
-    }, [projectNumber, objectiveNumber])
+    useEffect(()=>{ 
+        handleEntityNumbers()
+    }, [entity])
 
     const generateEntityId = (entityName) => {
         switch (entityName) {
@@ -65,7 +60,7 @@ export default function KanbanCard ({entity, entityName}) {
         >
             <button onPointerDown={onClickEditBtn} > <i className="fa fa-pencil" aria-hidden="true"></i></button>
             <div className="kanban-card-content">
-                {generateEntityId(entityName)} {entity.description}
+                {generateEntityId(entityName)} {entityName == "task"? entity.description: entity.title}
             </div>
             <button onPointerDown ={onClickDeleteBtn}> &times;</button>
 
