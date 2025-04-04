@@ -11,7 +11,7 @@ const Kanban = ({sitePage}) => {
     if (sitePage!=="view-kanban") {
         return 
     }
-    const {setSitePage, tasks, objectives, projects, handleEntitySubmit, handleRefresh} = useContext(globalContext)
+    const {tasks, objectives, projects, handleEntitySubmit, handleRefresh} = useContext(globalContext)
     const [entityName, setEntityName] = useState("task")
     const [entityArr, setEntityArr] = useState([])
     const [updatedEntity, setUpdatedEntity] = useState([])

@@ -4,7 +4,7 @@ import "./kanbanCard.css"
 import { useState, useEffect, useContext } from "react"
 
 export default function KanbanCard ({entity, entityName}) {
-    const {tasks, objectives, projects, setCurrentTask, setCurrentObjective, setCurrentProject, setIsModalOpen, setForm, handleDeleteEntity} = useContext(globalContext)
+    const {objectives, projects, setCurrentTask, setCurrentObjective, setCurrentProject, setIsModalOpen, setForm, handleDeleteEntity} = useContext(globalContext)
     const [projectNumber, setProjectNumber] = useState()
     const [objectiveNumber, setObjectiveNumber] = useState()
 
