@@ -146,7 +146,7 @@ def update_task(task_id: int) -> Tuple[Response, int]:
         resp_dict["message"] = "Failure: The task referenced does not exist."
         return jsonify(resp_dict), 404  
 
-    objective = Objective.query.filter_by(id=task.objective_id).first() #task will definitely belong to an objective as is a condition creating a task
+    objective = Objective.query.filter_by(id=task.objective_id).first() 
     project = Project.query.filter_by(id=objective.project_id, user_id=user_id).first()
     if not project:
         resp_dict["message"] = "Failure: The task referenced does not belong to user."
@@ -168,17 +168,23 @@ def update_task(task_id: int) -> Tuple[Response, int]:
     task.last_updated = datetime.now(tz=timezone.utc)
     task.was_paused = content.get("wasPaused", task.was_paused)
     task.tag = content.get("tag", task.tag)
-    task.objective_id = content.get("objectiveId", task.objective_id)
-
-    if len(task.description) > int(task_description_limit):
-        resp_dict["message"] = f"Failure: The task description is over the {task_description_limit} char limit."
-        return jsonify(resp_dict), 400
+    objective_id = content.get("objectiveId", task.objective_id)
 
     task.scheduled_start = convert_date_str_to_datetime(task.scheduled_start, '%Y-%m-%dT%H:%M')
     task.scheduled_finish = convert_date_str_to_datetime(task.scheduled_finish, '%Y-%m-%dT%H:%M')
     task.start = convert_date_str_to_datetime(task.start, '%Y-%m-%dT%H:%M')
     task.finish = convert_date_str_to_datetime(task.finish, '%Y-%m-%dT%H:%M')
+
+    #Check if task being updated already exist in the objective
+    existing_task = Task.query.filter_by(id = task_id, objective_id=objective_id).first()
+    if not existing_task: # if no existing task is found in the objective, it means the task is being moved from another objective
+        task.task_number = generate_entity_number(entity_number=None, parent_entity_id=objective_id, parent_entity_name="objective", entity_name="task", entity=Task)
+        task.objective_id = objective_id 
     
+    if len(task.description) > int(task_description_limit):
+        resp_dict["message"] = f"Failure: The task description is over the {task_description_limit} char limit."
+        return jsonify(resp_dict), 400
+        
     try:
         db.session.commit()
         resp_dict["message"] = "Success: Task has been updated!"
