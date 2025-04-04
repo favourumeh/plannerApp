@@ -111,7 +111,6 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
         resp_dict["message"] = "Failure: The objective selected does not belong to the user."
         return jsonify(resp_dict)
 
-    objective.objective_number = content.get("objectiveNumber", objective.objective_number)
     objective.status = content.get("status", objective.status)
     objective.title = content.get("title", objective.title)
     objective.description = content.get("description", objective.description)
@@ -120,7 +119,7 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     objective.scheduled_finish = content.get("scheduledFinish", objective.scheduled_finish)
     objective.last_updated = datetime.now(tz=timezone.utc)
     objective.tag = content.get("tag", objective.tag)
-    objective.project_id = content.get("projectId", objective.project_id)
+    project_id = content.get("projectId", objective.project_id)
 
     if len(objective.title) > objective_title_limit:
         resp_dict["message"] = f"Failure: The title has over {objective_title_limit} chars"
@@ -129,6 +128,12 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     objective.scheduled_start = convert_date_str_to_datetime(objective.scheduled_start, '%Y-%m-%dT%H:%M')
     objective.scheduled_finish = convert_date_str_to_datetime(objective.scheduled_finish, '%Y-%m-%dT%H:%M')
 
+   #Check if objective being updated already exist in the objective
+    existing_objective = Objective.query.filter_by(id=objective_id, project_id=project_id).first()
+    if not existing_objective: # if no existing objective is found in the project, it means the objective is being moved from another project
+        objective.objective_number = generate_entity_number(entity_number=None, parent_entity_id=project_id, parent_entity_name="project", entity_name="objective", entity=Objective)
+        objective.project_id = project_id 
+        
     if objective.type in ["default user project objective", "default project objective"]:
         resp_dict["message"] = "Failure: User is attempting to update a default objective which is not allowed."
         return jsonify(resp_dict),  403
