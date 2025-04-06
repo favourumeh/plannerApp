@@ -5,6 +5,10 @@ import TaskCard from "./taskCard"
 import Header from "./header"
 import ToolBar from "./toolbar"
 import TimeslotCards from "./timeslotCards"
+import AddEntity from "./toolbarContent/addEntity"
+import FilterPage from "./toolbarContent/filterPage" 
+import ViewPage from "./toolbarContent/viewPage"
+import RefreshEntities from "./toolbarContent/refreshEntities"
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todaysDate = new Date().toDateString()
@@ -52,7 +56,12 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
                 </div>
 
                 <div className="homepage-header-row3">
-                    <ToolBar/>
+                    <ToolBar> 
+                        <AddEntity/>
+                        <ViewPage/>
+                        <RefreshEntities/>
+                        <FilterPage/>
+                    </ToolBar>
                 </div>
             </div>
 

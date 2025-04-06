@@ -6,6 +6,10 @@ import ToolBar from "./toolbar"
 import KanbanColumn from "./kanbanColumn"
 import {DndContext} from "@dnd-kit/core"
 import Dropdown from "./Dropdown"
+import AddEntity from "./toolbarContent/addEntity"
+import FilterPage from "./toolbarContent/filterPage" 
+import ViewPage from "./toolbarContent/viewPage"
+import RefreshEntities from "./toolbarContent/refreshEntities"
 
 const Kanban = ({sitePage}) => {
     if (sitePage!=="view-kanban") {
@@ -101,7 +105,12 @@ const Kanban = ({sitePage}) => {
                         <div onClick={() => setEntityName("task")}> Tasks </div>
                     </Dropdown>
                 </div>
-                <ToolBar/>
+                <ToolBar> 
+                    <AddEntity/>
+                    <ViewPage/>
+                    <RefreshEntities/>
+                    <FilterPage/>
+                </ToolBar>
             </div>
             <DndContext onDragEnd={handleDragEnd}>
                 <div className="kanban-page-body">

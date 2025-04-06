@@ -4,6 +4,10 @@ import globalContext from "../context"
 import Header from "./header"
 import EntityCard from "./EntityCard"
 import ToolBar from "./toolbar"
+import AddEntity from "./toolbarContent/addEntity"
+import FilterPage from "./toolbarContent/filterPage" 
+import ViewPage from "./toolbarContent/viewPage"
+import RefreshEntities from "./toolbarContent/refreshEntities"
 
 function EntityPage ({sitePage}) {
 
@@ -34,7 +38,12 @@ function EntityPage ({sitePage}) {
                 </div>
                 
                 <div className="entity-page-header-row3">
-                    <ToolBar />
+                    <ToolBar> 
+                        <AddEntity/>
+                        <ViewPage/>
+                        <RefreshEntities/>
+                        <FilterPage/>
+                    </ToolBar>
                 </div>
             </div>
 
