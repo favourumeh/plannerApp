@@ -73,8 +73,6 @@ const Kanban = ({sitePage}) => {
     }
 
     useEffect(() => {
-        console.log("updatedEntityIdAndStatus:", updatedEntityIdAndStatus)
-        console.log("entityArr:", entityArr)
         if (updatedEntityIdAndStatus.id) {
             let updatedEntity_ = entityArr.find((entity) => entity.id ===  updatedEntityIdAndStatus.id)
             console.log("updatedEntity_:", updatedEntity_)
