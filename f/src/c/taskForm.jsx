@@ -88,6 +88,28 @@ function TaskForm () {
         ["scheduledStart", "scheduledFinish", "start", "finish"].forEach(field => formatDateTime(field)) //#2
       }, []);
 
+    useEffect(() => {
+        if (currentTask["duration"] && currentTask["scheduledStart"]){
+            const duration = parseInt(currentTask["duration"])
+            let scheduledStart = new Date(currentTask["scheduledStart"])
+            const timezoneOffset = new Date().getTimezoneOffset() * 60000;
+            const scheduledFinish = new Date(scheduledStart.getTime() + duration * 60000 - timezoneOffset) 
+            setCurrentTask((prev) => ({...prev, "scheduledFinish":scheduledFinish.toISOString().replace(/:\d{2}\.\d{3}Z$/, '')}))
+        }
+    },[currentTask["duration"], currentTask["scheduledStart"]])
+
+    const roundToNearest10 = (num) => {
+        return Math.ceil(num/10 -0.49)*10
+    }
+
+    const handleScheduledStart = (e) => {
+        if (!e.target.value) {
+            return
+        }
+        let scheduledStart = new Date(e.target.value)
+        scheduledStart = new Date(scheduledStart.setMinutes(roundToNearest10(scheduledStart.getMinutes()))).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
+        setCurrentTask((prev) => ({...prev, "scheduledStart":scheduledStart}))
+    }
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
         const { labelName, inputName, inputType, currentTask, setCurrentTask, mandatoryField} = params
@@ -100,8 +122,9 @@ function TaskForm () {
                     className="form-input"
                     name = {inputName} // used in the request made to the server
                     value = {currentTask[inputName]}
-                    onChange = {e => setCurrentTask({...currentTask, [inputName]:e.target.value} )}
+                    onChange = {e => labelName!=="Scheduled Start"? setCurrentTask({...currentTask, [inputName]:e.target.value}): handleScheduledStart(e)}
                     min={labelName=="Duration"?"10":"1"}
+                    step={labelName==="Duration"?"10": undefined} 
                     autoComplete="off"/>
             </div>
         )
