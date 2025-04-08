@@ -107,7 +107,9 @@ function TaskForm () {
             return
         }
         let scheduledStart = new Date(e.target.value)
-        scheduledStart = new Date(scheduledStart.setMinutes(roundToNearest10(scheduledStart.getMinutes()))).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
+        scheduledStart = scheduledStart.setMinutes(roundToNearest10(scheduledStart.getMinutes()))
+        const timezoneOffset = new Date().getTimezoneOffset() * 60000;
+        scheduledStart = new Date(scheduledStart-timezoneOffset).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
         setCurrentTask((prev) => ({...prev, "scheduledStart":scheduledStart}))
     }
     const formField = (params) => {
