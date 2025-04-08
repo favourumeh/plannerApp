@@ -165,8 +165,8 @@ function App() {
 
     const handleEntitySubmit = async(e, action, entityName, currentEntity) =>{
         //Makes a (POST or PATCH) request to the backend to to create or update an entity
-            //action: one of: create or edit
-            //enityName: one of project, objective ortask
+            //action: one of: create or update
+            //enityName: one of project, objective or task
             //currentEntity: one of currentTask, currentProject or currentObjective
         e? e.preventDefault(): undefined
         const url = `${backendBaseUrl}/${ action + "-" + entityName + (action == "create"? "": "/" + currentEntity.id) }`
@@ -202,7 +202,19 @@ function App() {
             }
         }
     }
+
     
+    const formatDateFields = (entity) => {// Formats datetime string: Thu, 27 Mar 2025 09:09:00 GMT ==> 2025-03-27T09:00 
+        const dateFields = ["scheduledStart", "scheduledFinish", "start", "finish", "deadline"]
+        for (const dateField of dateFields) {
+            if (Object.keys(entity).includes(dateField) && !!entity[dateField]) {
+                const formatedDateTime = new Date(entity[dateField]).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
+                var entity = {...entity, [dateField]:formatedDateTime} //#1
+            }
+        }
+        return entity
+    } 
+
     // create global prop object
     const globalProps = {
         isModalOpen, setIsModalOpen,
@@ -226,7 +238,7 @@ function App() {
         form, setForm, handleEntitySubmit,
         currentDate, setCurrentDate, 
         entityName, setEntityName, entity, setEntity,
-        userSettings, setUserSettings
+        userSettings, setUserSettings, formatDateFields
     }
 
     return (
