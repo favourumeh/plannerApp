@@ -136,7 +136,9 @@ def generate_user_content(user_id:int, content:str)-> List[Refresh_Token] | List
 
 
 def convert_date_str_to_datetime(date:str|datetime|None, format:str) -> datetime|None:
-    if isinstance(date, str):
+    if date == "":
+        return None
+    if isinstance(date, str) :
         return datetime.strptime(date, format)
     else:
         return date
