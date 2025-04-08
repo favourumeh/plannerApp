@@ -70,7 +70,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
                 <ol id="task-list" className="task-list">
                     {homePageTasks?.map((task)=> 
                         <li align="left" key={task.id}>
-                            <TaskCard task={task} handleDeleteEntity={handleDeleteEntity}/>
+                            <TaskCard task={task}/>
                         </li>
                     )}
                 </ol>
