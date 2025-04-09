@@ -2,8 +2,8 @@ import "./taskCard.css"
 import { useState, useEffect, useContext} from "react"
 import globalContext from "../context"
 
-function TaskCard ({task}) {
-    const {setForm, setIsModalOpen, objectives, projects, setCurrentTask, handleDeleteEntity, handleEntitySubmit, formatDateFields } = useContext(globalContext)
+function TaskCard ({task, taskDatum}) {
+    const {setForm, setIsModalOpen, objectives, projects, setCurrentTask, handleDeleteEntity, handleEntitySubmit, formatDateFields, userSettings } = useContext(globalContext)
     const [projectNumber, setProjectNumber] = useState()
     const [objectiveNumber, setObjectiveNumber] = useState()
 
@@ -21,8 +21,8 @@ function TaskCard ({task}) {
     }
     const handleCompleteTask = (e, task) => {
         e.stopPropagation()
-        let  completedTask = {...task, status:"Completed"}
-        console.log("completedTask", completedTask)
+        let  completedTask = {...task, status:task.status!=="Completed"? "Completed":"To-Do"}
+        // console.log("completedTask", completedTask)
         completedTask = formatDateFields(completedTask)
         handleEntitySubmit(e, "update", "task", completedTask)
     }
@@ -35,31 +35,36 @@ function TaskCard ({task}) {
         }, [projectNumber, objectiveNumber])
     const cardHeight  = String(15*task.duration/10) + "px"
     const taskIdentifierStyle = {"color": task.status === "Completed"? "rgb(0, 230, 0)": "white"}
-    return (
-        <div id={`row-id-${task.id}`} className="task-row">
-            <button> 
-                <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"/>
-            </button>
-            <button onClick={(e) => handleCompleteTask(e, task)}> 
-                <i class="fa fa-check" aria-hidden="true"></i>
-            </button>
-            <div id={`task-card-id-${task.id}`} style = {{"height":cardHeight}} className="task-card">
-                <div id={`task-content-id-${task.id}`}className="task-content" onClick={(e) => handleEditTask(e)}>
-                    <div 
-                        id={`task-identifier-id-${task.id}`} 
-                        style={taskIdentifierStyle}
-                        className="task-identifier"
-                    >   Task {projectNumber}.{objectiveNumber}.{task.taskNumber}
-                    </div> 
-                    <div className ="task-content-divider"></div>
-                    <div class="task-description"> {task.description} </div>
-                </div>
-            </div>
-            <button onClick={(e) => handleDeleteEntity(e, "task", task.id)}> 
-                <i id={`add-task-id-${task.id}`}  className="fa fa-times" aria-hidden="true"/>
-            </button>
-        </div>
 
+    //calculate the position of the task row card relative to the top of the homepage body 
+    const taskPosition = () => {
+        const dayStartMs = new Date(task.scheduledStart).setHours(userSettings.dayStartTime.split(":")[0], userSettings.dayStartTime.split(":")[1], 0, 0)
+        const taskStartMs = new Date(task.scheduledStart).getTime()
+        const deltaMinutes = (taskStartMs - dayStartMs)/(1000*60) + new Date().getTimezoneOffset()
+        // console.log(`deltaMinutes (${projectNumber}.${objectiveNumber}.${task.taskNumber})`, task.scheduledStart, deltaMinutes)
+        // console.log(taskDatum + deltaMinutes*15/10)
+        return String(taskDatum + deltaMinutes*15/10) // convert minutes to px
+    }
+    const taskRowCardStyle = { "position": "absolute", "top":taskPosition()+ "px"}
+
+    return (
+            <div  style={taskRowCardStyle} id={`row-id-${task.id}`} className="task-row">
+                <button> 
+                    <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"/>
+                </button>
+                <button onClick={(e) => handleCompleteTask(e, task)}> 
+                    <i className="fa fa-check" aria-hidden="true"></i>
+                </button>
+                <div id={`task-card-id-${task.id}`} style = {{"height":cardHeight}} className="task-card">
+                    <div id={`task-content-id-${task.id}`}className="task-content" onClick={(e) => handleEditTask(e)}>
+
+                        <div style={taskIdentifierStyle} className="task-description"> Task {projectNumber}.{objectiveNumber}.{task.taskNumber} {task.description} </div>
+                    </div>
+                </div>
+                <button onClick={(e) => handleDeleteEntity(e, "task", task.id)}> 
+                    <i id={`add-task-id-${task.id}`}  className="fa fa-times" aria-hidden="true"/>
+                </button>
+            </div>
     )
 }
 export default TaskCard

@@ -1,9 +1,10 @@
 div.homepage-body div.task-row{
     display: flex;
-    justify-content: space-around;
+    justify-content: flex-start;
     align-items: center;
-    width: 100%;
     /* border: 1px solid white; */
+    width: 358.831px;
+    padding: 0px 0px;
 }
 
 div.homepage-body div.task-card {
@@ -13,7 +14,7 @@ div.homepage-body div.task-card {
     border-radius: 4px;
     height: 15px;
     max-width: 355px;
-    width: 100%;
+    width: 321.47px;
     margin: 0px 0px;
 }
 
@@ -27,6 +28,7 @@ div.homepage-body div.task-content{
     align-items : center;
     font-size: 0.7rem;
     border-radius: 5px;
+    width: 320px;
 }
 
 div.homepage-body div.task-description{
@@ -39,6 +41,7 @@ div.homepage-body div.task-description{
     padding: 1px 5px;
     text-align: left;
     margin-right: 5px;
+    margin-left: 5px;
 }
 
 div.homepage-body div.task-row button{
@@ -49,15 +52,4 @@ div.homepage-body div.task-row button{
     border-radius: 0px;
     margin: 0px;
     visibility: hidden;
-}
-
-div .homepage-body div.task-identifier{
-    margin-left: 5px;
-}
-div.homepage-body div.task-content-divider{
-    height:100%;
-    border: 1px solid;
-    border-right: 0px;
-    margin-right: 5px;
-    margin-left: 5px;
 }
