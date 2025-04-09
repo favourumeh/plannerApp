@@ -1,5 +1,5 @@
 import "./homePage.css"
-import { useState, useContext, useEffect } from "react"
+import { useState, useContext, useEffect, useRef } from "react"
 import globalContext from "../context"
 import TaskCard from "./taskCard"
 import Header from "./header"
@@ -18,15 +18,32 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
         return null
     }
 
-    const {currentDate, setCurrentDate,  handleDeleteEntity, tasks, objectives, projects, userSettings} = useContext(globalContext)
-    const [currentDay, setCurrentDay] = useState(null)
+    const {currentDate, setCurrentDate,  tasks, objectives, projects, userSettings} = useContext(globalContext)
+    const divRef = useRef(null)
+    const [taskDatum, setTaskDatum] = useState()
+    const currentDay = daysOfWeek[new Date(currentDate).getDay()]
 
-    useEffect(() => {setCurrentDay(daysOfWeek[new Date(currentDate).getDay()])}, [currentDate])
+    // calculate the postion of the top of the homepage body which serves as the datum
+    const handlePageResize = () => {
+        if (divRef.current) {
+          const rect = divRef.current.getBoundingClientRect()
+          setTaskDatum(rect.top + window.scrollY)
+        }
+      }
 
-   useEffect(() => {
+    useEffect(() => handlePageResize(), [])      
+    useEffect(() => {
+        window.addEventListener('resize', handlePageResize)
+        return () => window.removeEventListener('resize', handlePageResize)
+      }, [])
+
+    
+    // filter the tasks to be displayed on the homepage
+    useEffect(() => {
         setHomePageTasks(tasks.filter(task => new Date(task.scheduledStart).toDateString() ===  new Date(currentDate).toDateString()))
     }, [currentDate, tasks, objectives, projects])
 
+    // change day on the homepage by clicking the left and right arrows
     const handleDayNavigation = (direction) => {
         switch (direction) {
             case "previous-day":
@@ -38,9 +55,8 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
         }
     }
 
-    const todayIndicator = () => {
-        return todaysDate === new Date(currentDate).toDateString()? "rgb(0, 230, 0)" : "red"
-    }
+    // change the colour of (the text of) the day if it is not today's date
+    const todayIndicator = () => todaysDate === new Date(currentDate).toDateString()? "rgb(0, 230, 0)" : "red"
 
     return (
         <div className="homepage">
@@ -64,16 +80,12 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
                     </ToolBar>
                 </div>
             </div>
-
-            <div className="homepage-body"> 
+            <div ref={divRef} className="homepage-body"> 
                 <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
-                <ol id="task-list" className="task-list">
-                    {homePageTasks?.map((task)=> 
-                        <li align="left" key={task.id}>
-                            <TaskCard task={task}/>
-                        </li>
-                    )}
-                </ol>
+                <div className="task-card-overlay">
+                    {homePageTasks?.map((task)=> <TaskCard task={task} taskDatum={taskDatum}/>)}
+                </div>
+
             </div>
 
         </div>

@@ -44,15 +44,7 @@ div.homepage-body {
     align-content: flex-start;
 }
 
-ol.task-list{
-    list-style-type: none;
-    /* border: 1px solid white; */
-    padding-left:0px;
-    width: 100%;
-    margin-top:0px
-}
 
-#task-list div.task-card:hover{
-    color: grey;
-    cursor: pointer;
+div.homepage-body .task-card-overlay {
+    width: 358.831px;
 }
