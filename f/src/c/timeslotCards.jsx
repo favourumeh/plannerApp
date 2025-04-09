@@ -40,7 +40,8 @@ function TimeslotCards({dayStart, dayEnd, timeIntervalInMinutes}) {
                     style={{
                         "borderBottom": index==timeSlots.timeSlots.length-1? "none":"1px solid", 
                         "borderBottomLeftRadius": index==timeSlots.timeSlots.lengtht-1? "8px":"0px",
-                        "height": index == timeSlots.timeSlots.length-1? 1.5*timeSlots.finaltimeSlotInterval : 1.5*timeIntervalInMinutes }}
+                        "height": index == timeSlots.timeSlots.length-1? 1.5*timeSlots.finaltimeSlotInterval : 1.5*timeIntervalInMinutes,
+                        "boxSizing":"border-box" }}
                     id = {`timeslot-${index}`} 
                     className="timeslot"> 
                     <div id = {`timeslot-${index}-text`}> {timeSlot} </div>
