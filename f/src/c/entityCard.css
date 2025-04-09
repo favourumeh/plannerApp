@@ -1,4 +1,4 @@
-div.task-row{
+div.entity-row{
     /* border: 1px solid; */
     display: flex;
     justify-content: center;
@@ -8,7 +8,7 @@ div.task-row{
 i.fa-plus:hover{
     cursor: pointer;
 }
-div.task-card {
+div.entity-card {
     display: flex;
     justify-content: space-between;
     border: 1px solid rgba(255, 255, 255, 0.274);
@@ -19,19 +19,13 @@ div.task-card {
     width: 100%;
 }
 
-div.task-card:hover{
+div.entity-card:hover{
     color: grey;
     cursor: pointer;
 }
 
-#task-list button:hover{
-    color: grey;
-    cursor: pointer;
-    border-color: rgba(0, 0, 0, 0);
-}
 
-
-div.task-content{
+div.entity-content{
     font-size: 0.7rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -42,7 +36,7 @@ div.task-content{
 }
 
 
-button.task-delete-btn{
+button.entity-delete-btn{
     position: relative;
     background: none;
     right:1px;
@@ -56,7 +50,7 @@ button.task-delete-btn{
     margin: 0px;
 }
 
-span.task-identifier{
+span.entity-identifier{
     border-right: 1px solid;
     margin-right: 3px;
     margin-left: 3px;

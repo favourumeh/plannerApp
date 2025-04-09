@@ -53,13 +53,13 @@ function EntityCard ({entity, entityName}) {
     }
 
     return (
-        <div id={`row-id-${entity.id}`} className="task-row">
-            <div id={`task-card-id-${entity.id}`} className="task-card">
-                <div id={`task-content-id-${entity.id}`}className="task-content" onClick={(e) => handleEditEntity(e)}>
-                    <span id={`task-identifier-id-${entity.id}`} className="task-identifier"> {generateCardContent()} </span> 
+        <div id={`row-id-${entity.id}`} className="entity-row">
+            <div id={`entity-card-id-${entity.id}`} className="entity-card">
+                <div id={`entity-content-id-${entity.id}`}className="entity-content" onClick={(e) => handleEditEntity(e)}>
+                    <span id={`entity-identifier-id-${entity.id}`} className="entity-identifier"> {generateCardContent()} </span> 
                     {["project", "objective"].includes(entityName)? entity.title:entity.description}
                 </div>
-                <button id={`delete-task-id-${entity.id}`} className="task-delete-btn" onClick={(e) => handleDeleteEntity(e, entityName, entity.id)}>&times;</button>
+                <button id={`delete-entity-id-${entity.id}`} className="entity-delete-btn" onClick={(e) => handleDeleteEntity(e, entityName, entity.id)}>&times;</button>
             </div>
         </div>
 
