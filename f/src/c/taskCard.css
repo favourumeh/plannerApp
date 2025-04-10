@@ -1,6 +1,6 @@
 div.homepage-body div.task-row{
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     /* border: 1px solid white; */
     width: 358.831px;
@@ -21,7 +21,9 @@ div.homepage-body div.task-card {
 div.homepage-body .task-row:hover button{
     visibility: visible;
 }
-
+div.homepage-body .task-row:hover{
+    cursor: pointer;
+}
 div.homepage-body div.task-content{
     display: flex;
     justify-content: flex-start;
