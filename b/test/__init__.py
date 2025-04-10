@@ -3,7 +3,7 @@ from routes import auth, project, objective, task # import blueprints
 from config import app, serializer
 from models import db, User, Project, Objective, Refresh_Token, Task
 from datetime import datetime
-from plannerPackage import login_required, token_required, filter_dict, filter_list_of_dicts
+from plannerPackage import login_required, token_required, filter_dict
 from flask import jsonify, Response
 from typing import Tuple, Dict, List
 from werkzeug.test import TestResponse
@@ -37,28 +37,6 @@ def test_token() -> Tuple[Response, int]:
 db.init_app(app=app)
 
 #Test dependencies
-def camel_to_snake_dict(camel_case_dict: Dict) ->Dict:
-    """Converts keys of a dictionary from camelcase to snake case"""
-    snake_case_dict = {}
-    for key, value in camel_case_dict.items():
-        # Convert camelCase key to snake_case
-        snake_key = re.sub(r'(?<!^)([A-Z])', r'_\1', key).lower()
-        # If the value is a dictionary, recursively convert its keys
-        if isinstance(value, dict):
-            value = camel_to_snake_dict(value)
-        # Add the new key-value pair to the new dictionary
-        snake_case_dict[snake_key] = value
-    return snake_case_dict
-
-def snake_to_camel_dict(snake_case_dict: Dict) -> Dict:
-    """Convers keys of a dictionary from snake to camel case"""
-    camel_case_dict = {}
-    for key, value in snake_case_dict.items():
-        # Convert snake_case key to camelCase
-        camel_key = re.sub(r'_([a-z])', lambda match: match.group(1).upper(), key)
-        # Add the new key-value pair to the new dictionary
-        camel_case_dict[camel_key] = value
-    return camel_case_dict
 
 class plannerAppTestDependecies():
     """This class contains methods that are used in all test modules. These methods standardise the tesing of login and auth for 
