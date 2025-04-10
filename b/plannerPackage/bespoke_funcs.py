@@ -142,3 +142,26 @@ def convert_date_str_to_datetime(date:str|datetime|None, format:str) -> datetime
         return datetime.strptime(date, format)
     else:
         return date
+
+def camel_to_snake_dict(camel_case_dict: Dict) ->Dict:
+    """Converts keys of a dictionary from camelcase to snake case"""
+    snake_case_dict = {}
+    for key, value in camel_case_dict.items():
+        # Convert camelCase key to snake_case
+        snake_key = re.sub(r'(?<!^)([A-Z])', r'_\1', key).lower()
+        # If the value is a dictionary, recursively convert its keys
+        if isinstance(value, dict):
+            value = camel_to_snake_dict(value)
+        # Add the new key-value pair to the new dictionary
+        snake_case_dict[snake_key] = value
+    return snake_case_dict
+
+def snake_to_camel_dict(snake_case_dict: Dict) -> Dict:
+    """Convers keys of a dictionary from snake to camel case"""
+    camel_case_dict = {}
+    for key, value in snake_case_dict.items():
+        # Convert snake_case key to camelCase
+        camel_key = re.sub(r'_([a-z])', lambda match: match.group(1).upper(), key)
+        # Add the new key-value pair to the new dictionary
+        camel_case_dict[camel_key] = value
+    return camel_case_dict
