@@ -22,7 +22,7 @@ task_description_limit = int(os.environ["task_description_limit"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def create_task() -> Tuple[Response, int]:
-    resp_dict = {"message":""}
+    resp_dict = {"message":"", "task":""}
     user_id = session["userId"]
     content = request.json
     task_number = content.get("taskNumber", None)
@@ -90,6 +90,7 @@ def create_task() -> Tuple[Response, int]:
         db.session.add(task)
         db.session.commit()
         resp_dict["message"] = "Success: Added Task to db!"
+        resp_dict["task"] = task.to_dict()
         return jsonify(resp_dict), 201
     except Exception as e:
         resp_dict["message"] = f"Failure: The Task could not be added to the db! Reason: {e}"
@@ -138,7 +139,7 @@ def read_all():
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def update_task(task_id: int) -> Tuple[Response, int]:
-    resp_dict = {"message":""} 
+    resp_dict = {"message":"", "task":""} 
     user_id = session["userId"]
     task = Task.query.filter_by(id=task_id).first()
 
@@ -188,6 +189,7 @@ def update_task(task_id: int) -> Tuple[Response, int]:
     try:
         db.session.commit()
         resp_dict["message"] = "Success: Task has been updated!"
+        resp_dict["task"] = task.to_dict()
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = "Failure: Task could not be updated!"
