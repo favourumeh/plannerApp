@@ -4,7 +4,7 @@ import globalContext from "../context"
 import Dropdown from "./Dropdown"
 function ProjectForm () {
 
-    const {form, currentProject, setCurrentProject, handleEntitySubmit} = useContext(globalContext)
+    const {form, currentProject, setCurrentProject, handleEntitySubmit, formatDateFields} = useContext(globalContext)
 
     if (!["create-project", "update-project"].includes(form)) {
         return null
@@ -13,18 +13,7 @@ function ProjectForm () {
     const mandatoryIndicator = (fieldStateVar, indicator) => {
         return (typeof fieldStateVar==="undefined" || fieldStateVar==="")? <span className="required-asterisk">{indicator}</span>: undefined
     }
-
-    const formatDateTime = (dateField) => {// Formats datetime string: Thu, 27 Mar 2025 09:09:00 GMT ==> 2025-03-27T09:00 
-        if (!currentProject[dateField]) {
-            return
-        }
-        const formatedDateTime = new Date(currentProject[dateField]).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
-        setCurrentProject((prev) => ({...prev, [dateField]:formatedDateTime})) //#1
-    }
-
-    useEffect(() => {
-        ["deadline"].forEach(field => formatDateTime(field)) //#2
-      }, []);
+    useEffect(() => {setCurrentProject(prev => (formatDateFields(prev)))}, []);
 
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/

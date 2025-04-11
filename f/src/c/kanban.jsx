@@ -15,7 +15,7 @@ const Kanban = ({sitePage}) => {
     if (sitePage!=="view-kanban") {
         return 
     }
-    const {tasks, objectives, projects, handleEntitySubmit, handleRefresh} = useContext(globalContext)
+    const {tasks, objectives, projects, handleEntitySubmit, handleRefresh, formatDateFields} = useContext(globalContext)
     const [entityName, setEntityName] = useState("task")
     const [entityArr, setEntityArr] = useState([])
     const [updatedEntity, setUpdatedEntity] = useState([])
@@ -60,25 +60,12 @@ const Kanban = ({sitePage}) => {
         setUpdatedEntityIdAndStatus({id:updatedEntity_.id, status:newStatus})
     }
 
-    const formatDateFields = (entity, dateFields) => {
-        return Object.entries(entity).reduce((acc, [key, value]) => {
-            if (dateFields.includes(key)) {
-                const formatedDateTime = new Date(value).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
-                acc[key] = formatedDateTime
-            } else{
-                acc[key] = entity[key]
-            } 
-            return acc
-        }, {})
-    }
-
     useEffect(() => {
         if (updatedEntityIdAndStatus.id) {
             let updatedEntity_ = entityArr.find((entity) => entity.id ===  updatedEntityIdAndStatus.id)
             console.log("updatedEntity_:", updatedEntity_)
             updatedEntity_ = {...updatedEntity_, "status":updatedEntityIdAndStatus.status}
-            const dateFields = ["scheduledStart", "scheduledFinish", "start", "finish", "deadline"]
-            updatedEntity_ = formatDateFields(updatedEntity_, dateFields)
+            updatedEntity_ = formatDateFields(updatedEntity_)
             setUpdatedEntity(updatedEntity_)
         }
     }, [updatedEntityIdAndStatus])

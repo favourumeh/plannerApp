@@ -11,7 +11,7 @@ function TaskForm () {
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
         defaultProject, defaultProjectObjective,
-        projects, objectives, handleEntitySubmit} = useContext(globalContext)
+        projects, objectives, handleEntitySubmit, formatDateFields} = useContext(globalContext)
 
     if (!["create-task", "update-task"].includes(form)) {
         return null
@@ -76,17 +76,7 @@ function TaskForm () {
         setShowObjectiveQueryResult(false)
     }
 
-    const formatDateTime = (dateField) => {// Formats datetime string: Thu, 27 Mar 2025 09:09:00 GMT ==> 2025-03-27T09:00 
-        if (!currentTask[dateField]) {
-            return
-        }
-        const formatedDateTime = new Date(currentTask[dateField]).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
-        setCurrentTask((prev) => ({...prev, [dateField]:formatedDateTime})) //#1
-    }
-
-    useEffect(() => {
-        ["scheduledStart", "scheduledFinish", "start", "finish"].forEach(field => formatDateTime(field)) //#2
-      }, []);
+    useEffect(() => {setCurrentTask(prev => (formatDateFields(prev))) }, []);
 
     useEffect(() => {
         if (currentTask["duration"] && currentTask["scheduledStart"]){
