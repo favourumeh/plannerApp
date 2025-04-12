@@ -129,7 +129,7 @@ class Task(db.Model):
     task_number = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(12), default="project task") # 2 types: "free task" and "project task"
     status = db.Column(db.String(50), default="To-Do") #4 tpoes: To-Do, In-Progress, Paused and Completed
-    description = db.Column(db.String(100))
+    description = db.Column(db.String(200))
     duration = db.Column(db.Integer, nullable=False) # minutes
     priority_score = db.Column(db.Integer, default=1)
     scheduled_start = db.Column(db.Date)
