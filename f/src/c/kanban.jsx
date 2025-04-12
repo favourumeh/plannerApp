@@ -12,9 +12,7 @@ import ViewPage from "./toolbarContent/viewPage"
 import RefreshEntities from "./toolbarContent/refreshEntities"
 
 const Kanban = ({sitePage}) => {
-    if (sitePage!=="view-kanban") {
-        return 
-    }
+    if (sitePage!=="view-kanban") return 
     const {tasks, objectives, projects, handleEntitySubmit, handleRefresh, formatDateFields} = useContext(globalContext)
     const [entityName, setEntityName] = useState("task")
     const [entityArr, setEntityArr] = useState([])
@@ -29,10 +27,16 @@ const Kanban = ({sitePage}) => {
         {id:"Paused", title:"Paused"}, 
         {id:"Completed", title:"Completed"}
     ])
+
+    const tasksShownOnKanban = (task) => {
+        if ( (new Date(task.scheduledStart).toDateString()) === (new Date()).toDateString() )  return true 
+        if ( task.status !== "Completed" ) return true
+    }
+
     useEffect( () => {
         switch (entityName) {
             case "task":
-                setEntityArr(tasks)
+                setEntityArr( tasks.filter(tasksShownOnKanban) ) 
                 break
             case "objective":
                 setEntityArr(objectives)
