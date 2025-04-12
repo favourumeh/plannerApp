@@ -113,6 +113,7 @@ function ObjectiveForm () {
                     {formSearchField({labelName:"Project", inputName:"project", queryField:projectQuery, setQueryField:setProjectQuery, entityArray:projects})}
                     {formField({labelName:"Title", inputName:"title", inputType:"text", currentObjective:currentObjective, setCurrentObjective:setCurrentObjective, mandatoryField:true})}
                     {formField({labelName:"Description", inputName:"description", inputType:"text", currentObjective:currentObjective, setCurrentObjective:setCurrentObjective, mandatoryField:true})}
+                    {formField({labelName:"Deadline", inputName:"deadline", inputType:"date", currentObjective:currentObjective, setCurrentObjective:setCurrentObjective, mandatoryField:false})}
                     {formField({labelName:"Tag", inputName:"tag", inputType:"text", currentObjective:currentObjective, setCurrentObjective:setCurrentObjective, mandatoryField:false})}
 
                     <div className="btn-div">
