@@ -44,7 +44,7 @@ def create_project() -> Tuple[Response, int]:
         resp_dict["message"] = f"Failure: The title has over {project_title_limit} chars"
         return jsonify(resp_dict), 400
 
-    deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%dT%H:%M')
+    deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%d')
     project_number = generate_entity_number(entity_number=project_number, parent_entity_id=user_id, parent_entity_name="user", entity_name="project", entity=Project)
 
     try:
@@ -104,7 +104,7 @@ def update_project(project_id: int) -> Tuple[Response, int]:
         resp_dict["message"] = f"Failure: The title has over {project_title_limit} chars"
         return jsonify(resp_dict), 400
 
-    project.deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%dT%H:%M')
+    project.deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%d')
     
     if project.type in ["default project"]:
         resp_dict["message"] = "Failure: User is attempting to update a default project which is not allowed."
