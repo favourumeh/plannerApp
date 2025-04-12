@@ -205,11 +205,13 @@ function App() {
 
     
     const formatDateFields = (entity) => {// Formats datetime string: Thu, 27 Mar 2025 09:09:00 GMT ==> 2025-03-27T09:00 
-        const dateFields = ["scheduledStart", "scheduledFinish", "start", "finish", "deadline"]
-        for (const dateField of dateFields) {
+        const allDateFields = ["scheduledStart", "scheduledFinish", "start", "finish", "deadline"]
+        const dateTimeFields = ["start", "finish"]
+        for (const dateField of allDateFields) {
             if (Object.keys(entity).includes(dateField) && !!entity[dateField]) {
-                const formatedDateTime = new Date(entity[dateField]).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
-                var entity = {...entity, [dateField]:formatedDateTime} //#1
+                const formattedDateTime = new Date(entity[dateField]).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
+                const formattedDate = new Date(entity[dateField]).toISOString().split("T")[0]
+                var entity = {...entity, [dateField]: dateTimeFields.includes(dateField)? formattedDateTime:formattedDate} //#1
             }
         }
         return entity
