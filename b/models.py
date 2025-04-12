@@ -54,7 +54,10 @@ class Project(db.Model):
     status = db.Column(db.String(50), default="To-Do") # 3 types = To-Do, In-Progress and Completed
     title = db.Column(db.String(80), default="Unnamed Project")
     description = db.Column(db.Text, nullable=False)
-    deadline = db.Column(db.DateTime(timezone=True))
+    deadline = db.Column(db.Date)   #can be directly set or derived from objectives
+    predicted_finish = db.Column(db.Date) #when user finishes based on 
+    scheduled_start = db.Column(db.Date)
+    scheduled_finish = db.Column(db.Date)
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
     last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
     tag = db.Column(db.Text)
@@ -72,6 +75,9 @@ class Project(db.Model):
                 "title": cls.title,
                 "description": cls.description,
                 "deadline": cls.deadline,
+                "predictedFinish": cls.predicted_finish,
+                "scheduledStart": cls.scheduled_start,
+                "scheduledFinish": cls.scheduled_finish,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
                 "tag": cls.tag,
@@ -86,8 +92,10 @@ class Objective(db.Model):
     title = db.Column(db.String(80), default=f"Project {id}")
     description = db.Column(db.Text)
     duration = db.Column(db.Integer)  #hours
-    scheduled_start = db.Column(db.DateTime(timezone=True))
-    scheduled_finish = db.Column(db.DateTime(timezone=True))
+    deadline = db.Column(db.Date) #can be directly set or derived 
+    predicted_finish = db.Column(db.Date) #determines when user finishes based on their current progress and remaining tasks
+    scheduled_start = db.Column(db.Date)
+    scheduled_finish = db.Column(db.Date)
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
     last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
     tag = db.Column(db.String(40))
@@ -105,13 +113,14 @@ class Objective(db.Model):
                 "title": cls.title,
                 "description": cls.description,
                 "duration": cls.duration,
+                "deadline": cls.deadline,
+                "predictedFinish": cls.predicted_finish,
                 "scheduledStart": cls.scheduled_start,
                 "scheduledFinish": cls.scheduled_finish,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
                 "tag": cls.tag,
                 "projectId": cls.project_id}
-
 
 class Task(db.Model):
     """Defines the properties of the 'Task' entity: id, task_number, type, status, description, duration, priorityScore, scheduled_start/finish, start/finish, 
@@ -123,18 +132,15 @@ class Task(db.Model):
     description = db.Column(db.String(100))
     duration = db.Column(db.Integer, nullable=False) # minutes
     priority_score = db.Column(db.Integer, default=1)
-    scheduled_start = db.Column(db.DateTime(timezone=True))
-    scheduled_finish = db.Column(db.DateTime(timezone=True))
+    scheduled_start = db.Column(db.Date)
     start = db.Column(db.DateTime(timezone=True))
     finish = db.Column(db.DateTime(timezone=True))
-    previous_task_id = db.Column(db.Integer)
-    next_task_id = db.Column(db.Integer)
     is_recurring = db.Column(db.Boolean, default=False)
     is_cancelled = db.Column(db.Boolean, default=False)
-    dependencies = db.Column(db.Text)
     date_added = db.Column(db.DateTime(timezone=True), default=func.now())
     last_updated = db.Column(db.DateTime(timezone=True), default=func.now())
     was_paused = db.Column(db.Boolean, default=False)
+    parent_task_id = db.Column(db.Integer)
     tag = db.Column(db.String(40))
     objective_id = db.Column(db.Integer, db.ForeignKey("objective.id"), nullable=False)
 
@@ -150,16 +156,13 @@ class Task(db.Model):
                 "duration": cls.duration,
                 "priorityScore": cls.priority_score,
                 "scheduledStart": cls.scheduled_start,
-                "scheduledFinish": cls.scheduled_finish,
                 "start": cls.start,
                 "finish": cls.finish,
-                "previousTaskId":cls.previous_task_id,
-                "nextTaskId":cls.next_task_id,
                 "isRecurring":cls.is_recurring,
                 "isCancelled":cls.is_cancelled,
-                "dependencies":cls.dependencies,
                 "dateAdded": cls.date_added,
                 "lastUpdated": cls.last_updated,
                 "wasPaused": cls.was_paused,
+                "parentTaskId": cls.parent_task_id,
                 "tag": cls.tag,
                 "objectiveId": cls.objective_id}
