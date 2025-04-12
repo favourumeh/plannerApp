@@ -28,9 +28,7 @@ def create_objective() -> Tuple[Response, int]:
     status: str = content.get("status", "To-Do")
     title: str = content.get("title", None)
     description: str = content.get("description", None)
-    duration: int = content.get("duration", None) # hours
-    scheduled_start = content.get("scheduledStart", None)
-    scheduled_finish = content.get("scheduledFinish", None)
+    deadline = content.get("deadline", None)
     last_updated: datetime = datetime.now(tz=timezone.utc)
     tag: str = content.get("tag", None)
     project_id: int = content.get("projectId", None)
@@ -58,12 +56,10 @@ def create_objective() -> Tuple[Response, int]:
     #generate objective number if not provided
     objective_number = generate_entity_number(entity_number=objective_number, parent_entity_id=project_id, parent_entity_name="project", entity_name="objective", entity=Objective)
 
-    scheduled_start = convert_date_str_to_datetime(scheduled_start, '%Y-%m-%dT%H:%M')
-    scheduled_finish = convert_date_str_to_datetime(scheduled_finish, '%Y-%m-%dT%H:%M')
-
+    deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%d')
     try:
-        objective: Objective = Objective(objective_number=objective_number, status=status, type=type, title=title, description=description, duration=duration, 
-                                         scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, last_updated=last_updated, tag=tag, project_id=project_id)
+        objective: Objective = Objective(objective_number=objective_number, status=status, type=type, title=title, description=description,
+                                         deadline=deadline, last_updated=last_updated, tag=tag, project_id=project_id)
         db.session.add(objective)
         db.session.commit()
         resp_dict["message"] = "Success: objective Added!"
@@ -114,9 +110,7 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     objective.status = content.get("status", objective.status)
     objective.title = content.get("title", objective.title)
     objective.description = content.get("description", objective.description)
-    objective.duration = content.get("duration", objective.duration) # hours
-    objective.scheduled_start = content.get("scheduledStart", objective.scheduled_start)
-    objective.scheduled_finish = content.get("scheduledFinish", objective.scheduled_finish)
+    objective.deadline = content.get("deadline", None)
     objective.last_updated = datetime.now(tz=timezone.utc)
     objective.tag = content.get("tag", objective.tag)
     project_id = content.get("projectId", objective.project_id)
@@ -124,9 +118,6 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     if len(objective.title) > objective_title_limit:
         resp_dict["message"] = f"Failure: The title has over {objective_title_limit} chars"
         return jsonify(resp_dict), 400
-
-    objective.scheduled_start = convert_date_str_to_datetime(objective.scheduled_start, '%Y-%m-%dT%H:%M')
-    objective.scheduled_finish = convert_date_str_to_datetime(objective.scheduled_finish, '%Y-%m-%dT%H:%M')
 
    #Check if objective being updated already exist in the objective
     existing_objective = Objective.query.filter_by(id=objective_id, project_id=project_id).first()
