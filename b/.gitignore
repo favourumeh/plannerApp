@@ -1,6 +1,6 @@
 __pycache__/
 .venv*/
-planner_app_db.db*
+planner_app_db*.db*
 proj_secrets.py
 DigiCertGlobalRootCA.crt.pem
 notes/
