@@ -1,5 +1,4 @@
 import "./entityForm.css"
-import { backendBaseUrl} from "../project_config"
 import {useState, useContext, useEffect, useRef} from "react"
 import globalContext from "../context"
 import SearchResult from "./searchResult"
@@ -87,6 +86,10 @@ function TaskForm () {
             setCurrentTask((prev) => ({...prev, "finish":finish.toISOString().replace(/:\d{2}\.\d{3}Z$/, '')}))
         }
     },[currentTask["duration"], currentTask["start"]])
+
+    useEffect(() => {
+        const scheduledStart = new Date(currentTask.scheduledStart).toISOString().split("T")[0]
+        setCurrentTask({...currentTask, "scheduledStart":scheduledStart})}, [])
 
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
