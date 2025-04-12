@@ -79,29 +79,15 @@ function TaskForm () {
     useEffect(() => {setCurrentTask(prev => (formatDateFields(prev))) }, []);
 
     useEffect(() => {
-        if (currentTask["duration"] && currentTask["scheduledStart"]){
+        if (currentTask["duration"] && currentTask["start"]){
             const duration = parseInt(currentTask["duration"])
-            let scheduledStart = new Date(currentTask["scheduledStart"])
+            let start = new Date(currentTask["start"])
             const timezoneOffset = new Date().getTimezoneOffset() * 60000;
-            const scheduledFinish = new Date(scheduledStart.getTime() + duration * 60000 - timezoneOffset) 
-            setCurrentTask((prev) => ({...prev, "scheduledFinish":scheduledFinish.toISOString().replace(/:\d{2}\.\d{3}Z$/, '')}))
+            const finish = new Date(start.getTime() + duration * 60000 - timezoneOffset) 
+            setCurrentTask((prev) => ({...prev, "finish":finish.toISOString().replace(/:\d{2}\.\d{3}Z$/, '')}))
         }
-    },[currentTask["duration"], currentTask["scheduledStart"]])
+    },[currentTask["duration"], currentTask["start"]])
 
-    const roundToNearest10 = (num) => {
-        return Math.ceil(num/10 -0.49)*10
-    }
-
-    const handleScheduledStart = (e) => {
-        if (!e.target.value) {
-            return
-        }
-        let scheduledStart = new Date(e.target.value)
-        scheduledStart = scheduledStart.setMinutes(roundToNearest10(scheduledStart.getMinutes()))
-        const timezoneOffset = new Date().getTimezoneOffset() * 60000;
-        scheduledStart = new Date(scheduledStart-timezoneOffset).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
-        setCurrentTask((prev) => ({...prev, "scheduledStart":scheduledStart}))
-    }
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
         const { labelName, inputName, inputType, currentTask, setCurrentTask, mandatoryField} = params
@@ -114,7 +100,7 @@ function TaskForm () {
                     className="form-input"
                     name = {inputName} // used in the request made to the server
                     value = {currentTask[inputName]}
-                    onChange = {e => labelName!=="Scheduled Start"? setCurrentTask({...currentTask, [inputName]:e.target.value}): handleScheduledStart(e)}
+                    onChange = {(e) => setCurrentTask({...currentTask, [inputName]:e.target.value})}
                     min={labelName=="Duration"?"10":"1"}
                     step={labelName==="Duration"?"10": undefined} 
                     autoComplete="off"/>
@@ -173,11 +159,7 @@ function TaskForm () {
                     {formField({labelName:"Priority", inputName:"priorityScore", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Start", inputName:"start", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Finish", inputName:"finish", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-                    {formField({labelName:"Scheduled Start", inputName:"scheduledStart", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-                    {formField({labelName:"Scheduled Finish", inputName:"scheduledFinish", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-                    {formField({labelName:"Previous Task", inputName:"previousTaskNumber", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-                    {formField({labelName:"Next Task", inputName:"nextTaskNumber", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
-                    {formField({labelName:"Dependencies", inputName:"dependencies", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
+                    {formField({labelName:"Scheduled Date", inputName:"scheduledStart", inputType:"date", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Tag", inputName:"tag", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     <div className="btn-div">
                         <button type="submit" 

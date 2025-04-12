@@ -40,7 +40,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
     
     // filter the tasks to be displayed on the homepage
     useEffect(() => {
-        setHomePageTasks(tasks.filter(task => new Date(task.scheduledStart).toDateString() ===  new Date(currentDate).toDateString()))
+        setHomePageTasks(tasks.filter(task => new Date(task.start).toDateString() ===  new Date(currentDate).toDateString()))
     }, [currentDate, tasks, objectives, projects])
 
     // change day on the homepage by clicking the left and right arrows

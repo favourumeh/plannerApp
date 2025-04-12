@@ -38,8 +38,8 @@ function TaskCard ({task, taskDatum}) {
 
     //calculate the position of the task row card relative to the top of the homepage body 
     const taskPosition = () => {
-        const dayStartMs = new Date(task.scheduledStart).setHours(userSettings.dayStartTime.split(":")[0], userSettings.dayStartTime.split(":")[1], 0, 0)
-        const taskStartMs = new Date(task.scheduledStart).getTime()
+        const dayStartMs = new Date(task.start).setHours(userSettings.dayStartTime.split(":")[0], userSettings.dayStartTime.split(":")[1], 0, 0)
+        const taskStartMs = new Date(task.start).getTime()
         const deltaMinutes = (taskStartMs - dayStartMs)/(1000*60) + new Date().getTimezoneOffset()
         // console.log(`deltaMinutes (${projectNumber}.${objectiveNumber}.${task.taskNumber})`, task.scheduledStart, deltaMinutes)
         // console.log(taskDatum + deltaMinutes*15/10)
@@ -52,9 +52,9 @@ function TaskCard ({task, taskDatum}) {
                 <button> 
                     <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"/>
                 </button>
-                <button onClick={(e) => handleCompleteTask(e, task)}> 
+                {/* <button onClick={(e) => handleCompleteTask(e, task)}> 
                     <i className="fa fa-check" aria-hidden="true"></i>
-                </button>
+                </button> */}
                 <div id={`task-card-id-${task.id}`} style = {{"height":cardHeight}} className="task-card">
                     <div id={`task-content-id-${task.id}`}className="task-content" onClick={(e) => handleEditTask(e)}>
 
