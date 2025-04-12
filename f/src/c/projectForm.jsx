@@ -53,7 +53,7 @@ function ProjectForm () {
                 <form className="form">
                     {formField({labelName:"Title", inputName:"title", inputType:"text", currentProject:currentProject, setCurrentProject:setCurrentProject, mandatoryField:false})}
                     {formField({labelName:"Description", inputName:"description", inputType:"text", currentProject:currentProject, setCurrentProject:setCurrentProject, mandatoryField:true})}
-                    {formField({labelName:"Deadline", inputName:"deadline", inputType:"datetime-local", currentProject:currentProject, setCurrentProject:setCurrentProject, mandatoryField:false})}
+                    {formField({labelName:"Deadline", inputName:"deadline", inputType:"date", currentProject:currentProject, setCurrentProject:setCurrentProject, mandatoryField:false})}
                     {formField({labelName:"Tag", inputName:"tag", inputType:"text", currentProject:currentProject, setCurrentProject:setCurrentProject, mandatoryField:false})}
 
                     <div className="btn-div">
