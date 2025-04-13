@@ -75,21 +75,14 @@ function TaskForm () {
         setShowObjectiveQueryResult(false)
     }
 
-    useEffect(() => {setCurrentTask(prev => (formatDateFields(prev))) }, []);
-
     useEffect(() => {
-        if (currentTask["duration"] && currentTask["start"]){
-            const duration = parseInt(currentTask["duration"])
-            let start = new Date(currentTask["start"])
-            const timezoneOffset = new Date().getTimezoneOffset() * 60000;
-            const finish = new Date(start.getTime() + duration * 60000 - timezoneOffset) 
-            setCurrentTask((prev) => ({...prev, "finish":finish.toISOString().replace(/:\d{2}\.\d{3}Z$/, '')}))
+        if (!!currentTask.start && !!currentTask.finish){
+            const durationAccMs = new Date (currentTask.finish).getTime() - new Date(currentTask.start).getTime()
+            const durationAccMin = Math.round(durationAccMs/(60*1000))
+            setCurrentTask({...currentTask, "durationAcc":durationAccMin})
         }
-    },[currentTask["duration"], currentTask["start"]])
-
-    useEffect(() => {
-        const scheduledStart = new Date(currentTask.scheduledStart).toISOString().split("T")[0]
-        setCurrentTask({...currentTask, "scheduledStart":scheduledStart})}, [])
+        setCurrentTask( prev => (formatDateFields(prev)) )
+    }, [])
 
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
@@ -104,9 +97,11 @@ function TaskForm () {
                     name = {inputName} // used in the request made to the server
                     value = {currentTask[inputName]}
                     onChange = {(e) => setCurrentTask({...currentTask, [inputName]:e.target.value})}
-                    min={labelName=="Duration"?"10":"1"}
-                    step={labelName==="Duration"?"10": undefined} 
-                    autoComplete="off"/>
+                    min={["Duration (est)", "Duration (acc)"].includes(labelName)? "10":"1"}
+                    max={labelName === "Priority"? 5: undefined}
+                    step={["Duration (est)", "Duration (acc)"].includes(labelName)? "10": undefined} 
+                    autoComplete="off"
+                    disabled = {["Duration (acc)"].includes(labelName)? true:false} />
             </div>
         )
     }
@@ -136,7 +131,7 @@ function TaskForm () {
         <>
         <div className="form-overlay" onClick={closeSearchResult}>
             <div className="form-header-overlay">
-                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
+                <div className="form-title"> {form.split("-").join(" ").toUpperCase()}  ({currentTask.id}) </div>
                 <div className="form-header-buttons">
                     <Dropdown buttonContent={`Status: ${currentTask.status}`} translate={"0% 34%"}>
                         <div onClick={() => setCurrentTask({...currentTask, "status":"To-Do"})}> To-Do</div>
@@ -158,7 +153,8 @@ function TaskForm () {
                     {formSearchField({labelName:"Project", inputName:"project", queryField:projectQuery, setQueryField:setProjectQuery, entityArray:projects})}
                     {formSearchField({labelName:"Objective", inputName:"objective", queryField:objectiveQuery, setQueryField:setObjectiveQuery, entityArray:relevantObjectives})}
                     {formField({labelName:"Description", inputName:"description", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
-                    {formField({labelName:"Duration", inputName:"duration", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
+                    {formField({labelName:"Duration (est)", inputName:"duration", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
+                    {formField({labelName:"Duration (acc)", inputName:"durationAcc", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Priority", inputName:"priorityScore", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Start", inputName:"start", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Finish", inputName:"finish", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
