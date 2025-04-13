@@ -66,7 +66,6 @@ function ObjectiveForm () {
                     name = {inputName} // used in the request made to the server
                     value = {currentObjective[inputName]}
                     onChange = {e => setCurrentObjective({...currentObjective, [inputName]:e.target.value} )}
-                    min={labelName=="Duration"?"10":"1"}
                     autoComplete="off"/>
             </div>
         )
