@@ -33,7 +33,17 @@ function TaskCard ({task, taskDatum}) {
             handleEntityNumbers()
             }
         }, [projectNumber, objectiveNumber])
-    const cardHeight  = String(15*task.duration/10) + "px"
+    
+    const calculateTaskDuration = () => {
+        let duration = task.duration
+        if (!!task.start && !!task.finish ) {
+            const durationMS  = new Date (task.finish).getTime() - new Date(task.start).getTime() // in MS
+            duration  = Math.round(durationMS/(60*1000)) // in Mins
+            duration = duration < 10 ? 10 : duration
+        }
+        return duration
+    }
+    const cardHeight  = String(15*calculateTaskDuration()/10) + "px"
     const taskIdentifierStyle = {"color": task.status === "Completed"? "rgb(0, 230, 0)": "white"}
 
     //calculate the position of the task row card relative to the top of the homepage body 
