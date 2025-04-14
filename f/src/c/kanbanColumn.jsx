@@ -4,6 +4,7 @@ import KanbanCard from "./kanbanCard"
 import { useDroppable } from "@dnd-kit/core"
 
 export default function KanbanColumn ({columnId, columnTitle, entityArr, entityName}) {
+    if (entityName !="task" && columnId ==  "Paused") return
     const [columnEntityArr, setColumnEntityArr] = useState([])
 
     useEffect ( () => {
