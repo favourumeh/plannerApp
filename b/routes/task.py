@@ -205,10 +205,15 @@ def delete_task(task_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 403
     
     try:
-        db.session.delete(task)
+        # db.session.delete(task)
+        if task.parent_task_id: #if task is a child task
+            db.session.delete(task)
+        else: #if task is a parent task
+            #Identify the task and its children for deletion (tasks derived from a 'parent' task)
+            db.session.query(Task).filter_by(task_number=task.task_number, objective_id=task.objective_id).delete()
         db.session.commit()
         resp_dict["message"] = "Success: The task was deleted!"
         return jsonify(resp_dict), 200
     except Exception as e:
-        resp_dict["message"] = "Failure: The task could not be delete"
+        resp_dict["message"] = f"Failure: The task could not be deleted. {e}"
         return jsonify(resp_dict), 404
