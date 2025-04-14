@@ -13,7 +13,7 @@ import RefreshEntities from "./toolbarContent/refreshEntities"
 
 const Kanban = ({sitePage}) => {
     if (sitePage!=="view-kanban") return 
-    const {tasks, objectives, projects, handleEntitySubmit, handleRefresh, formatDateFields} = useContext(globalContext)
+    const {tasks, setTasks, objectives, projects, handleEntitySubmit, handleRefresh, formatDateFields} = useContext(globalContext)
     const [entityName, setEntityName] = useState("task")
     const [entityArr, setEntityArr] = useState([])
     const [updatedEntity, setUpdatedEntity] = useState([])
@@ -29,10 +29,13 @@ const Kanban = ({sitePage}) => {
     ])
 
     const tasksShownOnKanban = (task) => {
-        if ( (new Date(task.scheduledStart).toDateString()) === (new Date()).toDateString() )  return true 
+        const todaysDate = (new Date()).toDateString()
+        if ( (new Date(task.scheduledStart).toDateString()) === todaysDate )  return true 
+        if ( (new Date(task.finish).toDateString() === todaysDate ) ) return true
         if ( task.status !== "Completed" ) return true
     }
 
+    //Allows kaban page to switch between entities (task, objective and project). Also updates kanban board upon updaete sto tasks, objectives and projects arrays. 
     useEffect( () => {
         switch (entityName) {
             case "task":
@@ -52,33 +55,62 @@ const Kanban = ({sitePage}) => {
     const handleDragEnd = (e) => { //dnd
         const {active, over} = e
 
-        if (!over) {
-            return}
+        if (!over) return
 
         const entityId = active.id
-        const newStatus = over.id 
-        
+        const newStatus = over.id // one of: To-Do, In-Progress, Paused and Completed
+
         const updatedEntity_ = entityArr.find((entity) => entity.id ===  entityId)
         setSourceColumn(updatedEntity_.status)
         setDestColumn(newStatus)
         setUpdatedEntityIdAndStatus({id:updatedEntity_.id, status:newStatus})
     }
 
+    const handleDateFieldsAndStatus = (entity) => {
+        if (entityName == "task") {
+            let now = new Date( new Date().getTime() - new Date().getTimezoneOffset()*60*1000)
+            if (entity.status==="To-Do") {
+                entity.start = null
+                entity.finish = null
+            }
+            if (entity.status==="In-Progress") {
+                entity.start = !entity.start? now : entity.start
+                entity.finish = null
+            }
+            if (entity.status==="Completed") {
+                const start = new Date(now.getTime() - entity.duration*60*1000)
+                entity.start = !!entity.start? entity.start: start
+                entity.finish = now
+            }
+            if (entity.status==="Paused") {
+                entity.wasPaused = true
+                const getParentTaskId = () => !!entity.parentTaskId?  entity.parentTaskId : entity.id
+                let task = {...entity, "parentTaskId":getParentTaskId(), "start":null}
+                handleEntitySubmit(null,  "create", "task", formatDateFields(task))
+                entity.status = "Completed"
+                const start = new Date(now.getTime() - entity.duration*60*1000)
+                entity.start = !!entity.start? entity.start: start
+                entity.finish = now
+            }
+        }
+        return entity
+    }
+
     useEffect(() => {
-        if (updatedEntityIdAndStatus.id) {
+        if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
             let updatedEntity_ = entityArr.find((entity) => entity.id ===  updatedEntityIdAndStatus.id)
             console.log("updatedEntity_:", updatedEntity_)
-            updatedEntity_ = {...updatedEntity_, "status":updatedEntityIdAndStatus.status}
+            updatedEntity_.status = updatedEntityIdAndStatus.status
+            updatedEntity_ = handleDateFieldsAndStatus(updatedEntity_)
             updatedEntity_ = formatDateFields(updatedEntity_)
             setUpdatedEntity(updatedEntity_)
         }
     }, [updatedEntityIdAndStatus])
 
     useEffect(() => {
-        if (updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
+        if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
             setUpdatedEntityIdAndStatus({})
             handleEntitySubmit(null, "update", entityName, updatedEntity)
-            handleRefresh()
         }
     }, [updatedEntity])
 
@@ -88,7 +120,7 @@ const Kanban = ({sitePage}) => {
                 <Header/>
                 <div className="kanban-page-header-2">
                     <strong> {`Kanban (${entityName}s)`}</strong>
-                    <Dropdown buttonContent={<i class="fa fa-chevron-down" aria-hidden="true"></i>} translate="0% 50%">
+                    <Dropdown buttonContent={<i className="fa fa-chevron-down" aria-hidden="true"></i>} translate="0% 50%">
                         <div onClick={() => setEntityName("project")}> Projects </div>
                         <div onClick={() => setEntityName("objective")}> Objectives </div>
                         <div onClick={() => setEntityName("task")}> Tasks </div>
