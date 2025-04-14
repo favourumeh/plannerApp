@@ -9,7 +9,7 @@ function ObjectiveForm () {
         form, currentObjective, setCurrentObjective, 
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
-        defaultProject, projects, handleEntitySubmit} = useContext(globalContext)
+        defaultProject, projects, handleEntitySubmit, formatDateFields} = useContext(globalContext)
 
     if (!["create-objective", "update-objective"].includes(form)) {
         return null
@@ -52,6 +52,8 @@ function ObjectiveForm () {
         setShowProjectQueryResult(false)
         setShowObjectiveQueryResult(false)
     }
+
+    useEffect(() => setCurrentObjective(formatDateFields(currentObjective)),[])
 
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
