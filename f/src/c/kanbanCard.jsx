@@ -52,7 +52,9 @@ export default function KanbanCard ({entity, entityName}) {
     // DnD - Make enitity cards draggable
     const { attributes, listeners, setNodeRef, transform } = useDraggable({id: entity.id}) //dnd
     const style = transform ? {transform: `translate(${transform.x}px, ${transform.y}px)`} : undefined; //dnd keeps track of x-y coordinate of entity card
-  
+    
+    // Signal Parent task (P) (i.e., a task is not derived from another task )
+    const signalParentTask = () => !!entity.parentTaskId?  "" : "(P)"
     return (
         <div 
             style ={style}
@@ -63,7 +65,7 @@ export default function KanbanCard ({entity, entityName}) {
         >
             <button onPointerDown={onClickEditBtn} > <i className="fa fa-pencil" aria-hidden="true"></i></button>
             <div className="kanban-card-content">
-                {generateEntityId(entityName)} {entityName==="task"? entity.description: entity.title}
+                {generateEntityId(entityName)} {entityName==="task"? signalParentTask() + " " + entity.description: entity.title}
             </div>
             <button onPointerDown ={onClickDeleteBtn}> &times;</button>
 
