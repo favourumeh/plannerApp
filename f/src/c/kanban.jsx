@@ -110,6 +110,8 @@ const Kanban = ({sitePage}) => {
     useEffect(() => {
         if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
             setUpdatedEntityIdAndStatus({})
+            const newEntity = entityArr.map(entity => entity.id === updatedEntityIdAndStatus.id? updatedEntity : entity)
+            setEntityArr(newEntity) // put here to speed up DnD action (but can be removed)
             handleEntitySubmit(null, "update", entityName, updatedEntity)
         }
     }, [updatedEntity])
