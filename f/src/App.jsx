@@ -129,23 +129,28 @@ function App() {
 
     const handleDeleteEntity = async (e, entityName, id) => {
         e.preventDefault()
-
-        const url = `${backendBaseUrl}/delete-${entityName}/${id}`
-        const options = {
-            method:"DELETE",
-            headers:{"content-type":"application/json"},
-            credentials:"include"
+        try {
+            const url = `${backendBaseUrl}/delete-${entityName}/${id}`
+            const options = {
+                method:"DELETE",
+                headers:{"content-type":"application/json"},
+                credentials:"include"
+            }
+            var resp = await fetch(url,options)
+            var resp_json = await resp.json()
+        } catch (err) {
+            handleNotification(err.message + `. Failed to DELETE ${entityName}. Error in fetch (NOT API)`, "failure")
+            handleRefresh()
         }
-        const resp = await fetch(url,options)
-        const resp_json = await resp.json()
 
         if (resp.status==200){
             console.log(resp_json.message)
             handleNotification(resp_json.message, "success")
             handleRefresh()
-        } else if (resp.status == 403) {
+        } else if ([403, 404].includes(resp.status)) {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "failure")
+            handleRefresh()
         } else {
             console.log(resp_json.message)
             const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
@@ -169,15 +174,20 @@ function App() {
             //enityName: one of project, objective or task
             //currentEntity: one of currentTask, currentProject or currentObjective
         e? e.preventDefault(): undefined
-        const url = `${backendBaseUrl}/${ action + "-" + entityName + (action == "create"? "": "/" + currentEntity.id) }`
-        const options = {
-            method:action=="create"? "POST":"PATCH",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(currentEntity),
-            credentials:"include"
+        try {
+            const url = `${backendBaseUrl}/${ action + "-" + entityName + (action == "create"? "": "/" + currentEntity.id) }`
+            const options = {
+                method:action=="create"? "POST":"PATCH",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(currentEntity),
+                credentials:"include"
+            }
+            var resp = await fetch(url, options)
+            var resp_json = await resp.json()
+        } catch (err) {
+            handleNotification(err.message + `. Failed to DELETE ${entityName}. Error in fetch (NOT API)`, "failure")
+            handleRefresh()
         }
-        const resp = await fetch(url, options)
-        const resp_json = await resp.json()
 
         if ([200, 201].includes(resp.status)){
             console.log(resp_json.message)
@@ -185,9 +195,10 @@ function App() {
             setIsModalOpen(false)
             setForm("")
             handleRefresh()
-        } else if (resp.status == 403) {
+        } else if ([403, 404].includes(resp.status)) {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "failure")
+            handleRefresh()
         } else {
             console.log(resp_json.message)
             const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
@@ -212,6 +223,8 @@ function App() {
                 const formattedDateTime = new Date(entity[dateField]).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
                 const formattedDate = new Date(entity[dateField]).toISOString().split("T")[0]
                 var entity = {...entity, [dateField]: dateTimeFields.includes(dateField)? formattedDateTime:formattedDate} //#1
+                console.log("deadline", entity[dateField])
+
             }
         }
         return entity
