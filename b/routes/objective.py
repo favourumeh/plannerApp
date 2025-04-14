@@ -114,6 +114,8 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     objective.last_updated = datetime.now(tz=timezone.utc)
     objective.tag = content.get("tag", objective.tag)
     project_id = content.get("projectId", objective.project_id)
+    
+    objective.deadline = convert_date_str_to_datetime(objective.deadline, '%Y-%m-%d')
 
     if len(objective.title) > objective_title_limit:
         resp_dict["message"] = f"Failure: The title has over {objective_title_limit} chars"
