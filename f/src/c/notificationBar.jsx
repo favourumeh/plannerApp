@@ -31,8 +31,8 @@ function NotificationBar () {
         setIsHoverNotificationBar(false)
     }
     //monitoring use-Effect: Can comment out
-    useEffect(() => {console.log("isNotiBarVisible:", isNotiBarVisible)}, [isNotiBarVisible] ) // used to track noti bar is removed from html
-    useEffect(() => {console.log("isHoverNotificationBar:",  isHoverNotificationBar)}, [isHoverNotificationBar]) //used to track if mouse hovers over noti bar#
+    // useEffect(() => {console.log("isNotiBarVisible:", isNotiBarVisible)}, [isNotiBarVisible] ) // used to track noti bar is removed from html
+    // useEffect(() => {console.log("isHoverNotificationBar:",  isHoverNotificationBar)}, [isHoverNotificationBar]) //used to track if mouse hovers over noti bar#
     // useEffect(() => console.log("timerRef:",notiBarTimerRef), [notiBarTimerRef.current])
 
 
