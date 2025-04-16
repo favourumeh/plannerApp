@@ -1,0 +1,20 @@
+div.hover-text {
+    display: -webkit-box;
+    position: relative;
+    background-color: '#333';
+    top: 0px;
+    color: '#fff';
+    padding: '5px';
+    border-radius: '3px';
+    white-space: 'nowrap';
+    z-index: 1000;
+    overflow: hidden;
+    max-width: 925px;
+    height:48px;
+    text-overflow: ellipsis;
+    overflow-wrap: break-word; 
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: pre-line;
+    /* border: 1px solid; */
+}
