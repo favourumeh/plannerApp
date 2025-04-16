@@ -35,11 +35,12 @@ div.homepage-body div.task-content{
 
 div.homepage-body div.task-description{
     /* border: 1px solid; */
+    display: -webkit-box;
     overflow: hidden;
     text-overflow: ellipsis; 
     overflow-wrap: break-word; 
     -webkit-box-orient: vertical;
-    line-clamp: 2;
+    -webkit-line-clamp: 1;
     padding: 1px 5px;
     text-align: left;
     margin-right: 5px;
