@@ -14,6 +14,7 @@ import ProjectForm from "./c/projectForm.jsx"
 import EntityPage from './c/entityPage.jsx'
 import ObjectiveForm from './c/objectiveForm.jsx'
 import Kanban from './c/kanban.jsx'
+import HoverText from './c/hoverText.jsx'
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -45,6 +46,8 @@ function App() {
     const [entity, setEntity] = useState(sitePage==="view-projects"? projects: sitePage==="view-objectives"? objectives:tasks)
     const [userSettings, setUserSettings] = useState({"dayStartTime":"08:00", "dayEndTime":"20:30", "timeIntervalInMinutes":50})
     const notiBarTimerRef = useRef()
+    const [hoverText, setHoverText] = useState("blah jk")
+    const [isShowHoverText, setIsShowHoverText] = useState(true)
 
     //Update session storage object when state variable changes
     useEffect(() => sessionStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn)), [isLoggedIn])
@@ -223,12 +226,20 @@ function App() {
                 const formattedDateTime = new Date(entity[dateField]).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
                 const formattedDate = new Date(entity[dateField]).toISOString().split("T")[0]
                 var entity = {...entity, [dateField]: dateTimeFields.includes(dateField)? formattedDateTime:formattedDate} //#1
-                console.log("deadline", entity[dateField])
-
             }
         }
         return entity
     } 
+
+    const onShowHoverText = (text) => {
+        setIsShowHoverText(true)
+        setHoverText(text)
+    }
+
+    const onHideHoverText = () => {
+        setIsShowHoverText(false)
+        setHoverText("")
+    }
 
     // create global prop object
     const globalProps = {
@@ -253,7 +264,8 @@ function App() {
         form, setForm, handleEntitySubmit,
         currentDate, setCurrentDate, 
         entityName, setEntityName, entity, setEntity,
-        userSettings, setUserSettings, formatDateFields
+        userSettings, setUserSettings, formatDateFields,
+        setIsShowHoverText, onShowHoverText, onHideHoverText
     }
 
     return (
@@ -268,6 +280,7 @@ function App() {
                 <ProjectForm/>
                 <ObjectiveForm/>
             </Modal>
+            <HoverText text={hoverText} isShowText={isShowHoverText}/>
             <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage} homePageTasks={homePageTasks} setHomePageTasks={setHomePageTasks}/>
             <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
             <Kanban sitePage={sitePage}/>
