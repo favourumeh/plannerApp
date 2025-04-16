@@ -14,6 +14,7 @@ div.kanban-card-overlay:hover{
 
 div.kanban-card-content{
     border: 1px solid;
+    max-width: 169.833px;
     border-radius: 5px;
     overflow: hidden;
     text-overflow: ellipsis; 
