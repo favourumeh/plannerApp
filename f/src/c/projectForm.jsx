@@ -43,7 +43,6 @@ function ProjectForm () {
                     <Dropdown buttonContent={`Status: ${currentProject.status}`} translate={"0% 34%"}>
                         <div onClick={() => setCurrentProject({...currentProject, "status":"To-Do"})}> To-Do</div>
                         <div onClick={() => setCurrentProject({...currentProject, "status":"In-Progress"})}> In-Progress</div>
-                        <div onClick={() => setCurrentProject({...currentProject, "status":"Paused"})}> Paused</div>
                         <div onClick={() => setCurrentProject({...currentProject, "status":"Completed"})}> Completed</div>
                     </Dropdown>
                 </div>
