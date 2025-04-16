@@ -40,7 +40,7 @@ function ProjectForm () {
             <div className="form-header-overlay">
                 <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
                 <div className="form-header-buttons">
-                    <Dropdown buttonContent={`Status: ${currentProject.status}`} translate={"0% 34%"}>
+                    <Dropdown buttonContent={`Status: ${currentProject.status}`} translate={"0% 50%"}>
                         <div onClick={() => setCurrentProject({...currentProject, "status":"To-Do"})}> To-Do</div>
                         <div onClick={() => setCurrentProject({...currentProject, "status":"In-Progress"})}> In-Progress</div>
                         <div onClick={() => setCurrentProject({...currentProject, "status":"Completed"})}> Completed</div>
