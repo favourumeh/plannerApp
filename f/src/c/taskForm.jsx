@@ -45,8 +45,8 @@ function TaskForm () {
     useEffect(() => setObjectiveTitles(relevantObjectives.map(objective=> objective.title)), [relevantObjectives])
 
     useEffect(() => objectiveTitles.includes(objectiveQuery)?
-            setTaskObjective(objectives.find(objective=> objective.title == objectiveQuery)):
-            setTaskObjective({}), 
+                        setTaskObjective(objectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ))
+                        :setTaskObjective({}), 
     [objectiveQuery])
 
     useEffect(() => objectiveTitles.includes(objectiveQuery)? 
