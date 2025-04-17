@@ -35,12 +35,12 @@ def token_required(app: Flask, serializer: URLSafeTimedSerializer):
 
             if not access_token_cookie:
                 resp_dict["message"] = "Request is missing access token. Please login to refresh access token"
-                return jsonify(resp_dict), 400
+                return jsonify(resp_dict), 401
             try:
                 access_token = serializer.loads(access_token_cookie)
             except Exception as e:
                 resp_dict["message"] = f"Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}"
-                return jsonify(resp_dict), 400
+                return jsonify(resp_dict), 401
 
             #Validate access token
             try:
@@ -67,14 +67,14 @@ def login_required(serializer: URLSafeTimedSerializer):
             
             if not cookie:
                 resp_dict["message"] = "Failure: User is not logged in (no b_sc). Please login!"
-                return jsonify(resp_dict), 400
+                return jsonify(resp_dict), 401
 
             #Decrypt bespoke session cookie
             try:
                 decrypted_session_data = decrypt_bespoke_session_cookie(cookie=cookie, serializer=serializer, decryption_key=os.environ["session_key"])
             except Exception as e:
                 resp_dict["message"] = f"Failure: Could not decrypt the bespoke_session cookies. Reason: {e}"
-                return jsonify(resp_dict), 400
+                return jsonify(resp_dict), 401
     
             #Extract user id,username and refreshToken  from the session data and store it in session object for use in downstream function
             session["userId"] = decrypted_session_data["userId"]
