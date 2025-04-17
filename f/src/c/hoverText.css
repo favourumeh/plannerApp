@@ -9,7 +9,6 @@ div.hover-text {
     white-space: 'nowrap';
     z-index: 1000;
     overflow: hidden;
-    max-width: 925px;
     height:48px;
     text-overflow: ellipsis;
     overflow-wrap: break-word; 

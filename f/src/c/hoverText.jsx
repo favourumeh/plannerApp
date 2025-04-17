@@ -1,10 +1,12 @@
 import "./hoverText.css"
-import { useState } from 'react';
+import { useContext } from "react"
+import globalContext from "../context"
 
-const HoverText = ({text, isShowText}) => {
+const HoverText = ({width}) => {
+    const {hoverText, isShowHoverText} = useContext(globalContext)
     return (
-        <div style = {{"visible":isShowText?true:false}}className="hover-text" >
-            {text}
+        <div style = {{"visible":isShowHoverText?true:false, "width":width}} className="hover-text" >
+            {hoverText}
         </div>
     )
 }

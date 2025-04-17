@@ -265,7 +265,7 @@ function App() {
         currentDate, setCurrentDate, 
         entityName, setEntityName, entity, setEntity,
         userSettings, setUserSettings, formatDateFields,
-        setIsShowHoverText, onShowHoverText, onHideHoverText
+        onShowHoverText, onHideHoverText, isShowHoverText, hoverText
     }
 
     return (
@@ -280,7 +280,6 @@ function App() {
                 <ProjectForm/>
                 <ObjectiveForm/>
             </Modal>
-            <HoverText text={hoverText} isShowText={isShowHoverText}/>
             <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage} homePageTasks={homePageTasks} setHomePageTasks={setHomePageTasks}/>
             <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
             <Kanban sitePage={sitePage}/>
