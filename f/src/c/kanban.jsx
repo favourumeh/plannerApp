@@ -10,6 +10,7 @@ import AddEntity from "./toolbarContent/addEntity"
 import FilterPage from "./toolbarContent/filterPage" 
 import ViewPage from "./toolbarContent/viewPage"
 import RefreshEntities from "./toolbarContent/refreshEntities"
+import HoverText from "./hoverText"
 
 const Kanban = ({sitePage}) => {
     if (sitePage!=="view-kanban") return 
@@ -115,8 +116,12 @@ const Kanban = ({sitePage}) => {
         }
     }, [updatedEntity])
 
+    const getHoverWidth = () => {
+        return entityName==="task"? "926.6px": "695px"
+    }
     return (
         <div className="kanban-page">
+            <HoverText width={getHoverWidth()}/>
             <div className="kanban-page-header"> 
                 <Header/>
                 <div className="kanban-page-header-2">
