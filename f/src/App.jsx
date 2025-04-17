@@ -150,7 +150,7 @@ function App() {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "success")
             handleRefresh()
-        } else if ([403, 404].includes(resp.status)) {
+        } else if ([400, 403, 404].includes(resp.status)) {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "failure")
             handleRefresh()
@@ -198,7 +198,7 @@ function App() {
             setIsModalOpen(false)
             setForm("")
             handleRefresh()
-        } else if ([403, 404].includes(resp.status)) {
+        } else if ([400, 403, 404].includes(resp.status)) {
             console.log(resp_json.message)
             handleNotification(resp_json.message, "failure")
             handleRefresh()
