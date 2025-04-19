@@ -26,7 +26,7 @@ export default function KanbanColumn ({columnId, columnTitle, entityArr, entityN
             <div ref = {setNodeRef} id={columnId} className="kanban-column"> {`${columnTitle} [${columnEntityArr.length}]`} 
                 {columnEntityArr.map( 
                     (columnEntity) => 
-                        <div 
+                        <div key={columnEntity.id}
                             className="kanban-item-overlay"
                             onMouseEnter={() => onShowHoverText(getHoverText(columnEntity))}
                             onMouseLeave={onHideHoverText}

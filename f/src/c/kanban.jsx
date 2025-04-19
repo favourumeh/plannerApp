@@ -142,7 +142,7 @@ const Kanban = ({sitePage}) => {
             <DndContext onDragEnd={handleDragEnd}>
                 <div className="kanban-page-body">
                     {columns?.map((column) => 
-                        <KanbanColumn columnId={column.id} columnTitle={column.title} entityArr={entityArr} entityName={entityName}/>
+                        <KanbanColumn key = {column.id} columnId={column.id} columnTitle={column.title} entityArr={entityArr} entityName={entityName}/>
                     )}
                 </div>
             </DndContext>
