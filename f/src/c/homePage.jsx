@@ -83,7 +83,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
             <div ref={divRef} className="homepage-body"> 
                 <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
                 <div className="task-card-overlay">
-                    {homePageTasks?.map((task)=> <TaskCard task={task} taskDatum={taskDatum}/>)}
+                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task} taskDatum={taskDatum}/>)}
                 </div>
 
             </div>

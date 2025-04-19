@@ -37,6 +37,7 @@ function TimeslotCards({dayStart, dayEnd, timeIntervalInMinutes}) {
         <div className="timeslots-overlay">
             { timeSlots.timeSlots.map((timeSlot, index) => 
                 <div 
+                    key = {index}
                     style={{
                         "borderBottom": index==timeSlots.timeSlots.length-1? "none":"1px solid", 
                         "borderBottomLeftRadius": index==timeSlots.timeSlots.lengtht-1? "8px":"0px",
