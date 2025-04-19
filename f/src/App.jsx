@@ -14,7 +14,7 @@ import ProjectForm from "./c/projectForm.jsx"
 import EntityPage from './c/entityPage.jsx'
 import ObjectiveForm from './c/objectiveForm.jsx'
 import Kanban from './c/kanban.jsx'
-import HoverText from './c/hoverText.jsx'
+import ProgressPage from './c/progressPage/progressPage.jsx'
 
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
@@ -46,7 +46,7 @@ function App() {
     const [entity, setEntity] = useState(sitePage==="view-projects"? projects: sitePage==="view-objectives"? objectives:tasks)
     const [userSettings, setUserSettings] = useState({"dayStartTime":"08:00", "dayEndTime":"20:30", "timeIntervalInMinutes":50})
     const notiBarTimerRef = useRef()
-    const [hoverText, setHoverText] = useState("blah jk")
+    const [hoverText, setHoverText] = useState("")
     const [isShowHoverText, setIsShowHoverText] = useState(true)
 
     //Update session storage object when state variable changes
@@ -283,6 +283,7 @@ function App() {
             <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage} homePageTasks={homePageTasks} setHomePageTasks={setHomePageTasks}/>
             <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
             <Kanban sitePage={sitePage}/>
+            <ProgressPage sitePage={sitePage}/>
         </globalContext.Provider>
         </>
     )
