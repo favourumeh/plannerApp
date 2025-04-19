@@ -31,9 +31,13 @@ const Kanban = ({sitePage}) => {
 
     const tasksShownOnKanban = (task) => {
         const todaysDate = (new Date()).toDateString()
-        if ( (new Date(task.scheduledStart).toDateString()) === todaysDate )  return true 
-        if ( (new Date(task.finish).toDateString() === todaysDate ) ) return true
-        if ( task.status !== "Completed" ) return true
+        const isTaskScheduledForToday = (new Date(task.scheduledStart).toDateString()) === todaysDate
+        const isTaskFinishedToday = (new Date(task.finish).toDateString() === todaysDate )
+        var outputBool = false
+        if (isTaskScheduledForToday) {outputBool = true}
+        if (isTaskFinishedToday) { outputBool = true}
+        if ( task.status !== "Completed" ) {outputBool = true}
+        return outputBool
     }
 
     //Allows kaban page to switch between entities (task, objective and project). Also updates kanban board upon updaete sto tasks, objectives and projects arrays. 
