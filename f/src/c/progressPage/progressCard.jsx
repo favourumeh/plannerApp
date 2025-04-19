@@ -13,7 +13,9 @@ const colourDict = {
 export default function ProgressCard ({entity, entityName, children}) {
     const [isExpanded, setIsExpanded] = useState(false)
     const [progressPercentage, setProgressPercentage] = useState(0)
-    const {tasks, objectives, projects} = useContext(globalContext)
+    const {tasks, objectives, projects, 
+        setCurrentTask, setCurrentObjective, setCurrentProject, 
+        setForm, setIsModalOpen} = useContext(globalContext)
     const divProgressOverlay = useRef(null)
     const divProgressCardTools = useRef(null)
     const [progressBarDivWidth, setProgressBarDivWidth] = useState(null)
@@ -33,7 +35,7 @@ export default function ProgressCard ({entity, entityName, children}) {
     //Determines whether an entity card can expand to reveal its children (e.g., Projects expands to reveal objectives) 
     const handleCardExpansion = (e) => {
         e.stopPropagation()
-        setIsExpanded(!isExpanded)
+        entityName!=="task"? setIsExpanded(!isExpanded): undefined
     }
 
     //Determines what is shown in the entity card 
@@ -99,9 +101,24 @@ export default function ProgressCard ({entity, entityName, children}) {
 
     useEffect(() => generateProgressPercentage(), [tasks, objectives, projects])
 
+    //Open an edit entity form
+    const onClickEditBtn = (e) => {
+        e.stopPropagation()
+        setForm(`update-${entityName}`)
+        entityName==="task"? setCurrentTask(entity) : entityName==="objective"? setCurrentObjective(entity) : setCurrentProject(entity)
+        setIsModalOpen(true)
+    }
+
+    const toggleDropdownIcon = () => {
+        return isExpanded? <i class="fa fa-caret-up" aria-hidden="true"></i> : <i className="fa fa-caret-down" aria-hidden="true"></i>
+    }
     return (
         <div className={`progress-card-container  ${entityName}-card-container`}>
-            <div ref={divProgressOverlay} className={`progress-card-overlay ${entityName}-card-overlay`}>
+            <div 
+                ref={divProgressOverlay} 
+                className={`progress-card-overlay ${entityName}-card-overlay`}
+                onClick={onClickEditBtn}
+            >
                 <div className="progress-bar">
                     <div className="progress-bar-fill" 
                         style={{"width":entityName!=="task"? `${progressBarDivWidth}px`:"100%", 
@@ -112,10 +129,10 @@ export default function ProgressCard ({entity, entityName, children}) {
                     <div className="progress-card-content">{generateCardContent()}</div>
                 </div>
 
-                <div ref={divProgressCardTools} className="progress-card-tools">
+                <div ref={divProgressCardTools} className="progress-card-tools" onClick={handleCardExpansion}>
                     {generateTaskStatusSymbol()}
                     {entityName !== "task"? <div className="progress-percentage"> {progressPercentage}%</div>: undefined}
-                    {entityName !== "task"? <button className="dropdown-btn" onClick={handleCardExpansion}> <i className="fa fa-caret-down" aria-hidden="true"> </i> </button>: undefined}
+                    {entityName !== "task"? <button className="dropdown-btn"> {toggleDropdownIcon()} </button>: undefined}
                 </div>
 
             </div>
