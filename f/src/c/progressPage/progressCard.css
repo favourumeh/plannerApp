@@ -1,0 +1,96 @@
+
+/* progress card container */
+.project-card-container{
+    /* border: 1px solid; */
+    display: flex;
+    flex-direction: column;
+    margin: 5px 0px;
+
+}
+
+.objective-card-container{
+    /* border: 1px solid; */
+    align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.task-card-container{
+    width: 400px;
+    /* border: 1px solid; */
+    align-self: flex-end;
+}
+
+/* progress card overlay */
+.progress-card-overlay {
+    display: flex;
+    justify-content: space-between;
+    width:500px;
+    border: 1px solid;
+    border-radius: 5px;
+    margin: 2px 0px;
+}
+
+.objective-card-overlay {
+    width: 450px;
+    /* border: 1px solid; */
+}
+
+.task-card-overlay {
+    width: 400px;
+    /* border: 1px solid; */
+}
+
+/* progress bar */
+.progress-bar{
+    /* border: 1px solid; */
+}
+.progress-bar-fill{
+    height: 100%;
+    border-radius: 4px 1px 1px 4px;
+}
+
+.progress-card-content{
+    position: relative;
+    top: -100%;
+
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: break-word; 
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+
+    /* border: 1px solid; */
+    border-radius: 5px;
+    width: 100%;
+    text-align: left;
+    transition: width 0.5s ease-out;
+    padding-left: 5px;
+    margin-right: 5px;
+
+}
+
+.progress-card-tools{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-left: 1px solid;
+    min-width: 58px;
+}
+.progress-percentage{
+    min-width: 39px; 
+    max-width: 39px;
+}
+
+/* dropdown button */
+.progress-card-overlay button{
+    background-color: rgba(0,0,0,0);
+    border: none;
+    padding:2px;
+    margin-right: 5px;
+}
+.progress-card-overlay button:focus, button:focus-visible{
+    outline: None;
+}
