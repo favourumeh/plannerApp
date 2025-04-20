@@ -31,12 +31,14 @@ const Kanban = ({sitePage}) => {
 
     const tasksShownOnKanban = (task) => {
         const todaysDate = (new Date()).toDateString()
-        const isTaskScheduledForToday = (new Date(task.scheduledStart).toDateString()) === todaysDate
+        const taskScheduleDate = new Date(task.scheduledStart).toDateString()
+        const isTaskScheduledForToday = (taskScheduleDate) === todaysDate
         const isTaskFinishedToday = (new Date(task.finish).toDateString() === todaysDate )
+        const isTaskScheduledBeforeToday = new Date(taskScheduleDate).getTime() < new Date(todaysDate).getTime()
         var outputBool = false
         if (isTaskScheduledForToday) {outputBool = true}
         if (isTaskFinishedToday) { outputBool = true}
-        if ( task.status !== "Completed" ) {outputBool = true}
+        if ( task.status !== "Completed" && isTaskScheduledBeforeToday ) {outputBool = true}
         return outputBool
     }
 
