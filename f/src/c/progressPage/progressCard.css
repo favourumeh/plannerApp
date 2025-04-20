@@ -40,6 +40,10 @@
     margin-right: 5px;
 }
 
+.add-entity button:hover{
+    color: rgb(0, 230, 0);
+}
+
 .progress-card-row:hover .add-entity button{
     visibility: visible;
 }
