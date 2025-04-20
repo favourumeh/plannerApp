@@ -35,6 +35,8 @@ function App() {
     const [projects, setProjects] = useState(() => persistState("projects",[])) 
     const [defaultProject, setDefaultProject] = useState(() => persistState("defaultProject",{})) 
     const [defaultProjectObjective, setDefaultProjectObjective] = useState(() => persistState("defaultProjectObjective",{}))
+    const [formProject, setFormProject] = useState(defaultProject)
+    const [formObjective, setFormObjective] = useState(defaultProjectObjective)
     const [currentTask, setCurrentTask] = useState(() => persistState("currentTask", {status:"To-Do", isRecurring:false, priorityScore:1, projectTitle:"", objectiveTitle:""}))
     const [currentObjective, setCurrentObjective] = useState(() => persistState("currentObjective", {status:"To-Do"}))
     const [currentProject, setCurrentProject] = useState(() => persistState("currentProject", {status:"To-Do"}))
@@ -254,7 +256,9 @@ function App() {
         projects, setProjects,
         handleNotification, notiBarTimerRef,
         handleLogin, handleLogout,
-        fetchAllContent, handleRefresh, defaultProject, defaultProjectObjective,
+        fetchAllContent, handleRefresh, 
+        defaultProject, defaultProjectObjective, formProject, formObjective,
+        setDefaultProject, setDefaultProjectObjective, setFormProject, setFormObjective,
         currentTask, setCurrentTask,
         currentProject, setCurrentProject,
         currentObjective, setCurrentObjective,
