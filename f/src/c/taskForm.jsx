@@ -4,6 +4,18 @@ import globalContext from "../context"
 import SearchResult from "./searchResult"
 import Dropdown from "./Dropdown"
 
+const defaultTask = {
+    isRecurring:false, 
+    priorityScore:1, 
+    status: "To-Do",
+    description:"", 
+    duration:10, 
+    scheduledStart: "", 
+    start: "", 
+    finish: "",
+    tag: ""
+}
+
 function TaskForm () {
     const {
         form, currentTask, setCurrentTask, 
@@ -27,7 +39,7 @@ function TaskForm () {
     const [relevantObjectives, setRelevantObjetives] = useState(objectives.filter(objective=> objective.projectId == taskProject.id))
     const [objectiveQuery, setObjectiveQuery] = useState(taskObjective.title)
     const [objectiveTitles, setObjectiveTitles] = useState(relevantObjectives.map(objective=> objective.title))
-    
+
     // add console prints here (see #1)
 
     //#region: search field useEffect updates
@@ -84,6 +96,11 @@ function TaskForm () {
         setCurrentTask( prev => (formatDateFields(prev)) )
     }, [])
 
+    const handleChange = (e) => {
+        const {name, value} = e.target
+        setCurrentTask(prev => ({...prev, [name]:value}))
+    }
+
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
         const { labelName, inputName, inputType, currentTask, setCurrentTask, mandatoryField} = params
@@ -98,7 +115,7 @@ function TaskForm () {
                     className="form-input"
                     name = {inputName} // used in the request made to the server
                     value = {currentTask[inputName]}
-                    onChange = {(e) => setCurrentTask({...currentTask, [inputName]:e.target.value})}
+                    onChange = {handleChange}
                     min={["Duration (est)", "Duration (acc)"].includes(labelName)? "10":"1"}
                     max={labelName === "Priority"? 5: undefined}
                     step={["Duration (est)", "Duration (acc)"].includes(labelName)? "10": undefined} 
@@ -128,6 +145,12 @@ function TaskForm () {
             </div>
         )
     }
+    
+    //clearing all fields of a the form
+    const handleClearAll = (excludeEntityFields) => {
+        excludeEntityFields? undefined : setProjectQuery("")
+        setCurrentTask({...defaultTask, id:currentTask.id})
+    }
 
     return (
         <>
@@ -140,11 +163,10 @@ function TaskForm () {
                         <div onClick={() => setCurrentTask({...currentTask, "status":"In-Progress"})}> In-Progress</div>
                         <div onClick={() => setCurrentTask({...currentTask, "status":"Completed"})}> Completed</div>
                     </Dropdown>
-                    <button
-                        style={{"color":currentTask.isRecurring?"rgb(0, 128, 0)":"rgb(255, 0, 0)"}} 
-                        onClick={() => setCurrentTask({...currentTask, isRecurring:!currentTask.isRecurring})}>
-                        Recurring?
-                    </button>
+                    <Dropdown buttonContent={`Clear All`} translate={"0% 70%"}>
+                        <div onClick={()=> handleClearAll(false)}> All fields</div>
+                        <div onClick={()=> handleClearAll(true)}> Excl. entity fields</div>
+                    </Dropdown>
 
                 </div>
             </div>
