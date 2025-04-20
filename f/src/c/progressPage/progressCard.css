@@ -22,11 +22,34 @@
     align-self: flex-end;
 }
 
+/*progress card row*/
+.progress-card-row{
+    /* border: 1px solid; */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+}
+
+/*add entity button*/
+.add-entity button{
+    visibility: hidden;
+    background-color: rgba(0,0,0,0);
+    border: none;
+    padding:2px;
+    margin-right: 5px;
+}
+
+.progress-card-row:hover .add-entity button{
+    visibility: visible;
+}
+
 /* progress card overlay */
 .progress-card-overlay {
     display: flex;
     justify-content: space-between;
-    width:500px;
+    max-width:500px;
+    min-width:500px;
     border: 1px solid;
     border-radius: 5px;
     margin: 2px 0px;
@@ -36,12 +59,14 @@
 }
 
 .objective-card-overlay {
-    width: 450px;
+    max-width:450px;
+    min-width:450px;
     /* border: 1px solid; */
 }
 
 .task-card-overlay {
-    width: 400px;
+    max-width:400px;
+    min-width:400px;    
     /* border: 1px solid; */
 }
 

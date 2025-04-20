@@ -14,8 +14,9 @@ export default function ProgressCard ({entity, entityName, children}) {
     const [isExpanded, setIsExpanded] = useState(false)
     const [progressPercentage, setProgressPercentage] = useState(0)
     const {tasks, objectives, projects, 
+        currentTask, currentObjective, currentProject,
         setCurrentTask, setCurrentObjective, setCurrentProject, 
-        setForm, setIsModalOpen} = useContext(globalContext)
+        setForm, setIsModalOpen, setFormProject, setFormObjective} = useContext(globalContext)
     const divProgressOverlay = useRef(null)
     const divProgressCardTools = useRef(null)
     const [progressBarDivWidth, setProgressBarDivWidth] = useState(null)
@@ -109,33 +110,60 @@ export default function ProgressCard ({entity, entityName, children}) {
         setIsModalOpen(true)
     }
 
+    //flip dropdown icon from downwards-facing to upwards-facing
     const toggleDropdownIcon = () => {
-        return isExpanded? <i class="fa fa-caret-up" aria-hidden="true"></i> : <i className="fa fa-caret-down" aria-hidden="true"></i>
+        return isExpanded? <i className="fa fa-caret-up" aria-hidden="true"></i> : <i className="fa fa-caret-down" aria-hidden="true"></i>
     }
+
+    //handle clicking add-entity button
+    const handleClickAddBtn = (e) => {
+        e.stopPropagation()
+
+        if (entityName==="project") {
+            setCurrentObjective({...currentObjective, "projectId":entity.id})
+            setFormProject(projects.find((project) => entity.id===project.id))
+            setForm(`create-objective`)
+        } 
+
+        if (entityName==="objective"){
+            setCurrentTask({...currentTask, "objectiveId":entity.id})
+            setFormProject(projects.find((project) => entity.projectId===project.id))
+            setFormObjective(entity)
+            setForm(`create-task`)
+        }
+        setIsModalOpen(true)
+    }
+
     return (
         <div className={`progress-card-container  ${entityName}-card-container`}>
-            <div 
-                ref={divProgressOverlay} 
-                className={`progress-card-overlay ${entityName}-card-overlay`}
-                onClick={onClickEditBtn}
-            >
-                <div className="progress-bar">
-                    <div className="progress-bar-fill" 
-                        style={{"width":entityName!=="task"? `${progressBarDivWidth}px`:"100%", 
-                        "backgroundColor":generateProgressBarColour()}}
-                    >
+            <div className="progress-card-row">
+                {entityName==="task"? undefined: <div className={`add-entity add-${entityName}-entity`}>
+                    <button onClick={handleClickAddBtn}> <i className="fa fa-plus" aria-hidden="true"></i> </button>
+                </div>}
+                <div 
+                    ref={divProgressOverlay} 
+                    className={`progress-card-overlay ${entityName}-card-overlay`}
+                    onClick={onClickEditBtn}
+                >
+                    <div className="progress-bar">
+                        <div className="progress-bar-fill" 
+                            style={{"width":entityName!=="task"? `${progressBarDivWidth}px`:"100%", 
+                            "backgroundColor":generateProgressBarColour()}}
+                        >
+                        </div>
+
+                        <div className="progress-card-content">{generateCardContent()}</div>
                     </div>
 
-                    <div className="progress-card-content">{generateCardContent()}</div>
-                </div>
+                    <div ref={divProgressCardTools} className="progress-card-tools" onClick={handleCardExpansion}>
+                        {generateTaskStatusSymbol()}
+                        {entityName !== "task"? <div className="progress-percentage"> {progressPercentage}%</div>: undefined}
+                        {entityName !== "task"? <button className="dropdown-btn"> {toggleDropdownIcon()} </button>: undefined}
+                    </div>
 
-                <div ref={divProgressCardTools} className="progress-card-tools" onClick={handleCardExpansion}>
-                    {generateTaskStatusSymbol()}
-                    {entityName !== "task"? <div className="progress-percentage"> {progressPercentage}%</div>: undefined}
-                    {entityName !== "task"? <button className="dropdown-btn"> {toggleDropdownIcon()} </button>: undefined}
                 </div>
-
             </div>
+
             {isExpanded? children : undefined}
         </div>
 
