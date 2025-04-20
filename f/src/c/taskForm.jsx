@@ -9,7 +9,7 @@ function TaskForm () {
         form, currentTask, setCurrentTask, 
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
-        defaultProject, defaultProjectObjective,
+        formProject, formObjective,
         projects, objectives, handleEntitySubmit, formatDateFields} = useContext(globalContext)
 
     if (!["create-task", "update-task"].includes(form)) {
@@ -20,8 +20,8 @@ function TaskForm () {
     const findTaskProject = (objective) => projects.find( (project)=> project.id===objective.projectId) || {"title":""}
 
     const projectTitles = useRef(projects.map(project=>project.title))
-    const [taskProject, setTaskProject] = useState(form=="create-task"? defaultProject:findTaskProject(findTaskObjective()))
-    const [taskObjective, setTaskObjective] = useState(form=="create-task"? defaultProjectObjective:findTaskObjective())
+    const [taskProject, setTaskProject] = useState(form=="create-task"? formProject:findTaskProject(findTaskObjective()))
+    const [taskObjective, setTaskObjective] = useState(form=="create-task"? formObjective:findTaskObjective())
 
     const [projectQuery, setProjectQuery] = useState(taskProject.title)
     const [relevantObjectives, setRelevantObjetives] = useState(objectives.filter(objective=> objective.projectId == taskProject.id))

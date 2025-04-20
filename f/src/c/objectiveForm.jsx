@@ -9,7 +9,7 @@ function ObjectiveForm () {
         form, currentObjective, setCurrentObjective, 
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
-        defaultProject, projects, handleEntitySubmit, formatDateFields} = useContext(globalContext)
+        formProject, projects, handleEntitySubmit, formatDateFields} = useContext(globalContext)
 
     if (!["create-objective", "update-objective"].includes(form)) {
         return null
@@ -18,7 +18,7 @@ function ObjectiveForm () {
     const findTaskProject = (objective) => projects.find( (project)=> project.id===objective.projectId) || {"title":""}
 
     const projectTitles = useRef(projects.map(project=>project.title))
-    const [taskProject, setTaskProject] = useState(form=="create-task"? defaultProject:findTaskProject(currentObjective))
+    const [taskProject, setTaskProject] = useState(form=="create-task"? formProject:findTaskProject(currentObjective))
     const [projectQuery, setProjectQuery] = useState(taskProject.title)
     
     //#region: search field useEffect updates
