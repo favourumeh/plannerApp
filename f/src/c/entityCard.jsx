@@ -1,6 +1,9 @@
 import "./entityCard.css"
 import { useContext} from "react"
 import globalContext from "../context"
+import TaskInfoCard from "./InfoCards/taskInfoCard"
+import ObjectiveInfoCard from "./InfoCards/objectiveInfoCard"
+import ProjectInfoCard from "./InfoCards/projectInfoCard"
 
 const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
 const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
@@ -48,8 +51,22 @@ function EntityCard ({entity, entityName}) {
         }
     }
 
+    const chooseInfoCard = () => {
+        switch (entityName){
+            case ("project"):
+                return <ProjectInfoCard project={entity} translate="122% 0%" />
+            case ("objective"):
+                return <ObjectiveInfoCard objective={entity} objectiveProject={project} translate="122% 0%"/>
+            case ("task"):
+                return <TaskInfoCard task={entity} taskObjective={objective} taskProject={project} translate="122% 0%"/>
+            default:
+                return
+        }
+    }
+
     return (
         <div id={`row-id-${entity.id}`} className="entity-row">
+            {chooseInfoCard()}
             <div id={`entity-card-id-${entity.id}`} className="entity-card">
                 <div id={`entity-content-id-${entity.id}`}className="entity-content" onClick={(e) => handleEditEntity(e)}>
                     <span id={`entity-identifier-id-${entity.id}`} className="entity-identifier"> {generateCardContent()} </span> 

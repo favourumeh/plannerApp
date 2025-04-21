@@ -21,6 +21,11 @@
     font-weight: bold;
 }
 
+/*Trigger info card visibility*/
 div.task-row:hover .hover-info-card-overlay{
+    visibility: visible;
+}
+
+div.entity-row:hover .hover-info-card-overlay{
     visibility: visible;
 }
