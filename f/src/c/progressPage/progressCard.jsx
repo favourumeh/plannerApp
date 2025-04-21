@@ -1,14 +1,7 @@
 import "./progressCard.css"
 import { useState, useContext, useRef, useEffect} from "react"
 import globalContext from "../../context"
-
-const colourDict = {
-    "red":"rgba(255, 59, 48, 0.8)",
-    "orange": "rgba(255, 149, 0, 0.8)",
-    "yellow":"rgba(255, 204, 0, 0.8)",
-    "light-green": "rgba(52, 199, 89, 0.6)",
-    "green": "rgba(48, 209, 88, 0.8)"
-}
+import {colourDict} from "../../staticVariables"
 
 export default function ProgressCard ({entity, entityName, children}) {
     const [isExpanded, setIsExpanded] = useState(false)
