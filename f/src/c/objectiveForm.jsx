@@ -3,6 +3,7 @@ import {useState, useContext, useEffect, useRef} from "react"
 import globalContext from "../context"
 import SearchResult from "./searchResult"
 import Dropdown from "./Dropdown"
+import { defaultObjective } from "../staticVariables"
 
 function ObjectiveForm () {
     const {
@@ -55,6 +56,11 @@ function ObjectiveForm () {
 
     useEffect(() => setCurrentObjective(formatDateFields(currentObjective)),[])
 
+    const handleChange = (e) => {
+        const {name, value} = e.target
+        setCurrentObjective(prev => ({...prev, [name]:value}))
+    }
+
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
         const { labelName, inputName, inputType, currentObjective, setCurrentObjective, mandatoryField} = params
@@ -67,7 +73,7 @@ function ObjectiveForm () {
                     className="form-input"
                     name = {inputName} // used in the request made to the server
                     value = {currentObjective[inputName]}
-                    onChange = {e => setCurrentObjective({...currentObjective, [inputName]:e.target.value} )}
+                    onChange = {handleChange}
                     autoComplete="off"/>
             </div>
         )
@@ -87,24 +93,38 @@ function ObjectiveForm () {
                     name = {inputName} // used in the request made to the server
                     value = {queryField}
                     autoComplete="off"
-                    onChange = {e => setQueryField(e.target.value)}
+                    onChange = {(e) => setQueryField(e.target.value)}
                     onClick = {(e) => toggleShowSearchResult(e, labelName)}/>
                 <SearchResult searchFieldLabel={labelName} query={queryField} setQuery={setQueryField} entityArray={entityArray}/>
             </div>
         )
     }
 
+     //clearing all fields of a the form
+     const handleClearAll = (excludeEntityFields) => {
+         excludeEntityFields? undefined : setProjectQuery("")
+         setCurrentObjective({
+            ...defaultObjective, 
+            id:currentObjective.id, 
+            projectId:currentObjective.projectId
+        })
+     }
+
     return (
         <>
         <div className="form-overlay" onClick={closeSearchResult}>
             <div className="form-header-overlay">
-                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
+                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} ({currentObjective.id}) </div>
                 <div className="form-header-buttons">
                 <Dropdown buttonContent={`Status: ${currentObjective.status}`} translate={"0% 50%"}>
                     <div onClick={() => setCurrentObjective({...currentObjective, "status":"To-Do"})}> To-Do</div>
                     <div onClick={() => setCurrentObjective({...currentObjective, "status":"In-Progress"})}> In-Progress</div>
                     <div onClick={() => setCurrentObjective({...currentObjective, "status":"Completed"})}> Completed</div>
                 </Dropdown>
+                <Dropdown buttonContent={`Clear`} translate={"0% 70%"}>
+                        <div onClick={()=> handleClearAll(false)}> All fields</div>
+                        <div onClick={()=> handleClearAll(true)}> Excl. entity fields</div>
+                    </Dropdown>
                 </div>
             </div>
 
