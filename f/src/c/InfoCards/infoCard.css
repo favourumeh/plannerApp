@@ -1,0 +1,26 @@
+.hover-info-card-overlay{
+    position: absolute;
+    visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: black;
+    width: 260px;
+    border-radius: 10px;
+    padding: 10px;
+
+}
+
+.hover-info-card-overlay .info-card-item {
+    text-align: left;
+    /* border-top: 1px solid; */
+}
+
+.hover-info-card-overlay .info-card-item span {
+    color: white;
+    font-weight: bold;
+}
+
+div.task-row:hover .hover-info-card-overlay{
+    visibility: visible;
+}

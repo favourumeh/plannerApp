@@ -1,0 +1,9 @@
+.info-card-task-description{
+    /* border: 1px solid; */
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    overflow-wrap: break-word; 
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
