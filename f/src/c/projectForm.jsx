@@ -2,6 +2,7 @@ import "./entityForm.css"
 import {useContext, useEffect} from "react"
 import globalContext from "../context"
 import Dropdown from "./Dropdown"
+import { defaultProject } from "../staticVariables"
 function ProjectForm () {
 
     const {form, currentProject, setCurrentProject, handleEntitySubmit, formatDateFields} = useContext(globalContext)
@@ -34,17 +35,26 @@ function ProjectForm () {
         )
     }
 
+     //clearing all fields of a the form
+     const handleClearAll = () => {
+        setCurrentProject({
+           ...defaultProject, 
+           id:currentProject.id, 
+           userId:currentProject.userId
+       })
+    }
     return (
         <>
         <div className="form-overlay">
             <div className="form-header-overlay">
-                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} </div>
+                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} ({currentProject.id}) </div>
                 <div className="form-header-buttons">
                     <Dropdown buttonContent={`Status: ${currentProject.status}`} translate={"0% 50%"}>
                         <div onClick={() => setCurrentProject({...currentProject, "status":"To-Do"})}> To-Do</div>
                         <div onClick={() => setCurrentProject({...currentProject, "status":"In-Progress"})}> In-Progress</div>
                         <div onClick={() => setCurrentProject({...currentProject, "status":"Completed"})}> Completed</div>
                     </Dropdown>
+                    <button onClick={() => handleClearAll()}> Clear</button>
                 </div>
             </div>
 
