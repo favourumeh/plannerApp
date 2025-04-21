@@ -1,17 +1,16 @@
 import "./taskCard.css"
-import { useState, useEffect, useContext} from "react"
+import {useContext} from "react"
 import globalContext from "../context"
 
-function TaskCard ({task, taskDatum}) {
-    const {setForm, setIsModalOpen, objectives, projects, setCurrentTask, handleDeleteEntity, handleEntitySubmit, formatDateFields, userSettings } = useContext(globalContext)
-    const [projectNumber, setProjectNumber] = useState()
-    const [objectiveNumber, setObjectiveNumber] = useState()
+const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
+const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
 
-    const handleEntityNumbers = () => {
-        setObjectiveNumber(objectives.filter((objective) => objective["id"] == task["objectiveId"])[0]["objectiveNumber"])
-        const projectId = objectives.filter((objective) => objective["id"] == task["objectiveId"])[0]["projectId"]
-        setProjectNumber(projects.filter((project)=> project["id"]==projectId)[0]["projectNumber"])
-    }
+function TaskCard ({task, taskDatum}) {
+    const {setForm, setIsModalOpen, objectives, projects, setCurrentTask, handleDeleteEntity, userSettings } = useContext(globalContext)
+    const taskObjective  = findTaskObjective(objectives, task)
+    const taskProject = findObjectiveProject(projects, taskObjective)
+    const projectNumber  = taskProject.projectNumber
+    const objectiveNumber  = taskObjective.objectiveNumber
 
     const handleEditTask = (e) => {
         e.stopPropagation()
@@ -19,21 +18,6 @@ function TaskCard ({task, taskDatum}) {
         setCurrentTask(task)
         setIsModalOpen(true)
     }
-    const handleCompleteTask = (e, task) => {
-        e.stopPropagation()
-        let  completedTask = {...task, status:task.status!=="Completed"? "Completed":"To-Do"}
-        // console.log("completedTask", completedTask)
-        completedTask = formatDateFields(completedTask)
-        handleEntitySubmit(e, "update", "task", completedTask)
-    }
-
-    useEffect(()=>handleEntityNumbers, [task])
-    useEffect(()=>{
-        if (!projectNumber || !objectiveNumber) {
-            handleEntityNumbers()
-            }
-        }, [projectNumber, objectiveNumber])
-    
     const calculateTaskDuration = () => {
         let duration = task.duration
         if (!!task.start && !!task.finish ) {
@@ -58,23 +42,20 @@ function TaskCard ({task, taskDatum}) {
     const taskRowCardStyle = { "position": "absolute", "top":taskPosition()+ "px"}
 
     return (
-            <div  style={taskRowCardStyle} id={`row-id-${task.id}`} className="task-row">
-                <button> 
-                    <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"/>
-                </button>
-                {/* <button onClick={(e) => handleCompleteTask(e, task)}> 
-                    <i className="fa fa-check" aria-hidden="true"></i>
-                </button> */}
-                <div id={`task-card-id-${task.id}`} style = {{"height":cardHeight}} className="task-card">
-                    <div id={`task-content-id-${task.id}`}className="task-content" onClick={(e) => handleEditTask(e)}>
+        <div  style={taskRowCardStyle} id={`row-id-${task.id}`} className="task-row">
+            <button> 
+                <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"/>
+            </button>
+            <div id={`task-card-id-${task.id}`} style = {{"height":cardHeight}} className="task-card">
+                <div id={`task-content-id-${task.id}`}className="task-content" onClick={(e) => handleEditTask(e)}>
 
-                        <div style={taskIdentifierStyle} className="task-description"> Task {projectNumber}.{objectiveNumber}.{task.taskNumber} {task.description} </div>
-                    </div>
+                    <div style={taskIdentifierStyle} className="task-description"> Task {projectNumber}.{objectiveNumber}.{task.taskNumber} {task.description} </div>
                 </div>
-                <button onClick={(e) => handleDeleteEntity(e, "task", task.id)}> 
-                    <i id={`add-task-id-${task.id}`}  className="fa fa-times" aria-hidden="true"/>
-                </button>
             </div>
+            <button onClick={(e) => handleDeleteEntity(e, "task", task.id)}> 
+                <i id={`add-task-id-${task.id}`}  className="fa fa-times" aria-hidden="true"/>
+            </button>
+        </div>        
     )
 }
 export default TaskCard
