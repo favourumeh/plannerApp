@@ -3,18 +3,7 @@ import {useState, useContext, useEffect, useRef} from "react"
 import globalContext from "../context"
 import SearchResult from "./searchResult"
 import Dropdown from "./Dropdown"
-
-const defaultTask = {
-    isRecurring:false, 
-    priorityScore:1, 
-    status: "To-Do",
-    description:"", 
-    duration:10, 
-    scheduledStart: "", 
-    start: "", 
-    finish: "",
-    tag: ""
-}
+import {defaultTask} from "../staticVariables"
 
 function TaskForm () {
     const {
@@ -149,7 +138,7 @@ function TaskForm () {
     //clearing all fields of a the form
     const handleClearAll = (excludeEntityFields) => {
         excludeEntityFields? undefined : setProjectQuery("")
-        setCurrentTask({...defaultTask, id:currentTask.id})
+        setCurrentTask({...defaultTask, id:currentTask.id, objectiveId:currentTask.objectiveId})
     }
 
     return (
@@ -163,7 +152,7 @@ function TaskForm () {
                         <div onClick={() => setCurrentTask({...currentTask, "status":"In-Progress"})}> In-Progress</div>
                         <div onClick={() => setCurrentTask({...currentTask, "status":"Completed"})}> Completed</div>
                     </Dropdown>
-                    <Dropdown buttonContent={`Clear All`} translate={"0% 70%"}>
+                    <Dropdown buttonContent={`Clear`} translate={"0% 70%"}>
                         <div onClick={()=> handleClearAll(false)}> All fields</div>
                         <div onClick={()=> handleClearAll(true)}> Excl. entity fields</div>
                     </Dropdown>
