@@ -1,6 +1,7 @@
 import "./taskCard.css"
 import {useContext} from "react"
 import globalContext from "../context"
+import TaskInfoCard from "./InfoCards/taskInfoCard"
 
 const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
 const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
@@ -18,6 +19,7 @@ function TaskCard ({task, taskDatum}) {
         setCurrentTask(task)
         setIsModalOpen(true)
     }
+
     const calculateTaskDuration = () => {
         let duration = task.duration
         if (!!task.start && !!task.finish ) {
@@ -43,6 +45,7 @@ function TaskCard ({task, taskDatum}) {
 
     return (
         <div  style={taskRowCardStyle} id={`row-id-${task.id}`} className="task-row">
+            <TaskInfoCard task={task} translate ={"122% 0%"} taskObjective={taskObjective} taskProject={taskProject}/>
             <button> 
                 <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"/>
             </button>
