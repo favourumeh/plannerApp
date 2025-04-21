@@ -1,39 +1,35 @@
 import "./entityCard.css"
-import { useState, useEffect, useContext} from "react"
+import { useContext} from "react"
 import globalContext from "../context"
 
+const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
+const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
+
 function EntityCard ({entity, entityName}) {
-    const {sitePage, setForm, setIsModalOpen, objectives, projects, setCurrentTask, setCurrentProject, setCurrentObjective, handleDeleteEntity} = useContext(globalContext)
+    const {setForm, setIsModalOpen, objectives, projects, setCurrentTask, setCurrentProject, setCurrentObjective, handleDeleteEntity} = useContext(globalContext)
 
-    const findTaskObjective = (task) => objectives.find((objective)=> objective.id===task.objectiveId )
-    const findObjectiveProject = (objective) => projects.find((project)=> project.id===objective.projectId)
-
-    const getProjectNumber = (entity) => {
+    const getProject = (entity) => {
         if (entityName === "task") {
-            return findObjectiveProject(findTaskObjective(entity))["projectNumber"]
+            return findObjectiveProject(projects, findTaskObjective(objectives, entity))
         } else if (entityName === "objective") {
-            return findObjectiveProject(entity)["projectNumber"]
+            return findObjectiveProject(projects, entity)
         } else {
-            return entity["projectNumber"]
+            return entity
         }
     }
-
-    const getObjectiveNumber = (entity) => {
+    
+    const getObjective = (entity) => {
         if (entityName === "task") {
-            return findTaskObjective(entity)["objectiveNumber"]
+            return findTaskObjective(objectives, entity)
         } else if (entityName === "objective") {
-            return entity["objectiveNumber"]
+            return entity
         } else {
             return null
         }
     }
 
-    const [projectNumber, setProjectNumber] = useState(getProjectNumber(entity)) 
-    const [objectiveNumber, setObjectiveNumber] = useState(getObjectiveNumber(entity) )
-
-    useEffect(()=>{
-        setProjectNumber(getProjectNumber(entity))
-        setObjectiveNumber(getObjectiveNumber(entity))}, [sitePage])
+    const project = getProject(entity)
+    const objective  = getObjective(entity)
 
     const handleEditEntity = (e) => {
         e.stopPropagation()
@@ -44,11 +40,11 @@ function EntityCard ({entity, entityName}) {
 
     const generateCardContent = () => {
         if (entityName==="task") {
-            return `Task ${projectNumber}.${objectiveNumber}.${entity.taskNumber}`
+            return `Task ${project.projectNumber}.${objective.objectiveNumber}.${entity.taskNumber}`
         } else if (entityName==="objective") {
-            return `Objective ${projectNumber}.${objectiveNumber}`
+            return `Objective ${project.projectNumber}.${entity.objectiveNumber}`
         } else {
-            return `Project ${projectNumber}`
+            return `Project ${entity.projectNumber}`
         }
     }
 
