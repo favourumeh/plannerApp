@@ -28,6 +28,7 @@ def create_task() -> Tuple[Response, int]:
     task_number = content.get("taskNumber", None)
     status = content.get("status", "To-Do")
     description = content.get("description", None)
+    duration_est = content.get("durationEst", None)
     duration = content.get("duration", None)
     priority_score = content.get("priorityScore", 1)
     scheduled_start = content.get("scheduledStart", None)
@@ -64,8 +65,8 @@ def create_task() -> Tuple[Response, int]:
         resp_dict["message"] = f"Failure: The description is over the {task_description_limit} char limit."
         return jsonify(resp_dict), 400
     
-    if not duration:
-        resp_dict["message"] = "Failure: Task is missing a duration (mins)."
+    if not duration_est:
+        resp_dict["message"] = "Failure: Task is missing a duration_est (mins)."
         return jsonify(resp_dict), 400
 
     scheduled_start = convert_date_str_to_datetime(scheduled_start, '%Y-%m-%d')
@@ -79,7 +80,7 @@ def create_task() -> Tuple[Response, int]:
 
     try:
         task = Task(task_number=task_number, status=status, description=description, 
-                    duration=duration, priority_score=priority_score, 
+                    duration_est=duration_est, duration=duration, priority_score=priority_score, 
                     scheduled_start=scheduled_start, start=start, finish=finish,
                     is_recurring=is_recurring, last_updated=last_updated,
                     was_paused=was_paused, parent_task_id=parent_task_id, tag=tag, objective_id=objective_id)
@@ -152,6 +153,7 @@ def update_task(task_id: int) -> Tuple[Response, int]:
     content = request.json
     task.status = content.get("status", task.status)
     task.description = content.get("description", task.description)
+    task.duration_est = content.get("durationEst", task.duration_est)
     task.duration = content.get("duration", task.duration)
     task.priority_score = content.get("priorityScore", task.priority_score)
     task.start = content.get("start", task.start)

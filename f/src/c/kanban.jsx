@@ -94,7 +94,7 @@ const Kanban = ({sitePage}) => {
                 let task = {...entity, "parentTaskId":getParentTaskId(), "start":null}
                 handleEntitySubmit(null,  "create", "task", formatDateFields(task))
                 entity.status = "Completed"
-                const start = new Date(now.getTime() - entity.duration*60*1000)
+                const start = new Date(now.getTime() - entity.duration_est*60*1000)
                 entity.start = !!entity.start? entity.start: start
                 entity.finish = now
             }

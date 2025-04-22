@@ -21,12 +21,12 @@ function TaskCard ({task, taskDatum}) {
     }
 
     const calculateTaskDuration = () => {
-        let duration = task.duration
+        let duration_est = task.duration_est
         if (!!task.start && !!task.finish ) {
             const durationMS  = new Date (task.finish).getTime() - new Date(task.start).getTime() // in MS
-            duration  = Math.round(durationMS/(60*1000)) // in Mins
+            duration_est  = Math.round(durationMS/(60*1000)) // in Mins
         }
-        return duration
+        return duration_est
     }
     const taskDuration = calculateTaskDuration()
     const cardHeight  = String(15*taskDuration/10) + "px"

@@ -77,7 +77,7 @@ def signup() -> Tuple[Response, int]:
         default_objective = Objective(objective_number=0,  type="default project objective", title="No Objective", description=description, tag="default", project_id=project_id)
         db.session.add(default_objective)
         objective_id = Objective.query.filter_by(type="default project objective", project_id=project_id).first().id #tag distinguishes user's default project objective 
-        example_task = Task(task_number=0, description="Example Task", type="example task", duration=10, scheduled_start=datetime.now().date(), objective_id=objective_id)
+        example_task = Task(task_number=0, description="Example Task", type="example task", duration_est=10, scheduled_start=datetime.now().date(), objective_id=objective_id)
         db.session.add(example_task)
         db.session.commit()
         resp_dict["message"] = f"Success: Account Created! Login to start planning"

@@ -32,6 +32,8 @@ def create_project() -> Tuple[Response, int]:
     title: str = content.get("title", "Unnamed Project")
     description: str = content.get("description", None)
     deadline: datetime = content.get("deadline", None)
+    scheduled_start: str|None = content.get("scheduledStart", None)
+    scheduled_finish: str|None = content.get("scheduledFinish", None) 
     last_updated: datetime = datetime.now(tz=timezone.utc) #keep: used to get the project id
     tag: str = content.get("tag", None)
     user_id: int = session["userId"] 
@@ -45,10 +47,14 @@ def create_project() -> Tuple[Response, int]:
         return jsonify(resp_dict), 400
 
     deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%d')
+    scheduled_start = convert_date_str_to_datetime(scheduled_start, '%Y-%m-%d')
+    scheduled_finish = convert_date_str_to_datetime(scheduled_finish, '%Y-%m-%d')
+
     project_number = generate_entity_number(entity_number=project_number, parent_entity_id=user_id, parent_entity_name="user", entity_name="project", entity=Project)
 
     try:
-        project = Project(project_number=project_number, status=status, title=title, description=description, deadline=deadline, last_updated=last_updated, tag=tag, user_id=user_id)
+        project = Project(project_number=project_number, status=status, title=title, description=description, deadline=deadline, 
+                          scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, last_updated=last_updated, tag=tag, user_id=user_id)
         db.session.add(project)
         project_id = Project.query.filter_by(title=title, description=description, last_updated=last_updated, user_id=user_id).first().id
         objective_desc = "Stores all project tasks that do not belong to an objective"
@@ -96,7 +102,9 @@ def update_project(project_id: int) -> Tuple[Response, int]:
     project.title = content.get("title", project.title)
     project.description = content.get("description", project.description)
     project.status = content.get("status", project.status)
-    deadline = content.get("deadline", project.deadline)
+    deadline: str|None = content.get("deadline", project.deadline)
+    scheduled_start: str|None = content.get("scheduledStart", project.scheduled_start)
+    scheduled_finish: str|None = content.get("scheduledFinish", project.scheduled_finish) 
     project.last_updated = datetime.now(tz=timezone.utc)
     project.tag = content.get("tag", project.tag)
 
@@ -105,11 +113,13 @@ def update_project(project_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 400
 
     project.deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%d')
-    
+    project.scheduled_start = convert_date_str_to_datetime(scheduled_start, '%Y-%m-%d')
+    project.scheduled_finish = convert_date_str_to_datetime(scheduled_finish, '%Y-%m-%d')
+
     if project.type in ["default project"]:
         resp_dict["message"] = "Failure: User is attempting to update a default project which is not allowed."
         return jsonify(resp_dict),  403
-    
+
     try:
         db.session.commit()
         resp_dict["message"] = "Success: Project has been updated."
@@ -117,7 +127,6 @@ def update_project(project_id: int) -> Tuple[Response, int]:
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not update the project! Reason: {e}"
         return jsonify(resp_dict), 404
-        
 
 #delete
 @project.route("/delete-project/<int:project_id>", methods=["DELETE"])

@@ -5,7 +5,7 @@ const defaultTask = {
     priorityScore:1, 
     status:"To-Do",
     description:"", 
-    duration:10, 
+    duration_est:10, 
     scheduledStart: "", 
     start:"", 
     finish:"",
