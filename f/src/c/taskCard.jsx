@@ -25,11 +25,11 @@ function TaskCard ({task, taskDatum}) {
         if (!!task.start && !!task.finish ) {
             const durationMS  = new Date (task.finish).getTime() - new Date(task.start).getTime() // in MS
             duration  = Math.round(durationMS/(60*1000)) // in Mins
-            duration = duration < 10 ? 10 : duration
         }
         return duration
     }
-    const cardHeight  = String(15*calculateTaskDuration()/10) + "px"
+    const taskDuration = calculateTaskDuration()
+    const cardHeight  = String(15*taskDuration/10) + "px"
     const taskIdentifierStyle = {"color": task.status === "Completed"? "rgb(0, 230, 0)": "white"}
 
     //calculate the position of the task row card relative to the top of the homepage body 
@@ -43,6 +43,11 @@ function TaskCard ({task, taskDatum}) {
     }
     const taskRowCardStyle = { "position": "absolute", "top":taskPosition()+ "px"}
 
+    //generate the text on the task card
+    const generateTaskCardText = () => {
+        if (taskDuration<10) return ""
+        return `Task ${projectNumber}.${objectiveNumber}.${task.taskNumber} ${task.description}`
+    }
     return (
         <div  style={taskRowCardStyle} id={`row-id-${task.id}`} className="task-row">
             <TaskInfoCard task={task} translate ={"122% 0%"} taskObjective={taskObjective} taskProject={taskProject}/>
@@ -52,7 +57,7 @@ function TaskCard ({task, taskDatum}) {
             <div id={`task-card-id-${task.id}`} style = {{"height":cardHeight}} className="task-card">
                 <div id={`task-content-id-${task.id}`}className="task-content" onClick={(e) => handleEditTask(e)}>
 
-                    <div style={taskIdentifierStyle} className="task-description"> Task {projectNumber}.{objectiveNumber}.{task.taskNumber} {task.description} </div>
+                    <div style={taskIdentifierStyle} className="task-description"> {generateTaskCardText()} </div>
                 </div>
             </div>
             <button onClick={(e) => handleDeleteEntity(e, "task", task.id)}> 
