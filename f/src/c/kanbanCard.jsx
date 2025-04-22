@@ -5,36 +5,27 @@ import { useState, useEffect, useContext } from "react"
 
 export default function KanbanCard ({entity, entityName}) {
     const {objectives, projects, setCurrentTask, setCurrentObjective, 
-           setCurrentProject, setIsModalOpen, setForm, handleDeleteEntity} = useContext(globalContext)
+           setCurrentProject, setIsModalOpen, setForm, handleDeleteEntity,
+            getProject, getObjective} = useContext(globalContext)
     const [projectNumber, setProjectNumber] = useState()
     const [objectiveNumber, setObjectiveNumber] = useState()
 
-
     // calculate the project and objective numbers for each entity 
     const handleEntityNumbers = () => {
-        if (entityName==="task") {
-            setObjectiveNumber(objectives.filter((objective) => objective["id"] == entity["objectiveId"])[0]["objectiveNumber"])
-            const projectId = objectives.filter((objective) => objective["id"] == entity["objectiveId"])[0]["projectId"]
-            setProjectNumber(projects.filter((project)=> project["id"]==projectId)[0]["projectNumber"])
-        }
-        if (entityName==="objective") {
-            setProjectNumber(projects.filter((project)=> project["id"]==entity.projectId)[0]["projectNumber"])
-        } 
+        setProjectNumber(getProject(entity, entityName, projects, objectives)?.projectNumber)
+        setObjectiveNumber(getObjective(entity, entityName, objectives)?.objectiveNumber)
     }
 
-    useEffect(()=>handleEntityNumbers(), [entity])
+    useEffect(()=>handleEntityNumbers(), [entity]) // very important
 
-    const generateEntityId = (entityName) => {
-        switch (entityName) {
-            case "task":
-                return `${projectNumber}.${objectiveNumber}.${entity.taskNumber}`
-            case "objective":
-                return `${projectNumber}.${entity.objectiveNumber}`
-            case "project":
-                return `${entity.projectNumber}`
-            default:
-                throw new Error("Invalid entity name. Must be one of 'task', 'objective', or 'project'.")
-        } 
+    const generateEntityNumbers = () => {
+        if (entityName==="task") {
+            return `${projectNumber}.${objectiveNumber}.${entity.taskNumber}`
+        } else if (entityName==="objective") {
+            return `${projectNumber}.${entity.objectiveNumber}`
+        } else {
+            return `${entity.projectNumber}`
+        }
     }
 
     // Edit and Delete buttons adjacent to entity cards
@@ -65,7 +56,7 @@ export default function KanbanCard ({entity, entityName}) {
         >
             <button onPointerDown={onClickEditBtn} > <i className="fa fa-pencil" aria-hidden="true"></i></button>
             <div className="kanban-card-content">
-                {generateEntityId(entityName)} {entityName==="task"? signalParentTask() + " " + entity.description: entity.title}
+                {generateEntityNumbers(entityName)} {entityName==="task"? signalParentTask() + " " + entity.description: entity.title}
             </div>
             <button onPointerDown ={onClickDeleteBtn}> &times;</button>
 
