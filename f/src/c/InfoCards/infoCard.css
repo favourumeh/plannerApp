@@ -29,3 +29,7 @@ div.task-row:hover .hover-info-card-overlay{
 div.entity-row:hover .hover-info-card-overlay{
     visibility: visible;
 }
+
+div.progress-card-overlay:hover .hover-info-card-overlay{
+    visibility: visible;
+}

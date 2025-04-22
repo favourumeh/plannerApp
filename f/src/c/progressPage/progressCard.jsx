@@ -2,14 +2,20 @@ import "./progressCard.css"
 import { useState, useContext, useRef, useEffect} from "react"
 import globalContext from "../../context"
 import {colourDict} from "../../staticVariables"
+import TaskInfoCard from "../InfoCards/taskInfoCard"
+import ObjectiveInfoCard from "../InfoCards/objectiveInfoCard"
+import ProjectInfoCard from "../InfoCards/projectInfoCard"
 
 export default function ProgressCard ({entity, entityName, children}) {
     const [isExpanded, setIsExpanded] = useState(false)
     const [progressPercentage, setProgressPercentage] = useState(0)
-    const {tasks, objectives, projects, 
-        currentTask, currentObjective, currentProject,
+    const {
+        tasks, objectives, projects, 
+        currentTask, currentObjective, 
         setCurrentTask, setCurrentObjective, setCurrentProject, 
-        setForm, setIsModalOpen, setFormProject, setFormObjective} = useContext(globalContext)
+        setForm, setIsModalOpen, setFormProject, setFormObjective, 
+        getProject, getObjective
+    } = useContext(globalContext)
     const divProgressOverlay = useRef(null)
     const divProgressCardTools = useRef(null)
     const [progressBarDivWidth, setProgressBarDivWidth] = useState(null)
@@ -127,6 +133,22 @@ export default function ProgressCard ({entity, entityName, children}) {
         setIsModalOpen(true)
     }
 
+    //choose which info card to show when progress card is hovered on
+    const project = getProject(entity, entityName, projects, objectives)
+    const objective = getObjective(entity, entityName, objectives)
+    const chooseInfoCard = () => {
+        switch (entityName){
+            case ("project"):
+                return <ProjectInfoCard project={entity} translate="-110% 0%" />
+            case ("objective"):
+                return <ObjectiveInfoCard objective={entity} objectiveProject={project} translate="-130% 0%"/>
+            case ("task"):
+                return <TaskInfoCard task={entity} taskObjective={objective} taskProject={project} translate="-140% 0%"/>
+            default:
+                return
+        }
+    }
+
     return (
         <div className={`progress-card-container  ${entityName}-card-container`}>
             <div className="progress-card-row">
@@ -138,6 +160,7 @@ export default function ProgressCard ({entity, entityName, children}) {
                     className={`progress-card-overlay ${entityName}-card-overlay`}
                     onClick={onClickEditBtn}
                 >
+                    {chooseInfoCard()}
                     <div className="progress-bar">
                         <div className="progress-bar-fill" 
                             style={{"width":entityName!=="task"? `${progressBarDivWidth}px`:"100%", 
