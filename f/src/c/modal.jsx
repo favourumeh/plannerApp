@@ -1,6 +1,7 @@
 import "./modal.css"
 import { useEffect, useContext } from "react"
 import globalContext from "../context.js"
+import { defaultTask, defaultObjective, defaultProject } from '../staticVariables.js'
 
 function Modal ({children}) {
     const {isModalOpen, setIsModalOpen, setForm, setCurrentTask, setCurrentObjective, setCurrentProject, setShowProjectQueryResult, setShowObjectiveQueryResult} = useContext(globalContext)
@@ -11,9 +12,9 @@ function Modal ({children}) {
     const handleModalClose = () => {
         setIsModalOpen(false)
         setForm("")
-        setCurrentTask({status:"To-Do", isRecurring:false, priorityScore:1})
-        setCurrentProject({status:"To-Do"})
-        setCurrentObjective({status:"To-Do"})
+        setCurrentTask(defaultTask)
+        setCurrentObjective(defaultObjective)
+        setCurrentProject(defaultProject)
         setShowProjectQueryResult(false)
         setShowObjectiveQueryResult(false)
     }

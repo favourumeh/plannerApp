@@ -15,7 +15,7 @@ import EntityPage from './c/entityPage.jsx'
 import ObjectiveForm from './c/objectiveForm.jsx'
 import Kanban from './c/kanban.jsx'
 import ProgressPage from './c/progressPage/progressPage.jsx'
-
+import { defaultTask, defaultObjective, defaultProject } from './staticVariables.js'
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
     return state!=null? state:default_ 
@@ -37,9 +37,9 @@ function App() {
     const [defaultProjectObjective, setDefaultProjectObjective] = useState(() => persistState("defaultProjectObjective",{}))
     const [formProject, setFormProject] = useState(defaultProject)
     const [formObjective, setFormObjective] = useState(defaultProjectObjective)
-    const [currentTask, setCurrentTask] = useState(() => persistState("currentTask", {status:"To-Do", isRecurring:false, priorityScore:1, projectTitle:"", objectiveTitle:""}))
-    const [currentObjective, setCurrentObjective] = useState(() => persistState("currentObjective", {status:"To-Do"}))
-    const [currentProject, setCurrentProject] = useState(() => persistState("currentProject", {status:"To-Do"}))
+    const [currentTask, setCurrentTask] = useState(() => persistState("currentTask", defaultTask))
+    const [currentObjective, setCurrentObjective] = useState(() => persistState("currentObjective", defaultObjective))
+    const [currentProject, setCurrentProject] = useState(() => persistState("currentProject", defaultProject))
     const [showProjectQueryResult, setShowProjectQueryResult] = useState(false)
     const [showObjectiveQueryResult, setShowObjectiveQueryResult] = useState(false)
     const [homePageTasks, setHomePageTasks] = useState(()=>persistState("homePageTasks",[]))
