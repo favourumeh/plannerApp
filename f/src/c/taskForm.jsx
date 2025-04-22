@@ -80,7 +80,7 @@ function TaskForm () {
         if (!!currentTask.start && !!currentTask.finish){
             const durationAccMs = new Date (currentTask.finish).getTime() - new Date(currentTask.start).getTime()
             const durationAccMin = Math.round(durationAccMs/(60*1000))
-            setCurrentTask({...currentTask, "durationAcc":durationAccMin})
+            setCurrentTask({...currentTask, "duration":durationAccMin})
         }
         setCurrentTask( prev => (formatDateFields(prev)) )
     }, [])
@@ -167,7 +167,7 @@ function TaskForm () {
                     {formField({labelName:"Description", inputName:"description", inputType:"text", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
                     {formField({labelName:"Scheduled Date", inputName:"scheduledStart", inputType:"date", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Duration (est)", inputName:"durationEst", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:true})}
-                    {formField({labelName:"Duration (acc)", inputName:"durationAcc", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
+                    {formField({labelName:"Duration (acc)", inputName:"duration", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Priority", inputName:"priorityScore", inputType:"number", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Start", inputName:"start", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}
                     {formField({labelName:"Finish", inputName:"finish", inputType:"datetime-local", currentTask:currentTask, setCurrentTask:setCurrentTask, mandatoryField:false})}

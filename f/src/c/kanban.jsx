@@ -87,6 +87,8 @@ const Kanban = ({sitePage}) => {
             if (entity.status==="Completed") {
                 entity.start = !!entity.start? entity.start: now
                 entity.finish = now
+                const durationMS  = new Date (entity.finish).getTime() - new Date(entity.start).getTime() // in MS
+                entity.duration  = Math.round(durationMS/(60*1000)) // in Mins
             }
             if (entity.status==="Paused") {
                 entity.wasPaused = true
