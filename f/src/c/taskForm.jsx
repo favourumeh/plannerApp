@@ -176,7 +176,7 @@ function TaskForm () {
                         <button type="submit" 
                             className="submit-btn" 
                             onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentTask)}
-                            disabled ={!taskProject.title || !taskObjective || !currentTask.description || !(currentTask.duration_est >=  10) ? true:false}>
+                            disabled ={!taskProject.title || !taskObjective || !currentTask.description || !(currentTask.durationEst >=  10) ? true:false}>
                             {form == "create-task"? "Create":"Update"}
                         </button>
                     </div>

@@ -21,7 +21,7 @@ function TaskCard ({task, taskDatum}) {
     }
 
     const calculateTaskDuration = () => {
-        let duration_est = task.duration_est
+        let duration_est = task.durationEst
         if (!!task.start && !!task.finish ) {
             const durationMS  = new Date (task.finish).getTime() - new Date(task.start).getTime() // in MS
             duration_est  = Math.round(durationMS/(60*1000)) // in Mins
