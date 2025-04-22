@@ -9,7 +9,7 @@ function Modal ({children}) {
         return null
     }
 
-    const handleModalClose = () => {
+    const handleClickCloseBtn= () => {
         setIsModalOpen(false)
         setForm("")
         setCurrentTask(defaultTask)
@@ -19,10 +19,17 @@ function Modal ({children}) {
         setShowObjectiveQueryResult(false)
     }
 
+    const handleClickModalOverlay= () => {
+        setIsModalOpen(false)
+        setForm("")
+        setShowProjectQueryResult(false)
+        setShowObjectiveQueryResult(false)
+    }
+
     return (
-        <div className="modal-overlay" onClick={handleModalClose} >
+        <div className="modal-overlay" onClick={handleClickModalOverlay} >
             <div className="modal-content" onClick={(e)=>e.stopPropagation()}> 
-                <button className="modal-close-btn" onClick={()=>handleModalClose()}>&times;</button>
+                <button className="modal-close-btn" onClick={()=>handleClickCloseBtn()}>&times;</button>
                 {children}
             </div>
         </div>
