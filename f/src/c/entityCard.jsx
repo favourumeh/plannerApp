@@ -5,34 +5,14 @@ import TaskInfoCard from "./InfoCards/taskInfoCard"
 import ObjectiveInfoCard from "./InfoCards/objectiveInfoCard"
 import ProjectInfoCard from "./InfoCards/projectInfoCard"
 
-const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
-const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
-
 function EntityCard ({entity, entityName}) {
-    const {setForm, setIsModalOpen, objectives, projects, setCurrentTask, setCurrentProject, setCurrentObjective, handleDeleteEntity} = useContext(globalContext)
+    const {
+        setForm, setIsModalOpen, objectives, projects, 
+        setCurrentTask, setCurrentProject, setCurrentObjective, 
+        handleDeleteEntity, getObjective, getProject} = useContext(globalContext)
 
-    const getProject = (entity) => {
-        if (entityName === "task") {
-            return findObjectiveProject(projects, findTaskObjective(objectives, entity))
-        } else if (entityName === "objective") {
-            return findObjectiveProject(projects, entity)
-        } else {
-            return entity
-        }
-    }
-    
-    const getObjective = (entity) => {
-        if (entityName === "task") {
-            return findTaskObjective(objectives, entity)
-        } else if (entityName === "objective") {
-            return entity
-        } else {
-            return null
-        }
-    }
-
-    const project = getProject(entity)
-    const objective  = getObjective(entity)
+    const project = getProject(entity, entityName, projects, objectives)
+    const objective  = getObjective(entity, entityName, objectives)
 
     const handleEditEntity = (e) => {
         e.stopPropagation()

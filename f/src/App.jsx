@@ -233,6 +233,7 @@ function App() {
         return entity
     } 
 
+    // Hover Functions 
     const onShowHoverText = (text) => {
         setIsShowHoverText(true)
         setHoverText(text)
@@ -241,6 +242,31 @@ function App() {
     const onHideHoverText = () => {
         setIsShowHoverText(false)
         setHoverText("")
+    }
+
+    const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
+    const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
+
+    const getProject = (entity, entityName, projects, objectives) => {
+        //get the project of an objective or task. If entity is a project return entity.
+        if (entityName === "task") {
+            return findObjectiveProject(projects, findTaskObjective(objectives, entity))
+        } else if (entityName === "objective") {
+            return findObjectiveProject(projects, entity)
+        } else {
+            return entity
+        }
+    }
+    
+    const getObjective = (entity, entityName, objectives) => {
+        //get the objective of a task entity. Return entity and null if the entity is an objetive and project respectively.  
+        if (entityName === "task") {
+            return findTaskObjective(objectives, entity)
+        } else if (entityName === "objective") {
+            return entity
+        } else {
+            return null
+        }
     }
 
     // create global prop object
@@ -269,7 +295,8 @@ function App() {
         currentDate, setCurrentDate, 
         entityName, setEntityName, entity, setEntity,
         userSettings, setUserSettings, formatDateFields,
-        onShowHoverText, onHideHoverText, isShowHoverText, hoverText
+        onShowHoverText, onHideHoverText, isShowHoverText, hoverText,
+        getProject, getObjective
     }
 
     return (
