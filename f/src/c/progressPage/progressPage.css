@@ -1,0 +1,28 @@
+.progress-page-header-row2 {
+    margin-top:5px;
+    margin-bottom: 5px;
+    background-color: rgba(48, 48, 100, 0.137);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress-page-header-row2:hover {
+    border-radius: 5px;
+    background-color: rgba(48, 48, 100, 0.137);
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+
+.progress-page-header-row2 button.dropbtn {
+    background: none;
+    font-weight: 600;
+    border: rgba(0,0,0,0);
+
+}
+
+.progress-page-header-row2 button.dropbtn:hover {
+    border: rgba(0,0,0,0);
+    color: rgb(0, 230, 0);
+
+}

@@ -6,7 +6,7 @@ import TaskInfoCard from "../InfoCards/taskInfoCard"
 import ObjectiveInfoCard from "../InfoCards/objectiveInfoCard"
 import ProjectInfoCard from "../InfoCards/projectInfoCard"
 
-export default function ProgressCard ({entity, entityName, children}) {
+export default function ProgressCard ({entity, entityName, metric, children}) {
     const [isExpanded, setIsExpanded] = useState(false)
     const [progressPercentage, setProgressPercentage] = useState(0)
     const {
@@ -16,6 +16,7 @@ export default function ProgressCard ({entity, entityName, children}) {
         setForm, setIsModalOpen, setFormProject, setFormObjective, 
         getProject, getObjective
     } = useContext(globalContext)
+    
     const divProgressOverlay = useRef(null)
     const divProgressCardTools = useRef(null)
     const [progressBarDivWidth, setProgressBarDivWidth] = useState(null)
@@ -30,7 +31,7 @@ export default function ProgressCard ({entity, entityName, children}) {
             setProgressBarDivWidth((overlayWidth-toolWidth)*progressPercentage/100)
         }
     }
-    useEffect(() => {getWidthOfProgressBarFill()}, [progressBarDivWidth])
+    useEffect(() => {getWidthOfProgressBarFill()}, [progressBarDivWidth, progressPercentage])
 
     //Determines whether an entity card can expand to reveal its children (e.g., Projects expands to reveal objectives) 
     const handleCardExpansion = (e) => {
@@ -82,7 +83,7 @@ export default function ProgressCard ({entity, entityName, children}) {
     }
 
     //Determine the progress percentage based on completed entities of the children
-    const generateProgressPercentage = () => {
+    const generateProgressPercentageByTaskCount = () => {
         if (entityName==="project") {
             const projectsObjectives = objectives.filter( (objective) => objective.projectId == entity.id )
             const objectiveIds = projectsObjectives.map( (objective) => objective.id)
@@ -99,7 +100,40 @@ export default function ProgressCard ({entity, entityName, children}) {
         }
     }
 
-    useEffect(() => generateProgressPercentage(), [tasks, objectives, projects])
+    const chooseTaskDuration = (task) => {
+        //choose between the actual task duration and the estimated task duration
+        return task.duration ? task.duration: task.durationEst
+    }
+    const generateProgressPercentageByDuration = () => {
+        if (entityName==="project") {
+            const projectsObjectives = objectives.filter( (objective) => objective.projectId == entity.id )
+            const objectiveIds = projectsObjectives.map( (objective) => objective.id)
+            const projectsTasks = tasks.filter((task) => objectiveIds.includes(task.objectiveId)) 
+
+            const projectDuration = projectsTasks.reduce((acc, currTask) => acc + chooseTaskDuration(currTask), 0)
+            const durationofCompletedTasks = projectsTasks.reduce((acc, currTask) => currTask.status==="Completed"? acc+currTask.duration:acc+0, 0)
+            projectDuration>0? setProgressPercentage(Math.round(100*durationofCompletedTasks/projectDuration)): setProgressPercentage(0)
+        }
+
+        if (entityName==="objective") {
+            const objectivesTasks = tasks.filter((task) => task.objectiveId == entity.id)
+            const objectiveDuration = objectivesTasks.reduce((acc, currTask) => acc + chooseTaskDuration(currTask), 0)
+            const durationofCompletedTasks = objectivesTasks.reduce((acc, currTask) => currTask.status==="Completed"? acc+currTask.duration:acc+0, 0)
+            objectiveDuration>0? setProgressPercentage(Math.round(100*durationofCompletedTasks/objectiveDuration)): setProgressPercentage(0)
+        }
+    }
+
+    const generateProgressPercentage = () => {
+        if (metric==="duration") {
+            generateProgressPercentageByDuration() 
+        }
+
+        if (metric==="task-count") {
+            generateProgressPercentageByTaskCount()
+        }
+    }
+
+    useEffect(() => generateProgressPercentage(), [tasks, objectives, projects, metric])
 
     //Open an edit entity form
     const onClickEditBtn = (e) => {
