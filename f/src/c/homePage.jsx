@@ -9,6 +9,7 @@ import AddEntity from "./toolbarContent/addEntity"
 import FilterPage from "./toolbarContent/filterPage" 
 import ViewPage from "./toolbarContent/viewPage"
 import RefreshEntities from "./toolbarContent/refreshEntities"
+import TimerLine from "./timerLine"
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todaysDate = new Date().toDateString()
@@ -80,6 +81,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
                     </ToolBar>
                 </div>
             </div>
+            <TimerLine bodyTop={taskDatum}/>
             <div ref={divRef} className="homepage-body"> 
                 <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
                 <div className="task-card-overlay">
