@@ -1,0 +1,25 @@
+.timer-line-container{
+    position: absolute;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    /* border: 1px solid; */
+    padding: 0px;
+    z-index: 0;
+    translate: 72px 0px;;
+    width: 360px;
+}
+.timer-line {
+    position: relative;
+    top: 1px;
+    width: 100%;
+    height:1px;
+    background-color: red;
+
+}
+
+.timer-line-caret{
+    color: red;
+    /* border: 1px solid white; */
+    padding:0px;
+}
