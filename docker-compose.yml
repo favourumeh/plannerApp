@@ -1,0 +1,19 @@
+x-backend-vars: #used as a way to store reusable variables.
+  repoAndImageName: &backend_repo_and_image_tag flask-backend-planner-app:v1
+
+
+services:
+  flask-backend:
+    container_name: planner-app-backend
+    image: *backend_repo_and_image_tag
+    build: 
+      context: ./b
+      dockerfile: Dockerfile
+      args:
+        backend_container_port: ${backend_container_port:-1234}
+    ports:
+      - "${backend_hosting_port}:${backend_container_port:-1234}"
+    env_file:
+      - ./b/.env
+    restart: unless-stopped
+         

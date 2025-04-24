@@ -1,0 +1,11 @@
+#files/dirs to exclude 
+__pycache__/
+.venv*/
+notes/
+ssl cert/
+temp*/
+test/
+.gitignore
+.env
+Dockerfile
+*.db
