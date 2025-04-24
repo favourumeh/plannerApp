@@ -31,7 +31,7 @@ serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 #generate the config dict
 params = sys.argv[1:]
 print("sys.argv: ", params)
-default_config_dict= {"--env":"dev", "--rdbms":"sqlite"}
+default_config_dict= {"--env":"dev", "--rdbms":"az_mysql"}
 config_dict = pp.generate_config_dict(params, default_config_dict)
 
 #configure databse sqlite or az_mysql
