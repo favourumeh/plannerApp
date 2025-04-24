@@ -105,10 +105,12 @@ function App() {
     }
 
     const handleRefresh = async (hideNoti=true) => {
-        try {
-            fetchAllContent()
-            hideNoti || handleNotification("User content refreshed", "success")
-        } catch {
+        const resp_status = await fetchAllContent()
+        if (resp_status === 500){
+            return 
+        } else if (resp_status === 200 ) {
+            hideNoti  ||  handleNotification("User content refreshed", "success")
+        } else {
             handleLogout()
             handleNotification("Could not refresh User Content", "failure")
         }

@@ -1,14 +1,20 @@
 import { backendBaseUrl } from "./project_config"
 
 const fetchAllUserContent = async (setProjects, setDefaultProject, setObjectives, setDefaultProjectObjective, setTasks, handleNotification) => {
-    const url = `${backendBaseUrl}/read-all`
-    const options = {
-        method:"GET",
-        headers: {"Content-Type":"application/json"},
-        credentials:"include"
+    try {
+        const url = `${backendBaseUrl}/read-all`
+        const options = {
+            method:"GET",
+            headers: {"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (error) {
+        console.error("Error fetching all user content:", error)
+        handleNotification(`Error fetching all user content. R: Database is most likely down. Please wait a few mins.`, "failure")
+        return resp.status
     }
-    const resp = await fetch(url, options)
-    const resp_json = await resp.json()
 
     if (resp.status == 200){
         console.log(resp_json.message)
@@ -32,6 +38,7 @@ const fetchAllUserContent = async (setProjects, setDefaultProject, setObjectives
             handleNotification(resp_ref_json.message, "failure")
         }
     }
+    return resp.status
 }
 
 const fetchUserProjects = async (setProjects, handleNotification, setDefaultProject) => {
