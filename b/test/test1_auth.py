@@ -6,7 +6,7 @@ from . import db, User, Refresh_Token, Project
 from . import plannerAppTestDependecies
 from datetime import datetime, timezone, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
-from plannerPackage import filter_dict, decrypt_bespoke_session_cookie, generate_all_user_content
+from plannerPackage import filter_dict, decrypt_bespoke_session_cookie, session_key
 
 #Record test execution time
 now = datetime.now(tz=timezone.utc)
@@ -71,7 +71,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.client.get("/logout")
         
         print("         Test accessing route with expired with bsc containing expired rt fails (i.e. bsc rt == db rt but db's exp field in the past)")
-        expired_rt = decrypt_bespoke_session_cookie(expired_bsc, serializer, os.environ["session_key"])["refreshToken"]
+        expired_rt = decrypt_bespoke_session_cookie(expired_bsc, serializer, session_key)["refreshToken"]
         expired_rt_hash = generate_password_hash(expired_rt, "pbkdf2")
         refresh_token_obj = Refresh_Token(token=expired_rt_hash, exp=now-timedelta(days=1), user_id=1)
         with app.app_context():
@@ -242,7 +242,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         
         #import an expired bespoke session cookie and decryption key
         bsc = os.environ["expired_bespoke_session_cookie"]
-        sk = os.environ["session_key"]
+        sk = session_key
 
         #Test Cases 
         print("         Test accessing the route whilst not logged in fails - (c: no bespoke_session cookie)")

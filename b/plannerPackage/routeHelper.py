@@ -7,6 +7,7 @@ from models import Refresh_Token
 from functools import wraps
 from datetime import datetime, timedelta, timezone
 from . import refresh_token_dur, decrypt_bespoke_session_cookie #alternative: from plannerPackage import refre...
+from . import session_key
 from uuid import uuid4
 from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
@@ -71,7 +72,7 @@ def login_required(serializer: URLSafeTimedSerializer):
 
             #Decrypt bespoke session cookie
             try:
-                decrypted_session_data = decrypt_bespoke_session_cookie(cookie=cookie, serializer=serializer, decryption_key=os.environ["session_key"])
+                decrypted_session_data = decrypt_bespoke_session_cookie(cookie=cookie, serializer=serializer, decryption_key=session_key)
             except Exception as e:
                 resp_dict["message"] = f"Failure: Could not decrypt the bespoke_session cookies. Reason: {e}"
                 return jsonify(resp_dict), 401

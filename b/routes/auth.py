@@ -10,7 +10,8 @@ from typing import Tuple, List
 import jwt
 from datetime import datetime, timezone, timedelta
 from uuid import uuid4
-from plannerPackage import login_required, token_required, update_refresh_token_table, access_token_dur, filter_dict, generate_all_user_content
+from plannerPackage import login_required, token_required, update_refresh_token_table, access_token_dur, filter_dict, generate_all_user_content 
+from plannerPackage import session_key
 from cryptography.fernet import Fernet
 
 #import env vars from b/.env file
@@ -150,7 +151,7 @@ def login() -> Tuple[Response, int]:
 
     #encode session data dict and set it as an http-only cookie
     session_data_json: str = json.dumps(session_data) # json.dumps serializes dict to json fromatted string
-    cipher = Fernet(os.environ["session_key"].encode())
+    cipher = Fernet(session_key.encode())
     encrypted_session_data: bytes = cipher.encrypt(session_data_json.encode())
     serialized_session_data: str = serializer.dumps(encrypted_session_data.decode())
     resp.set_cookie(key="bespoke_session", value=serialized_session_data, httponly=True, samesite="None", secure=True)
