@@ -14,7 +14,7 @@ import HoverText from "./hoverText"
 
 const Kanban = ({sitePage}) => {
     if (sitePage!=="view-kanban") return 
-    const {tasks, objectives, projects, handleEntitySubmit, formatDateFields} = useContext(globalContext)
+    const {tasks, objectives, projects, handleEntitySubmit, formatDateFields, currentDate, setCurrentDate, handleDayNavigation} = useContext(globalContext)
     const [entityName, setEntityName] = useState("task")
     const [entityArr, setEntityArr] = useState([])
     const [updatedEntity, setUpdatedEntity] = useState([])
@@ -33,13 +33,13 @@ const Kanban = ({sitePage}) => {
     ])
 
     const tasksShownOnKanban = (task) => {
-        const todaysDate = (new Date()).toDateString()
+        const selectedDay = (new Date(currentDate)).toDateString()
         const taskScheduleDate = new Date(task.scheduledStart).toDateString()
-        const isTaskScheduledForToday = (taskScheduleDate) === todaysDate
-        const isTaskFinishedToday = (new Date(task.finish).toDateString() === todaysDate )
-        const isTaskScheduledBeforeToday = new Date(taskScheduleDate).getTime() < new Date(todaysDate).getTime()
+        const isTaskScheduledForSelectedDay = (taskScheduleDate) === selectedDay
+        const isTaskFinishedToday = (new Date(task.finish).toDateString() === selectedDay )
+        const isTaskScheduledBeforeToday = new Date(taskScheduleDate).getTime() < new Date().getTime()
         var outputBool = false
-        if (isTaskScheduledForToday) {outputBool = true}
+        if (isTaskScheduledForSelectedDay) {outputBool = true}
         if (isTaskFinishedToday) { outputBool = true}
         if ( task.status !== "Completed" && isTaskScheduledBeforeToday ) {outputBool = true}
         return outputBool
@@ -60,7 +60,7 @@ const Kanban = ({sitePage}) => {
             default:
                 throw new Error("Invalid entity name. Must be one of 'task', 'objective', or 'project'.")
         } 
-    }, [tasks, objectives, projects, entityName])
+    }, [tasks, objectives, projects, entityName, currentDate])
 
     const handleDragEnd = (e) => { //dnd
         const {active, over} = e
@@ -150,7 +150,6 @@ const Kanban = ({sitePage}) => {
         const totalTime = relevantTasks.reduce((acc, task) => acc + chooseTaskDuration(task), 0)
         const remainingTime = relevantTasks.reduce((acc, task) => acc + (task.status !== "Completed" ? chooseTaskDuration(task) : 0), 0)
         setTotalTaskTime((totalTime/60).toFixed(1)) 
-        console.log("totalTime: ", totalTime, "remainingTime: ", remainingTime)
         if (remainingTime >= 60){
             setRemainingTaskTimeUnits("hrs")
             setRemainingTaskTime((remainingTime/60).toFixed(1))
@@ -168,13 +167,18 @@ const Kanban = ({sitePage}) => {
             <div className="kanban-page-header"> 
                 <Header/>
                 <div className="kanban-page-header-2">
-                    <strong> {`Kanban (${entityName}s)`}</strong>
-                    <Dropdown buttonContent={<i className="fa fa-chevron-down" aria-hidden="true"></i>} translate="0% 50%">
-                        <div onClick={() => setEntityName("project")}> Projects </div>
-                        <div onClick={() => setEntityName("objective")}> Objectives </div>
-                        <div onClick={() => setEntityName("task")}> Tasks </div>
-                    </Dropdown>
-                    <strong> {remainingTaskTime} {remainingTaskTimeUnits} left (total {totalTaskTime} hrs) </strong>
+                    <button type="button" className="yesterday-btn" onClick={() => handleDayNavigation("previous-day")}> <i className="fa fa-arrow-left" aria-hidden="true"></i> </button>
+                    <div className="kanbnan-page-header-2-text">
+                        <strong className="kanban-page-title" onClick={()=> setCurrentDate(new Date())} > {`Kanban (${entityName}s)`}</strong>
+                        <Dropdown buttonContent={<i className="fa fa-chevron-down" aria-hidden="true"></i>} translate="0% 50%">
+                            <div onClick={() => setEntityName("project")}> Projects </div>
+                            <div onClick={() => setEntityName("objective")}> Objectives </div>
+                            <div onClick={() => setEntityName("task")}> Tasks </div>
+                        </Dropdown>
+                        <strong> {remainingTaskTime} {remainingTaskTimeUnits} left (total {totalTaskTime} hrs) </strong>
+                    </div>
+
+                    <button type="button" className="tomorrow-btn" onClick={() => handleDayNavigation("next-day")} > <i className="fa fa-arrow-right" aria-hidden="true"> </i> </button>
                 </div>
                 <ToolBar> 
                     <AddEntity/>

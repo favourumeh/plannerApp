@@ -1,9 +1,34 @@
+/* style page buttons */
+div.kanban-page button{
+    border: none;
+    background-color: rgba(0,0,0,0);
+}
+
+div.kanban-page button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+div.kanban-page button:hover{
+    color: rgb(0, 230, 0);
+}
+
+/* style page header */
+.kanban-page-title:hover{
+    cursor: pointer;
+    color: rgba(0, 230, 0)
+}
 div.kanban-page-header-2 {
     margin-top:5px;
     margin-bottom: 5px;
     background-color: rgba(48, 48, 100, 0.137);
     display: flex;
     justify-content: center;
+    align-items: center;
+}
+.kanbnan-page-header-2-text{
+    display:flex;
+    justify-content: flex-start;
     align-items: center;
 }
 div.kanban-page-header-2:hover {
@@ -13,6 +38,7 @@ div.kanban-page-header-2:hover {
     outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* style page body */
 div.kanban-page-body {
     /* border: 1px solid; */
     display: flex;
@@ -25,11 +51,4 @@ div.kanban-page-header-2 button.dropbtn {
     border: rgba(0,0,0,0);
 
 }
-
-div.kanban-page-header-2 button.dropbtn:hover {
-    border: rgba(0,0,0,0);
-    color: rgb(0, 230, 0);
-
-}
-
 
