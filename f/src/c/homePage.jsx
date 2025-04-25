@@ -18,32 +18,8 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
     if (!isLoggedIn || sitePage!=="view-homepage") {
         return null
     }
-
     const {currentDate, setCurrentDate,  tasks, objectives, projects, userSettings} = useContext(globalContext)
-    const divBodyRef = useRef(null)
-    const divHeaderRef  = useRef(null)
-    const [bodyTopDistance, setBodyTopDistance] = useState()
     const currentDay = daysOfWeek[new Date(currentDate).getDay()]
-
-    // calculate the postion of the top of the homepage body which serves as the datum
-    const handlePageResize = () => {
-        if (divBodyRef.current) {
-            const headerRect = divHeaderRef.current.getBoundingClientRect()
-            const headerOffset = headerRect.top 
-            const rootNodePadding = 32 //first div child of body node with an id=="roor" has a padding of 32px 
-
-            const bodyRect = divBodyRef.current.getBoundingClientRect()
-            const bodyOffset = bodyRect.top 
-            setBodyTopDistance(bodyOffset - headerOffset + rootNodePadding)
-        }
-      }
-
-    useEffect(() => handlePageResize(), [])      
-    useEffect(() => {
-        window.addEventListener('resize', handlePageResize)
-        return () => window.removeEventListener('resize', handlePageResize)
-    }, [])
-
 
     // filter the tasks to be displayed on the homepage
     useEffect(() => {
@@ -68,7 +44,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
     return (
         <div className="homepage">
             <div  className="homepage-header"> 
-                <div ref = {divHeaderRef} className="homepage-header-row1">
+                <div className="homepage-header-row1">
                     <Header setCurrentDate={setCurrentDate}/>
                 </div>
 
@@ -87,11 +63,11 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
                     </ToolBar>
                 </div>
             </div>
-            <TimerLine bodyTop={bodyTopDistance}/>
-            <div ref={divBodyRef} className="homepage-body"> 
+            <div style={{"position":"relative"}} className="homepage-body"> 
+                <TimerLine/>
                 <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
-                <div className="task-card-overlay">
-                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task} taskDatum={bodyTopDistance}/>)}
+                <div style={{"position":"relative"}} className="task-card-overlay">
+                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task}/>)}
                 </div>
 
             </div>

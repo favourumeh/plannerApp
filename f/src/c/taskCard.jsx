@@ -6,7 +6,7 @@ import TaskInfoCard from "./InfoCards/taskInfoCard"
 const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
 const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
 
-function TaskCard ({task, taskDatum}) {
+function TaskCard ({task}) {
     const {setForm, setIsModalOpen, objectives, projects, setCurrentTask, handleDeleteEntity, userSettings } = useContext(globalContext)
     const taskObjective  = findTaskObjective(objectives, task)
     const taskProject = findObjectiveProject(projects, taskObjective)
@@ -38,8 +38,8 @@ function TaskCard ({task, taskDatum}) {
         const taskStartMs = new Date(task.start).getTime()
         const deltaMinutes = (taskStartMs - dayStartMs)/(1000*60) + new Date().getTimezoneOffset()
         // console.log(`deltaMinutes (${projectNumber}.${objectiveNumber}.${task.taskNumber})`, task.scheduledStart, deltaMinutes)
-        // console.log(taskDatum + deltaMinutes*15/10)
-        return String(taskDatum + deltaMinutes*15/10) // convert minutes to px
+        // console.log(deltaMinutes*15/10)
+        return String(deltaMinutes*15/10) // convert minutes to px
     }
     const taskRowCardStyle = { "position": "absolute", "top":taskPosition()+ "px"}
 

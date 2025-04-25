@@ -2,7 +2,7 @@ import "./timerLine.css"
 import {useState, useEffect, useContext} from 'react'
 import globalContext from "../context"
 
-const TimerLine = ({bodyTop}) => {
+const TimerLine = () => {
     const {userSettings} = useContext(globalContext)
     const currentDateStr = new Date().toDateString()
     const startOfDay =  new Date(currentDateStr + " " + userSettings.dayStartTime).getTime()
@@ -20,11 +20,11 @@ const TimerLine = ({bodyTop}) => {
 
     const getTimerLinePosition = () => {
         const elapsedTimeMS = currentDateTime.getTime() - startOfDay
-        // const elapsedTimeMS = new Date("2025-04-25 08:00").getTime() - startOfDay
+        // const elapsedTimeMS = new Date("2025-04-25 13:00").getTime() - startOfDay
         const elapsedTimeMins = elapsedTimeMS / (60*1000)
         const pixelsPerMinute = 15/10 // (15px for 10 mins)
         const halfTimerLineContainerHeight = 12
-        const postion = bodyTop + elapsedTimeMins*pixelsPerMinute - halfTimerLineContainerHeight
+        const postion = elapsedTimeMins*pixelsPerMinute - halfTimerLineContainerHeight
         return String(postion)
     }
 
