@@ -20,7 +20,7 @@ const TimerLine = ({bodyTop}) => {
 
     const getTimerLinePosition = () => {
         const elapsedTimeMS = currentDateTime.getTime() - startOfDay
-        // const elapsedTimeMS = new Date("2025-04-23 08:00").getTime() - startOfDay
+        // const elapsedTimeMS = new Date("2025-04-25 08:00").getTime() - startOfDay
         const elapsedTimeMins = elapsedTimeMS / (60*1000)
         const pixelsPerMinute = 15/10 // (15px for 10 mins)
         const halfTimerLineContainerHeight = 12
@@ -32,9 +32,9 @@ const TimerLine = ({bodyTop}) => {
 
     return (
         <div style={timerContinerStyle} className='timer-line-container'>
-            <div className="timer-line-caret"><i class="fa fa-caret-right" aria-hidden="true"></i></div>
+            <div className="timer-line-caret"><i className="fa fa-caret-right" aria-hidden="true"></i></div>
             <div className="timer-line"></div>
-            <div className="timer-line-caret"><i class="fa fa-caret-left" aria-hidden="true"></i></div>
+            <div className="timer-line-caret"><i className="fa fa-caret-left" aria-hidden="true"></i></div>
         </div>
     );
 };
