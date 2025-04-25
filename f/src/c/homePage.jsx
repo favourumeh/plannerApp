@@ -20,15 +20,21 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
     }
 
     const {currentDate, setCurrentDate,  tasks, objectives, projects, userSettings} = useContext(globalContext)
-    const divRef = useRef(null)
-    const [taskDatum, setTaskDatum] = useState()
+    const divBodyRef = useRef(null)
+    const divHeaderRef  = useRef(null)
+    const [bodyTopDistance, setBodyTopDistance] = useState()
     const currentDay = daysOfWeek[new Date(currentDate).getDay()]
 
     // calculate the postion of the top of the homepage body which serves as the datum
     const handlePageResize = () => {
-        if (divRef.current) {
-          const rect = divRef.current.getBoundingClientRect()
-          setTaskDatum(rect.top + window.scrollY)
+        if (divBodyRef.current) {
+            const headerRect = divHeaderRef.current.getBoundingClientRect()
+            const headerOffset = headerRect.top 
+            const rootNodePadding = 32 //first div child of body node with an id=="roor" has a padding of 32px 
+
+            const bodyRect = divBodyRef.current.getBoundingClientRect()
+            const bodyOffset = bodyRect.top 
+            setBodyTopDistance(bodyOffset - headerOffset + rootNodePadding)
         }
       }
 
@@ -36,9 +42,9 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
     useEffect(() => {
         window.addEventListener('resize', handlePageResize)
         return () => window.removeEventListener('resize', handlePageResize)
-      }, [])
+    }, [])
 
-    
+
     // filter the tasks to be displayed on the homepage
     useEffect(() => {
         setHomePageTasks(tasks.filter(task => new Date(task.start).toDateString() ===  new Date(currentDate).toDateString()))
@@ -61,8 +67,8 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
 
     return (
         <div className="homepage">
-            <div className="homepage-header"> 
-                <div className="homepage-header-row1">
+            <div  className="homepage-header"> 
+                <div ref = {divHeaderRef} className="homepage-header-row1">
                     <Header setCurrentDate={setCurrentDate}/>
                 </div>
 
@@ -81,11 +87,11 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
                     </ToolBar>
                 </div>
             </div>
-            <TimerLine bodyTop={taskDatum}/>
-            <div ref={divRef} className="homepage-body"> 
+            <TimerLine bodyTop={bodyTopDistance}/>
+            <div ref={divBodyRef} className="homepage-body"> 
                 <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
                 <div className="task-card-overlay">
-                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task} taskDatum={taskDatum}/>)}
+                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task} taskDatum={bodyTopDistance}/>)}
                 </div>
 
             </div>
