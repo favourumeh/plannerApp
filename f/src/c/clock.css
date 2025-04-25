@@ -1,0 +1,9 @@
+.clock span.time:hover{
+    cursor: pointer;
+    color: rgb(0, 230,0);
+
+}
+
+div.clock {
+    font-weight: 600;
+}

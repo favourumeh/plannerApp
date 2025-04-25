@@ -4,10 +4,9 @@ import globalContext from "../context.js";
 import {useContext} from "react"
 
 const Header = () => {
-    const {setSitePage, setCurrentDate, handleLogout} = useContext(globalContext)
+    const {setSitePage, handleLogout} = useContext(globalContext)
     const onClickTitle = () => {
         setSitePage("view-homepage")
-        setCurrentDate(new Date())
     }
 
     return (
