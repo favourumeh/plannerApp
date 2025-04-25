@@ -31,7 +31,7 @@ function ViewPage() {
     }
 
     return (
-        <Dropdown buttonContent={<i className="fa fa-eye" aria-hidden="true"></i>} translate={"0% 34%"}>
+        <Dropdown buttonContent={<i className="fa fa-eye" aria-hidden="true"></i>} translate={"0% 30%"}>
             {sitePage=="view-projects"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>:<div onClick={onClickViewProjects}> view projects </div>}
             {sitePage=="view-objectives"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>:<div onClick={onClickViewObjectives}> view objectives </div>}
             {sitePage=="view-tasks"? <div onClick={() => setSitePage("view-homepage")}>Homepage</div>: <div onClick={onClickViewTasks}> view tasks </div>}
