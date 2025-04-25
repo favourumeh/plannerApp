@@ -1,7 +1,7 @@
 import "./entityForm.css"
 import {useContext, useEffect} from "react"
 import globalContext from "../context"
-import Dropdown from "./Dropdown"
+import Dropdown from "./dropdown"
 import { defaultProject } from "../staticVariables"
 function ProjectForm () {
 

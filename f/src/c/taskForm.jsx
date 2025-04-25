@@ -2,7 +2,7 @@ import "./entityForm.css"
 import {useState, useContext, useEffect, useRef} from "react"
 import globalContext from "../context"
 import SearchResult from "./searchResult"
-import Dropdown from "./Dropdown"
+import Dropdown from "./dropdown"
 import {defaultTask} from "../staticVariables"
 
 function TaskForm () {

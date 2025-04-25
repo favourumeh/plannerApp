@@ -1,4 +1,4 @@
-import Dropdown from "../Dropdown"
+import Dropdown from "../dropdown"
 import globalContext from "../../context"
 import { useContext } from "react"
 

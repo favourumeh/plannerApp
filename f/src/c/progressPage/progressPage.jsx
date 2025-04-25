@@ -8,7 +8,7 @@ import ViewPage from "../toolbarContent/viewPage"
 import RefreshEntities from "../toolbarContent/refreshEntities"
 import FilterPage from "../toolbarContent/filterPage"
 import Header from "../header"
-import Dropdown from "../Dropdown"
+import Dropdown from "../dropdown"
 
 export default function ProgressPage ({sitePage}) {
     if (sitePage!=="view-progress") return
