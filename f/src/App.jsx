@@ -271,6 +271,18 @@ function App() {
         }
     }
 
+    const handleDayNavigation = (direction) => {
+        // change day on the homepage by clicking the left and right arrows
+        switch (direction) {
+            case "previous-day":
+                setCurrentDate(new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() - 1)))
+                break
+            case "next-day":
+                setCurrentDate(new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() + 1)))
+                break
+        }
+    }
+
     // create global prop object
     const globalProps = {
         isModalOpen, setIsModalOpen,
@@ -298,7 +310,8 @@ function App() {
         entityName, setEntityName, entity, setEntity,
         userSettings, setUserSettings, formatDateFields,
         onShowHoverText, onHideHoverText, isShowHoverText, hoverText,
-        getProject, getObjective
+        getProject, getObjective,
+        handleDayNavigation
     }
 
     return (

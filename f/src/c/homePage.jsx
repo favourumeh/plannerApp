@@ -18,25 +18,13 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
     if (!isLoggedIn || sitePage!=="view-homepage") {
         return null
     }
-    const {currentDate, setCurrentDate,  tasks, objectives, projects, userSettings} = useContext(globalContext)
+    const {currentDate, setCurrentDate,  tasks, objectives, projects, userSettings, handleDayNavigation} = useContext(globalContext)
     const currentDay = daysOfWeek[new Date(currentDate).getDay()]
 
     // filter the tasks to be displayed on the homepage
     useEffect(() => {
         setHomePageTasks(tasks.filter(task => new Date(task.start).toDateString() ===  new Date(currentDate).toDateString()))
     }, [currentDate, tasks, objectives, projects])
-
-    // change day on the homepage by clicking the left and right arrows
-    const handleDayNavigation = (direction) => {
-        switch (direction) {
-            case "previous-day":
-                setCurrentDate(new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() - 1)))
-                break
-            case "next-day":
-                setCurrentDate(new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() + 1)))
-                break
-        }
-    }
 
     // change the colour of (the text of) the day if it is not today's date
     const todayIndicator = () => todaysDate === new Date(currentDate).toDateString()? "rgb(0, 230, 0)" : "red"
