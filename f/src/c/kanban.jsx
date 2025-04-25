@@ -14,13 +14,16 @@ import HoverText from "./hoverText"
 
 const Kanban = ({sitePage}) => {
     if (sitePage!=="view-kanban") return 
-    const {tasks, setTasks, objectives, projects, handleEntitySubmit, handleRefresh, formatDateFields} = useContext(globalContext)
+    const {tasks, objectives, projects, handleEntitySubmit, formatDateFields} = useContext(globalContext)
     const [entityName, setEntityName] = useState("task")
     const [entityArr, setEntityArr] = useState([])
     const [updatedEntity, setUpdatedEntity] = useState([])
     const [updatedEntityIdAndStatus, setUpdatedEntityIdAndStatus] = useState({})
     const [sourceColumn, setSourceColumn] = useState("")
     const [destColumn, setDestColumn] = useState("")
+    const [remainingTaskTimeUnits, setRemainingTaskTimeUnits] = useState("hrs")
+    const [remainingTaskTime, setRemainingTaskTime] = useState(0) //can be hours or minutes
+    const [totalTaskTime, setTotalTaskTime] = useState(0)
 
     const [columns, setColumns] = useState([
         {id:"To-Do", title:"To Do"}, 
@@ -74,6 +77,7 @@ const Kanban = ({sitePage}) => {
     }
 
     const handleDateFieldsAndStatus = (entity) => {
+        //automatically adjusts the task fields when a task is dragged from one status column to another 
         if (entityName == "task") {
             let now = new Date( new Date().getTime() - new Date().getTimezoneOffset()*60*1000)
             if (entity.status==="To-Do") {
@@ -126,12 +130,41 @@ const Kanban = ({sitePage}) => {
         }
     }, [updatedEntity])
 
-    const getHoverWidth = () => {
+    const getInfoCardWidth = () => {
         return entityName==="task"? "926.6px": "695px"
     }
+
+    const chooseTaskDuration = (task) => {
+        return !!task.duration? task.duration : task.durationEst
+    }
+
+    const filterOutBreaks = (task) => {
+        //filter out task that are breaks. 
+        const breakObjective = objectives.find((objectives) => objectives.title==="Breaks")
+        return task.objectiveId==breakObjective.id ? false: true
+    }
+    
+    const calculateTaskTime = () => {
+        if (entityName !== "task") return
+        const relevantTasks = entityArr.filter(filterOutBreaks)
+        const totalTime = relevantTasks.reduce((acc, task) => acc + chooseTaskDuration(task), 0)
+        const remainingTime = relevantTasks.reduce((acc, task) => acc + (task.status !== "Completed" ? chooseTaskDuration(task) : 0), 0)
+        setTotalTaskTime((totalTime/60).toFixed(1)) 
+        console.log("totalTime: ", totalTime, "remainingTime: ", remainingTime)
+        if (remainingTime >= 60){
+            setRemainingTaskTimeUnits("hrs")
+            setRemainingTaskTime((remainingTime/60).toFixed(1))
+        } else {
+            setRemainingTaskTimeUnits("mins")
+            setRemainingTaskTime(remainingTime)
+        }
+    }
+
+    useEffect(()=> {calculateTaskTime()}, [entityArr])
+
     return (
         <div className="kanban-page">
-            <HoverText width={getHoverWidth()}/>
+            <HoverText width={getInfoCardWidth()}/>
             <div className="kanban-page-header"> 
                 <Header/>
                 <div className="kanban-page-header-2">
@@ -141,6 +174,7 @@ const Kanban = ({sitePage}) => {
                         <div onClick={() => setEntityName("objective")}> Objectives </div>
                         <div onClick={() => setEntityName("task")}> Tasks </div>
                     </Dropdown>
+                    <strong> {remainingTaskTime} {remainingTaskTimeUnits} left (total {totalTaskTime} hrs) </strong>
                 </div>
                 <ToolBar> 
                     <AddEntity/>
