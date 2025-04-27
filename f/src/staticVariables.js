@@ -6,7 +6,7 @@ const defaultTask = {
     status:"To-Do",
     description:"", 
     durationEst:10, 
-    scheduledStart: "", 
+    scheduledStart: new Date().toISOString().split("T")[0], 
     start:"", 
     finish:"",
     tag:""
