@@ -1,7 +1,7 @@
 import "./signUp.css"
 import {useState, useContext} from "react"
 import globalContext from "../context"
-import { backendBaseUrl } from "../project_config"
+import { backendBaseUrl } from "../../project_config"
 
 const SignUp = () => {
     const {setIsModalOpen, form, setSitePage, handleNotification} = useContext(globalContext)
