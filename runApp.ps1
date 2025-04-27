@@ -11,22 +11,20 @@ param (
     [string]$rdbms
 )
 
-Import-Module dotenv
+Import-Module ".\runAndDeployDependencies\runModule.psm1" -Force
+Update-Environment
 
 #allowed param inputs
 $allowed_env = "dev prod-local prod"
 $allowed_rdbms = "sqlite mysql az_mysql"
 
-#
+#Determine backend url 
 $devBackendBaseURL = $env:local_host_backend_base_url + $env:backend_host_port
 $prodBackendBaseURL = $env:VITE_PROD_BACKEND_API_URL
 
-# #shell script dependecy dir
-# $dependencyDir = "runAndDeployDependencies"
-
 function Update-FrontendDirEnv{
     #Changes the VITE_PROD_BACKEND_API_URL, VITE_DEV_BACKEND_API_URL in f/.env to allign with /.env file
-    #Also changes VITE_APP_ENV to allign with env param of Script. this variable determines the backendBaseURL used in f/src/project_config.js 
+    #Also changes VITE_APP_ENV to allign with env param of Script. this variable determines the backendBaseURL used in f/project_config.js 
     #funciton params 
     param (
         [string]$appEnv
@@ -44,7 +42,7 @@ function Update-FrontendDirEnv{
 
     # Write the updated content back to the file
     Set-Content -Path $frontendEnvFilePath -Value $content
-    Write-Host "Updated backendBaseURL variable in f/src/project_config.js to $backendBaseURL"
+    Write-Host "Updated backendBaseURL variable in f/project_config.js to $backendBaseURL"
 }
 function test-dockerImageTag{
     #checks if the docker image is valid (i.e., is it empty, does it already exist )
@@ -64,7 +62,11 @@ function test-dockerImageTag{
     $latestTag = $tagArr[$tagArr.Length -1]
 
     $justTesting = read-host "Are you testing the repo $repositoryName ? (y/n)" 
-    if ($justTesting -eq "y") {return "test"}
+    if ($justTesting -eq "y") {
+        write-host "Stoping and removing any running docker containers"
+        docker-compose down
+        docker rmi $repositoryName":test"
+        return "test"}
 
     $tagIsEmpty = $userInputTag -eq ""
     $tagAlreadyExist = $dockerTags -like "*$userInputTag"
