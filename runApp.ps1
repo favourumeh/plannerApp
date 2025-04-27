@@ -18,31 +18,29 @@ Update-Environment
 $allowed_env = "dev prod-local prod"
 $allowed_rdbms = "sqlite mysql az_mysql"
 
-#Determine backend url 
-$devBackendBaseURL = $env:local_host_backend_base_url + $env:backend_host_port
-$prodBackendBaseURL = $env:VITE_PROD_BACKEND_API_URL
-
 function Update-FrontendDirEnv{
     #Changes the VITE_PROD_BACKEND_API_URL, VITE_DEV_BACKEND_API_URL in f/.env to allign with /.env file
     #Also changes VITE_APP_ENV to allign with env param of Script. this variable determines the backendBaseURL used in f/project_config.js 
     #funciton params 
     param (
-        [string]$appEnv
+        [string]$appEnv,
+        [string]$devBackendUrl,
+        [string]$prodBackendUrl
     )  
     #get the content of  project_config.js
     $frontendEnvFilePath = $PWD.path + "\f\.env"
     $content = Get-Content -Path $frontendEnvFilePath -Raw
 
     #Update frontend/.env (so it is consistent with project_config)
-    $content = $content -replace "(VITE_PROD_BACKEND_API_URL=).*", "`$1$($prodBackendBaseURL)"
-    $content = $content -replace "(VITE_DEV_BACKEND_API_URL=).*", "`$1$($devBackendBaseURL)"
+    $content = $content -replace "(VITE_PROD_BACKEND_API_URL=).*", "`$1$($prodBackendUrl)"
+    $content = $content -replace "(VITE_DEV_BACKEND_API_URL=).*", "`$1$($devBackendUrl)"
 
     #Change VITE_APP_ENV environment variable in frontend/.env depending on appEnv param
     $content = $content -replace "(VITE_APP_ENV=).*", "`$1$($appEnv)"
 
     # Write the updated content back to the file
     Set-Content -Path $frontendEnvFilePath -Value $content
-    Write-Host "Updated backendBaseURL variable in f/project_config.js to $backendBaseURL"
+    Write-Host "Updated backendBaseURL variable in f/project_config.js to $devBackendUrl"
 }
 function test-dockerImageTag{
     #checks if the docker image is valid (i.e., is it empty, does it already exist )
@@ -120,26 +118,38 @@ if ($rdbms -eq "") {
     $userRDBMS = test-spelling -userInput $userRDBMS -allowedInputs $allowed_rdbms -promptMessage "[param: rdbms] Please enter one of - $allowed_rdbms_prompt_format"
 }
 
+#Determine backend port 
+$backendPort = ($userEnv -eq "dev") -or ($userEnv -eq "prod") ? 5000 : 5001
+#Determine backend url 
+$devBackendBaseURL = $env:local_host_backend_base_url + $backendPort
+$prodBackendBaseURL = $env:VITE_PROD_BACKEND_API_URL
+write-host("prodBackendBaseURL: " + $prodBackendBaseURL)
+
 #check if the docker image tag is already in use. If it is, prompt the user to enter a new tag.
 #Note: this is only done for the prod env.
 if ($userEnv -eq "prod-local") {
     $backend_image_tag =  test-dockerImageTag -repositoryName "flask-backend-planner-app" -userInputTag $backend_image_tag
     $frontend_image_tag = test-dockerImageTag -repositoryName "react-frontend-planner-app" -userInputTag $frontend_image_tag
+    write-host backend_image_tag : $backend_image_tag
     write-host frontend_image_tag: $frontend_image_tag
 }
-write-host backend_image_tag : $backend_image_tag
 
 function Update-RootEnv{
     # Updated the VITE_APP_ENV variable in .env file root directory to allign with the env param of this script. 
     # This variable controls the docker image build
     param (
-        [string] $appEnv
+        [string] $appEnv,
+        [string] $backendHostPort
     )
+
     $rootEnvFilePath = $PWD.path + "\.env"
     $content = Get-Content -Path $rootEnvFilePath -Raw
 
     #update VITE_APP_ENV var
     $content = $content -replace "(VITE_APP_ENV=).*", "`$1$($appEnv)"
+
+    #update backend port 
+    $content = $content -replace "(backend_host_port=).*", "backend_host_port=$backendHostPort"
 
     #update the docker image repo and repo tag
     if ($appEnv -eq "prod-local"){
@@ -154,17 +164,14 @@ function Update-RootEnv{
     }
     # Write the updated content back to the file
     Set-Content -Path $rootEnvFilePath -Value $content
-    Write-Host "Updated VITE_APP_ENV variable in /.env to '$appEnv'"
+    Write-Host "Updated VITE_APP_ENV variable in /.env to '$appEnv' and backend_host_port to '$backendHostPort'"
 }
 
-Write-Host ("PWD: " + $PWD.path)
-
 #update f/.env and /.env 
-Update-FrontendDirEnv -appEnv $userEnv
-Update-RootEnv -appEnv $userEnv
+Update-FrontendDirEnv -appEnv $userEnv -devBackendUrl $devBackendBaseURL -prodBackendUrl $prodBackendBaseURL
+Update-RootEnv -appEnv $userEnv -backendHostPort $backendPort
 
-
-#--------------------------------------------------------------------Execution----------------------------------------------------------------------------
+# --------------------------------------------------------------------Execution----------------------------------------------------------------------------
 # Execute the Python script with the user-defined variable as an argument
 # Define the path to the backend and frontend folders
 $frontendFolder =  $PWD.path.Replace("\", "/") + "/f"
