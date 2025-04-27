@@ -1,15 +1,7 @@
-x-backend-vars: #used as a way to store reusable variables.
-  repoAndImageName: &backend_repo_and_image_tag flask-backend-planner-app:v1
-
-x-frontend-vars:
-  repoAndImageName: &frontend_repo_and_image_tag react-frontend-planner-app:v1
-  b_env: &backend_url_opttion dev 
-  f_env: &frontend_domain_option dev
-
 services:
   flask-backend:
-    container_name: planner-app-backend
-    image: *backend_repo_and_image_tag
+    container_name: ${backend_container_name}
+    image: ${backend_repo_and_image_tag}
     build: 
       context: ./b
       dockerfile: Dockerfile
@@ -20,21 +12,20 @@ services:
     env_file:
       - ./b/.env
     restart: unless-stopped
-    # depends_on:
-    #   - react-frontend
+    depends_on:
+      - react-frontend
 
   react-frontend:
-    container_name: planner-app-frontend
-    image: *frontend_repo_and_image_tag
+    container_name: ${frontend_container_name}
+    image: ${frontend_repo_and_image_tag}
     build:
       context: ./f
       dockerfile: Dockerfile
       args:
         frontend_container_port: ${frontend_container_port}
-        VITE_BACKEND_ENV: ${VITE_BACKEND_ENV}
+        VITE_APP_ENV: ${VITE_APP_ENV}
         VITE_DEV_BACKEND_API_URL: ${local_host_backend_base_url}${backend_host_port}
         VITE_PROD_BACKEND_API_URL: ${VITE_PROD_BACKEND_API_URL}
-        frontend_domain_option: *frontend_domain_option
         FRONTEND_CONTAINER_APP_SERVICE_DOMAIN: ${FRONTEND_CONTAINER_APP_SERVICE_DOMAIN}
     ports:
       - "${frontend_host_port}:${frontend_container_port}"
