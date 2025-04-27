@@ -87,24 +87,26 @@ const Kanban = ({sitePage}) => {
             if (entity.status==="In-Progress") {
                 entity.start = !entity.start? now : entity.start
                 entity.finish = null
+                entity.duration = null
             }
             if (entity.status==="Completed") {
                 entity.start = !!entity.start? entity.start: now
                 entity.finish = now
-                const durationMS  = new Date (entity.finish).getTime() - new Date(entity.start).getTime() // in MS
+                const durationMS  = new Date(entity.finish).getTime() - new Date(entity.start).getTime() // in MS
                 entity.duration  = Math.round(durationMS/(60*1000)) // in Mins
             }
             if (entity.status==="Paused") {
+                //create paused task
                 entity.wasPaused = true
                 const getParentTaskId = () => !!entity.parentTaskId?  entity.parentTaskId : entity.id
-                let task = {...entity, "parentTaskId":getParentTaskId(), "start":null}
+                let task = {...entity, "parentTaskId":getParentTaskId(), "start":null, "finish":null, "duration":null}
                 handleEntitySubmit(null,  "create", "task", formatDateFields(task))
-                const durationMS  = new Date (entity.finish).getTime() - new Date(entity.start).getTime() // in MS
+                //create completed task
+                entity.start = !!entity.start? entity.start: now
+                entity.finish = !!entity.finish? entity.finish : now
+                const durationMS  = new Date(entity.finish).getTime() - new Date(entity.start).getTime() // in MS
                 entity.duration  = Math.round(durationMS/(60*1000)) 
                 entity.status = "Completed"
-                const start = new Date(now.getTime() - entity.durationEst*60*1000)
-                entity.start = !!entity.start? entity.start: start
-                entity.finish = now
             }
         }
         return entity
