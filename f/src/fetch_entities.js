@@ -1,6 +1,6 @@
-import { backendBaseUrl } from "./project_config"
+import { backendBaseUrl } from "../project_config"
 
-const fetchAllUserContent = async (setProjects, setDefaultProject, setObjectives, setDefaultProjectObjective, setTasks, handleNotification) => {
+const fetchAllUserContent = async (setProjects, setFormProject, setObjectives, setFormObjective, setTasks, handleNotification) => {
     try {
         const url = `${backendBaseUrl}/read-all`
         const options = {
@@ -22,9 +22,9 @@ const fetchAllUserContent = async (setProjects, setDefaultProject, setObjectives
         const objectives = resp_json.objectives
         const tasks = resp_json.tasks
         setProjects(projects)
-        setDefaultProject(projects.filter((project)=> project["type"]=="default project")[0])
+        setFormProject(projects.filter((project)=> project["type"]=="default project")[0])
         setObjectives(objectives)
-        setDefaultProjectObjective(objectives.filter((objective) => objective["type"]=="default project objective")[0])
+        setFormObjective(objectives.filter((objective) => objective["type"]=="default project objective")[0])
         setTasks(tasks)
     } else {
         console.log(resp_json.message)

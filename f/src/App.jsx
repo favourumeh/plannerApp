@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
-import { backendBaseUrl } from './project_config.js'
+import { backendBaseUrl } from '../project_config.js'
 import { fetchAllUserContent} from './fetch_entities'
 import GuestPage from './c/guestPage'
 import globalContext from './context'
@@ -33,10 +33,8 @@ function App() {
     const [tasks, setTasks] = useState(() => persistState("tasks",[])) 
     const [objectives, setObjectives] = useState(() => persistState("objectives",[])) 
     const [projects, setProjects] = useState(() => persistState("projects",[])) 
-    const [defaultProject, setDefaultProject] = useState(() => persistState("defaultProject",{})) 
-    const [defaultProjectObjective, setDefaultProjectObjective] = useState(() => persistState("defaultProjectObjective",{}))
-    const [formProject, setFormProject] = useState(defaultProject)
-    const [formObjective, setFormObjective] = useState(defaultProjectObjective)
+    const [formProject, setFormProject] = useState(() => persistState("formProject",{}))
+    const [formObjective, setFormObjective] = useState(() => persistState("formObjective",{}))
     const [currentTask, setCurrentTask] = useState(() => persistState("currentTask", defaultTask))
     const [currentObjective, setCurrentObjective] = useState(() => persistState("currentObjective", defaultObjective))
     const [currentProject, setCurrentProject] = useState(() => persistState("currentProject", defaultProject))
@@ -60,8 +58,8 @@ function App() {
     useEffect(() => sessionStorage.setItem("tasks", JSON.stringify(tasks)), [tasks])
     useEffect(() => sessionStorage.setItem("objectives", JSON.stringify(objectives)), [objectives])
     useEffect(() => sessionStorage.setItem("projects", JSON.stringify(projects)), [projects])
-    useEffect(() => sessionStorage.setItem("defaultProject", JSON.stringify(defaultProject)), [defaultProject])
-    useEffect(() => sessionStorage.setItem("defaultProjectObjective", JSON.stringify(defaultProjectObjective)), [defaultProjectObjective])
+    useEffect(() => sessionStorage.setItem("formProject", JSON.stringify(formProject)), [formProject])
+    useEffect(() => sessionStorage.setItem("formObjective", JSON.stringify(formObjective)), [formObjective])
     useEffect(() => sessionStorage.setItem("currentTask", JSON.stringify(currentTask)), [currentTask])
     useEffect(() => sessionStorage.setItem("currentProject", JSON.stringify(currentProject)), [currentProject])
     useEffect(() => sessionStorage.setItem("currentObjective", JSON.stringify(currentObjective)), [currentObjective])
@@ -75,7 +73,7 @@ function App() {
     } 
 
     // create fetch functions that interact with app's state
-    const fetchAllContent = () => fetchAllUserContent(setProjects, setDefaultProject, setObjectives, setDefaultProjectObjective, setTasks, handleNotification)
+    const fetchAllContent = () => fetchAllUserContent(setProjects, setFormProject, setObjectives, setFormObjective, setTasks, handleNotification)
 
     const handleLogin = async (user) => {
         setCurrentUser(user)
@@ -297,8 +295,8 @@ function App() {
         handleNotification, notiBarTimerRef,
         handleLogin, handleLogout,
         fetchAllContent, handleRefresh, 
-        defaultProject, defaultProjectObjective, formProject, formObjective,
-        setDefaultProject, setDefaultProjectObjective, setFormProject, setFormObjective,
+        formProject, formObjective,
+        setFormProject, setFormObjective,
         currentTask, setCurrentTask,
         currentProject, setCurrentProject,
         currentObjective, setCurrentObjective,
