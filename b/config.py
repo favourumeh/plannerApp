@@ -69,7 +69,7 @@ if 'test' not in ",".join(sys.argv): #1
         app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}?ssl_ca={ssl_cert_path}"
 
 
-    app.config["SQLACHEMY_TACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     #bind the database instance to flask app instance 
     db.init_app(app=app)
 
