@@ -8,9 +8,10 @@ from flask import jsonify, Response
 from typing import Tuple, Dict, List
 from werkzeug.test import TestResponse
 from datetime import datetime, timezone
+from pytz import timezone
 
 #Record test execution time
-now: datetime = datetime.now(tz=timezone.utc)
+now: datetime = datetime.now(tz=timezone('Europe/London'))
 now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M')
 now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:00 GMT")
 

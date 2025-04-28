@@ -7,6 +7,7 @@ from plannerPackage import login_required, token_required, generate_all_user_con
 from config import db, app, serializer
 from typing import Tuple, List
 from datetime import datetime, timezone, timedelta
+from pytz import timezone
 
 #create blueprint
 task = Blueprint("task", __name__)
@@ -35,7 +36,7 @@ def create_task() -> Tuple[Response, int]:
     start = content.get("start", None)
     finish = content.get("finish", None)
     is_recurring = content.get("isRecurring", False)
-    last_updated = datetime.now(tz=timezone.utc)
+    last_updated = datetime.now(tz=timezone('Europe/London'))
     was_paused = content.get("wasPaused", False)
     parent_task_id = content.get("parentTaskId", None)
     tag = content.get("tag", None)
@@ -160,7 +161,7 @@ def update_task(task_id: int) -> Tuple[Response, int]:
     task.finish = content.get("finish", task.finish)
     task.scheduled_start = content.get("scheduledStart", task.scheduled_start)
     task.is_recurring = content.get("isRecurring", task.is_recurring)
-    task.last_updated = datetime.now(tz=timezone.utc)
+    task.last_updated = datetime.now(tz=timezone('Europe/London'))
     task.was_paused = content.get("wasPaused", task.was_paused)
     task.tag = content.get("tag", task.tag)
     objective_id = content.get("objectiveId", task.objective_id)

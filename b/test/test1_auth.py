@@ -7,9 +7,10 @@ from . import plannerAppTestDependecies
 from datetime import datetime, timezone, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from plannerPackage import filter_dict, decrypt_bespoke_session_cookie, session_key
+from pytz import timezone
 
 #Record test execution time
-now = datetime.now(tz=timezone.utc)
+now = datetime.now(tz=timezone('Europe/London'))
 
 class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
@@ -255,7 +256,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please login!")
 
         print("         Test accessing the route with an expired refresh token fails")
-        exp: datetime = datetime.now(tz=timezone.utc) - timedelta(days =1)
+        exp: datetime = datetime.now(tz=timezone('Europe/London')) - timedelta(days =1)
         token = decrypt_bespoke_session_cookie(cookie=bsc, serializer=serializer, decryption_key=sk)["refreshToken"]
         token_hash = generate_password_hash(token, method = "pbkdf2")
         refresh_token_obj: Refresh_Token = Refresh_Token(token=token_hash, exp=exp, user_id=1)  

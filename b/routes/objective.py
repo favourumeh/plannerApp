@@ -7,6 +7,7 @@ from plannerPackage import login_required, token_required, flatten_2d_list, gene
 from config import db, app, serializer
 from typing import Tuple, List
 from datetime import datetime, timezone
+from pytz import timezone
 
 #create blueprint
 objective = Blueprint("objective", __name__)
@@ -31,7 +32,7 @@ def create_objective() -> Tuple[Response, int]:
     deadline: str|None = content.get("deadline", None)
     scheduled_start: str|None = content.get("scheduledStart", None)
     scheduled_finish: str|None = content.get("scheduledFinish", None) 
-    last_updated: datetime = datetime.now(tz=timezone.utc)
+    last_updated: datetime = datetime.now(tz=timezone('Europe/London'))
     tag: str = content.get("tag", None)
     project_id: int = content.get("projectId", None)
     user_id: int = session["userId"] 
@@ -125,7 +126,7 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     deadline = content.get("deadline", objective.deadline)
     scheduled_start: str|None = content.get("scheduledStart", objective.scheduled_start)
     scheduled_finish: str|None = content.get("scheduledFinish", objective.scheduled_finish) 
-    objective.last_updated = datetime.now(tz=timezone.utc)
+    objective.last_updated = datetime.now(tz=timezone('Europe/London'))
     objective.tag = content.get("tag", objective.tag)
     project_id = content.get("projectId", objective.project_id)
     

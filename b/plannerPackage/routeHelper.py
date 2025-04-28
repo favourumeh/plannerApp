@@ -8,12 +8,9 @@ from functools import wraps
 from datetime import datetime, timedelta, timezone
 from . import refresh_token_dur, decrypt_bespoke_session_cookie #alternative: from plannerPackage import refre...
 from . import session_key
-from uuid import uuid4
 from werkzeug.security import generate_password_hash, check_password_hash
-from cryptography.fernet import Fernet
-import json
-import os
 from dotenv import load_dotenv
+from pytz import timezone
 
 #import env vars from b/.env file
 load_dotenv()
@@ -93,8 +90,12 @@ def login_required(serializer: URLSafeTimedSerializer):
                 resp_dict["message"] = "Failure: Refresh token is invalid. Please login"
                 return jsonify(resp_dict), 401
             
-            #check if user's token has expired 
-            if refresh_token_obj.exp.replace(tzinfo = timezone.utc) < datetime.now(tz=timezone.utc):
+            #check if user's token has expired
+            now: datetime = datetime.now(tz=timezone('Europe/London'))
+            refresh_token_exp: datetime = refresh_token_obj.exp.replace(tzinfo = timezone('Europe/London'))
+            # print("now: ", now)
+            # print("refresh_token_exp: ", refresh_token_exp)
+            if  refresh_token_exp < now:
                 resp_dict["message"] = "Failure: Please login. Refresh token has expired."
                 return jsonify(resp_dict), 401
                 
@@ -113,7 +114,7 @@ def update_refresh_token_table(action: str, refresh_token_obj: Refresh_Token|Non
         token_UUID: the refresh token (uuid4). 
         user_id: user id of user whose refresh token is being created/updated
     """
-    exp = datetime.now(tz = timezone.utc) + timedelta(days = refresh_token_dur)
+    exp = datetime.now(tz=timezone('Europe/London')) + timedelta(days = refresh_token_dur)
     token_hash = generate_password_hash(token_UUID)
 
     if action == "create":

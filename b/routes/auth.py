@@ -13,6 +13,7 @@ from uuid import uuid4
 from plannerPackage import login_required, token_required, update_refresh_token_table, access_token_dur, filter_dict, generate_all_user_content 
 from plannerPackage import session_key
 from cryptography.fernet import Fernet
+from pytz import timezone
 
 #import env vars from b/.env file
 load_dotenv()
@@ -135,11 +136,14 @@ def login() -> Tuple[Response, int]:
     resp = jsonify(resp_dict)
 
     #create JWT(access token)
-    now: datetime = datetime.now(tz=timezone.utc)
+    now: datetime = datetime.now(tz=timezone('Europe/London'))
+    exp: datetime = now + timedelta(minutes=access_token_dur)
+    # print("now (login)", now)
+    # print("access token exp (login)", exp)
     access_token = jwt.encode(
         payload = {"sub": "access token", # identifies the subject of the jwt
                    "iat":  int(now.timestamp()), #time jwt was issued (as timestamp integer). To convert back to datetime.datetime:  datetime.fromtimestamp(<timestamp>, tz=timezone.utc)
-                   "exp": now + timedelta(minutes=access_token_dur), #token expiration date
+                   "exp": exp, #token expiration date
                    "userId": user.id,
                    "username": user.username},
         key = app.config["SECRET_KEY"],
@@ -190,11 +194,14 @@ def refresh() -> Tuple[Response, int]:
     user: User = User.query.filter(User.id == user_id).first()
 
     #generate access token (JWT)
-    now: datetime = datetime.now(tz=timezone.utc)
+    now: datetime = datetime.now(tz=timezone('Europe/London'))
+    exp: datetime = now + timedelta(minutes=access_token_dur)
+    # print("now (refresh)", now)
+    # print("access token exp (refresh)", exp)
     access_token = jwt.encode(
         payload = {"sub": "access token", # identifies the subject of the jwt
                    "iat": int(now.timestamp()), #time jwt was issued as a timestamp integer
-                   "exp": now + timedelta(minutes=access_token_dur), #token expiration date
+                   "exp": exp, #token expiration date
                    "userId": user.id,
                    "username": user.username},
         key = app.config["SECRET_KEY"],
@@ -251,7 +258,7 @@ def edit_user(user_id: int) -> Tuple[Response, int]:
     password1: str = creds.get("password1", user.password)
     password2: str = creds.get("password2", user.password)
     email: str = creds.get("email", user.email)
-    last_updated: datetime =  datetime.now(tz=timezone.utc)
+    last_updated: datetime =  datetime.now(tz=timezone('Europe/London'))
     
     if not current_password:
         resp_dict["message"] = "Failure: Please enter your current password"
