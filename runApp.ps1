@@ -46,8 +46,10 @@ function test-dockerImageTag{
     #checks if the docker image is valid (i.e., is it empty, does it already exist )
     param (
         [string]$repositoryName,
-        [string]$userInputTag
+        [string]$userInputTag,
+        [string]$justTesting = "n"
     )
+
     # Extract a list of docker tags for the specific repo
     $dockerTags = (docker images --filter "reference=$repositoryName" --format "{{.Tag}}") -join ", "
     $tagArr = $dockerTags.split(", ")
@@ -59,12 +61,12 @@ function test-dockerImageTag{
     #get the latest tag
     $latestTag = $tagArr[$tagArr.Length -1]
 
-    $justTesting = read-host "Are you testing the repo $repositoryName ? (y/n)" 
     if ($justTesting -eq "y") {
-        write-host "Stoping and removing any running docker containers"
-        docker-compose down
-        docker rmi $repositoryName":test"
-        return "test"}
+        # write-host "Stoping and removing any running docker containers"
+        # docker-compose down
+        # docker rmi $repositoryName":test"
+        return "test"
+    }
 
     $tagIsEmpty = $userInputTag -eq ""
     $tagAlreadyExist = $dockerTags -like "*$userInputTag"
@@ -125,11 +127,12 @@ $devBackendBaseURL = $env:local_host_backend_base_url + $backendPort
 $prodBackendBaseURL = $env:VITE_PROD_BACKEND_API_URL
 write-host("prodBackendBaseURL: " + $prodBackendBaseURL)
 
-#check if the docker image tag is already in use. If it is, prompt the user to enter a new tag.
-#Note: this is only done for the prod env.
-if ($userEnv -eq "prod-local") {
-    $backend_image_tag =  test-dockerImageTag -repositoryName "flask-backend-planner-app" -userInputTag $backend_image_tag
-    $frontend_image_tag = test-dockerImageTag -repositoryName "react-frontend-planner-app" -userInputTag $frontend_image_tag
+#check if the docker image tag is already in use. If it is, prompt the user to enter a new tag or use latest tag (not called "latest").
+#Note: this is only done for the prod-local env.
+if ( $userEnv -eq "prod-local" ) {
+    $justTesting = read-host "Are you testing the repo $repositoryName ? (y/n)" 
+    $backend_image_tag =  test-dockerImageTag -repositoryName "flask-backend-planner-app" -userInputTag $backend_image_tag -justTesting $justTesting
+    $frontend_image_tag = test-dockerImageTag -repositoryName "react-frontend-planner-app" -userInputTag $frontend_image_tag -justTesting $justTesting
     write-host backend_image_tag : $backend_image_tag
     write-host frontend_image_tag: $frontend_image_tag
 }
@@ -154,7 +157,7 @@ function Update-RootEnv{
     #update the docker image repo and repo tag
     if ($appEnv -eq "prod-local"){
         $content = $content -replace "(backend_repo_and_image_tag=).*", "`$1flask-backend-planner-app:$($backend_image_tag)"
-        $content = $content -replace "(frontend_repo_and_image_tag=).*", "`$1react-frontend-planner-app:$($backend_image_tag)"
+        $content = $content -replace "(frontend_repo_and_image_tag=).*", "`$1react-frontend-planner-app:$($frontend_image_tag)"
     }  elseif ($appEnv -eq "prod"){
         $content = $content -replace "(backend_repo_and_image_tag=).*", "`$1flask-backend-planner-app:latest"
         $content = $content -replace "(frontend_repo_and_image_tag=).*", "`$1react-frontend-planner-app:latest"
@@ -183,8 +186,8 @@ $backendCommands = @"
 "@
 
 $prodLocalDockerCommands = @"
-    docker-compose build --no-cache
-    docker-compose up
+    docker rmi $backend_image_tag $frontend_image_tag
+    docker-compose build --no-cache && docker-compose up
 "@ #6 #7
 
 $prodDockerCommands = @"
