@@ -32,7 +32,7 @@ const fetchAllUserContent = async (setProjects, setFormProject, setObjectives, s
         const resp_ref_json = await resp_ref.json()
         if (resp_ref.status == 200){
             console.log(resp_ref_json.message)
-            fetchAllUserContent(setProjects, setDefaultProject, setObjectives, setDefaultProjectObjective, setTasks, handleNotification)
+            fetchAllUserContent(setProjects, setFormProject, setObjectives, setFormObjective, setTasks, handleNotification)
         } else {
             console.log(resp_ref_json.message)
             handleNotification(resp_ref_json.message, "failure")
@@ -41,7 +41,7 @@ const fetchAllUserContent = async (setProjects, setFormProject, setObjectives, s
     return resp.status
 }
 
-const fetchUserProjects = async (setProjects, handleNotification, setDefaultProject) => {
+const fetchUserProjects = async (setProjects, handleNotification, setFormProject) => {
     const url = `${backendBaseUrl}/read-projects`
     const options = {
         method:"GET",
@@ -55,7 +55,7 @@ const fetchUserProjects = async (setProjects, handleNotification, setDefaultProj
         console.log(resp_json.message)
         const projects = resp_json.projects
         setProjects(projects)
-        setDefaultProject(projects.filter((project)=> project["type"]=="default project")[0])
+        setFormProject(projects.filter((project)=> project["type"]=="default project")[0])
         // console.log(resp_json.projects)
     } else {
         console.log(resp_json.message)
@@ -63,7 +63,7 @@ const fetchUserProjects = async (setProjects, handleNotification, setDefaultProj
     }
 }
 
-const fetchUserObjectives = async (setObjectives, handleNotification, setDefaultProjectObjective) => {
+const fetchUserObjectives = async (setObjectives, handleNotification, setFormObjective) => {
     const url = `${backendBaseUrl}/read-objectives`
     const options = {
         method:"GET",
@@ -77,7 +77,7 @@ const fetchUserObjectives = async (setObjectives, handleNotification, setDefault
         console.log(resp_json.message)
         const objectives = resp_json.objectives
         setObjectives(objectives)
-        setDefaultProjectObjective(objectives.filter((objective) => objective["type"]=="default project objective")[0].id)
+        setFormObjective(objectives.filter((objective) => objective["type"]=="default project objective")[0].id)
         // console.log(resp_json.objectives)
     } else {
         console.log(resp)
