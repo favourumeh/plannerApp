@@ -55,6 +55,12 @@ def create_objective() -> Tuple[Response, int]:
         resp_dict["message"] = f"Failure: The title has over {objective_title_limit} chars"
         return jsonify(resp_dict), 400
 
+    project_objectives: List[Objective] = Objective.query.filter_by(project_id=project_id).all()
+    objective_titles: List[str] = [objective.title for objective in project_objectives]
+    if title in objective_titles:
+        resp_dict["message"] = "Failure: The title provided already exists in the project. Please provide a different title."
+        return jsonify(resp_dict), 400
+    
     #generate objective number if not provided
     objective_number = generate_entity_number(entity_number=objective_number, parent_entity_id=project_id, parent_entity_name="project", entity_name="objective", entity=Objective)
 
@@ -129,6 +135,13 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     
     if len(objective.title) > objective_title_limit:
         resp_dict["message"] = f"Failure: The title has over {objective_title_limit} chars"
+        return jsonify(resp_dict), 400
+
+    #check if the objective title update shares the same title as another objective in the project
+    project_objectives: List[Objective] = Objective.query.filter(Objective.project_id == project_id, Objective.id != objective.id ).all()
+    objective_titles: List[str] = [objective.title for objective in project_objectives] # excludes the current objective being updated
+    if objective.title in objective_titles:
+        resp_dict["message"] = "Failure: The title provided already exists in the project. Please provide a different title."
         return jsonify(resp_dict), 400
 
    #Check if objective being updated already exist in the objective

@@ -7,6 +7,7 @@ from plannerPackage import login_required, token_required, generate_entity_numbe
 from config import db, app, serializer
 from typing import Tuple, List
 from datetime import datetime, timezone
+from pytz import timezone
 
 #create blueprint
 project = Blueprint("project", __name__)
@@ -29,12 +30,12 @@ def create_project() -> Tuple[Response, int]:
     content: dict = request.json
     project_number: int = content.get("projectNumber", None)
     status: str = content.get("status", "To-Do")
-    title: str = content.get("title", "Unnamed Project")
+    title: str = content.get("title", None)
     description: str = content.get("description", None)
     deadline: datetime = content.get("deadline", None)
     scheduled_start: str|None = content.get("scheduledStart", None)
     scheduled_finish: str|None = content.get("scheduledFinish", None) 
-    last_updated: datetime = datetime.now(tz=timezone.utc) #keep: used to get the project id
+    last_updated: datetime = datetime.now(tz=timezone('Europe/London'))
     tag: str = content.get("tag", None)
     user_id: int = session["userId"] 
     
@@ -42,10 +43,20 @@ def create_project() -> Tuple[Response, int]:
         resp_dict["message"] = "Failure: Project is missing a description. Please add one."
         return jsonify(resp_dict), 400
 
+    if not title:
+        resp_dict["message"] = "Failure: Project is missing a title. Please add one."
+        return jsonify(resp_dict), 400
+    
     if len(title) > project_title_limit:
         resp_dict["message"] = f"Failure: The title has over {project_title_limit} chars"
         return jsonify(resp_dict), 400
 
+    user_projects: List[Project] = Project.query.filter_by(user_id=user_id).all()
+    project_titles: List[str] = [project.title for project in user_projects]
+    if title in project_titles:
+        resp_dict["message"] = "Failure: The project title provided already exists for this user. Please provide a different title."
+        return jsonify(resp_dict), 400
+    
     deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%d')
     scheduled_start = convert_date_str_to_datetime(scheduled_start, '%Y-%m-%d')
     scheduled_finish = convert_date_str_to_datetime(scheduled_finish, '%Y-%m-%d')
@@ -56,7 +67,7 @@ def create_project() -> Tuple[Response, int]:
         project = Project(project_number=project_number, status=status, title=title, description=description, deadline=deadline, 
                           scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, last_updated=last_updated, tag=tag, user_id=user_id)
         db.session.add(project)
-        project_id = Project.query.filter_by(title=title, description=description, last_updated=last_updated, user_id=user_id).first().id
+        project_id = Project.query.filter_by(title=title, user_id=user_id).first().id
         objective_desc = "Stores all project tasks that do not belong to an objective"
         default_objective = Objective(title="No Objective", type="default user project objective", objective_number=0, description=objective_desc, project_id=project_id)
         db.session.add(default_objective)
@@ -89,7 +100,8 @@ def read_projects():
 def update_project(project_id: int) -> Tuple[Response, int]: 
     resp_dict = {"message":""}
     content: dict = request.json
-    project = Project.query.filter_by(id=project_id, user_id=session["userId"]).first()
+    user_id = session["userId"]
+    project = Project.query.filter_by(id=project_id, user_id=user_id).first()
 
     if not project:
         resp_dict["message"] = "Failure: Could not find the selected project in the db. Please choose another project id."
@@ -105,11 +117,21 @@ def update_project(project_id: int) -> Tuple[Response, int]:
     deadline: str|None = content.get("deadline", project.deadline)
     scheduled_start: str|None = content.get("scheduledStart", project.scheduled_start)
     scheduled_finish: str|None = content.get("scheduledFinish", project.scheduled_finish) 
-    project.last_updated = datetime.now(tz=timezone.utc)
+    project.last_updated = datetime.now(tz=timezone('Europe/London'))
     project.tag = content.get("tag", project.tag)
 
+    if not project.title:
+        resp_dict["message"] = "Failure: Project is missing a title. Please add one."
+        return jsonify(resp_dict), 400
+    
     if len(project.title) > project_title_limit:
         resp_dict["message"] = f"Failure: The title has over {project_title_limit} chars"
+        return jsonify(resp_dict), 400
+    
+    user_projects: List[Project] = Project.query.filter(Project.user_id == user_id, Project.id != project.id).all()
+    project_titles: List[str] = [project.title for project in user_projects]
+    if project.title in project_titles:
+        resp_dict["message"] = "Failure: The project title provided already exists for this user. Please provide a different title."
         return jsonify(resp_dict), 400
 
     project.deadline = convert_date_str_to_datetime(deadline, '%Y-%m-%d')
