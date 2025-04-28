@@ -115,7 +115,7 @@ const Kanban = ({sitePage}) => {
     useEffect(() => {
         if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
             let updatedEntity_ = entityArr.find((entity) => entity.id ===  updatedEntityIdAndStatus.id)
-            console.log("updatedEntity_:", updatedEntity_)
+            // console.log("updatedEntity_:", updatedEntity_)
             updatedEntity_.status = updatedEntityIdAndStatus.status
             updatedEntity_ = handleDateFieldsAndStatus(updatedEntity_)
             updatedEntity_ = formatDateFields(updatedEntity_)
