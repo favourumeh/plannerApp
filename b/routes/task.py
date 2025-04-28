@@ -170,16 +170,16 @@ def update_task(task_id: int) -> Tuple[Response, int]:
     task.start = convert_date_str_to_datetime(task.start, '%Y-%m-%dT%H:%M')
     task.finish = convert_date_str_to_datetime(task.finish, '%Y-%m-%dT%H:%M')
 
+    if len(task.description) > int(task_description_limit):
+        resp_dict["message"] = f"Failure: The task description is over the {task_description_limit} char limit."
+        return jsonify(resp_dict), 400
+    
     #Check if task being updated already exist in the objective
     existing_task = Task.query.filter_by(id = task_id, objective_id=objective_id).first()
     if not existing_task: # if no existing task is found in the objective, it means the task is being moved from another objective
         task.task_number = generate_entity_number(entity_number=None, parent_entity_id=objective_id, parent_entity_name="objective", entity_name="task", entity=Task)
         task.objective_id = objective_id 
-    
-    if len(task.description) > int(task_description_limit):
-        resp_dict["message"] = f"Failure: The task description is over the {task_description_limit} char limit."
-        return jsonify(resp_dict), 400
-        
+
     try:
         db.session.commit()
         resp_dict["message"] = "Success: Task has been updated!"
