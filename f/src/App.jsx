@@ -87,8 +87,8 @@ function App() {
         setTasks([])
         setProjects([])
         setObjectives([])
-        setDefaultProject({})
-        setDefaultProjectObjective({})
+        setFormProject({})
+        setFormObjective({})
         setHomePageTasks([])
     }
 
@@ -144,7 +144,7 @@ function App() {
             var resp = await fetch(url,options)
             var resp_json = await resp.json()
         } catch (err) {
-            handleNotification(err.message + `. Failed to DELETE ${entityName}. Error in fetch (NOT API)`, "failure")
+            handleNotification(err.message + `. Failed to DELETE ${entityName}. Either connection error or error not prevented by api unit test.`, "failure")
             handleRefresh()
         }
 
@@ -190,7 +190,7 @@ function App() {
             var resp = await fetch(url, options)
             var resp_json = await resp.json()
         } catch (err) {
-            handleNotification(err.message + `. Failed to DELETE ${entityName}. Error in fetch (NOT API)`, "failure")
+            handleNotification(err.message + `. Failed to ${action} ${entityName}. Either connection error or error not prevented by api unit test.`, "failure")
             handleRefresh()
         }
 
