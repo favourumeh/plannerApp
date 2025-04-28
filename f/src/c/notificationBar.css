@@ -7,27 +7,6 @@
     z-index: 2;
 }
 
-#notification-overlay.animation {
-  animation: fadeOut 5s ease forwards;
-}
-
-@keyframes fadeOut {
-    0% {
-      opacity: 1;
-    }
-    80% {
-      opacity: 1; 
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-/* Animation stops when mouse hovers over notification overlay */
-#notification-overlay:hover {
-    animation: none;
-  }
-
 #notification-overlay .notification-message{
     margin-right: 40px;
     overflow: hidden;

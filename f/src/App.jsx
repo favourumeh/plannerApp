@@ -45,7 +45,6 @@ function App() {
     const [entityName, setEntityName] = useState(sitePage==="view-projects"? "project": sitePage==="view-objectives"? "objective":"task")
     const [entity, setEntity] = useState(sitePage==="view-projects"? projects: sitePage==="view-objectives"? objectives:tasks)
     const [userSettings, setUserSettings] = useState({"dayStartTime":"08:00", "dayEndTime":"20:30", "timeIntervalInMinutes":50})
-    const notiBarTimerRef = useRef()
     const [hoverText, setHoverText] = useState("")
     const [isShowHoverText, setIsShowHoverText] = useState(true)
 
@@ -292,7 +291,7 @@ function App() {
         tasks, setTasks, 
         objectives, setObjectives,
         projects, setProjects,
-        handleNotification, notiBarTimerRef,
+        handleNotification,
         handleLogin, handleLogout,
         fetchAllContent, handleRefresh, 
         formProject, formObjective,

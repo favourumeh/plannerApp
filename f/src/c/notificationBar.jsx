@@ -3,9 +3,11 @@ import globalContext from "../context"
 import { useState, useRef, useEffect, useContext } from "react"
 
 function NotificationBar () {
-    const {notificationMessage, setNotificationMessage, isNotiBarVisible, setIsNotiBarVisible, isNotiMessageError, notiBarTimerRef} = useContext(globalContext)
+    const {notificationMessage, setNotificationMessage, isNotiBarVisible, setIsNotiBarVisible, isNotiMessageError} = useContext(globalContext)
     const [isNotiBarExpanded, setIsNotiBarExpanded] = useState(false)
     const [isHoverNotificationBar, setIsHoverNotificationBar] = useState(false)
+    const notiBarTimerRef = useRef()
+    
 
     useEffect(() => {
         if (!isHoverNotificationBar){
@@ -30,11 +32,10 @@ function NotificationBar () {
         setNotificationMessage("")
         setIsHoverNotificationBar(false)
     }
-    //monitoring use-Effect: Can comment out
+    // //monitoring use-Effect: Can comment out
     // useEffect(() => {console.log("isNotiBarVisible:", isNotiBarVisible)}, [isNotiBarVisible] ) // used to track noti bar is removed from html
     // useEffect(() => {console.log("isHoverNotificationBar:",  isHoverNotificationBar)}, [isHoverNotificationBar]) //used to track if mouse hovers over noti bar#
     // useEffect(() => console.log("timerRef:",notiBarTimerRef), [notiBarTimerRef.current])
-
 
     if (!isNotiBarVisible) {
         return null
