@@ -49,7 +49,6 @@ function test-dockerImageTag{
         [string]$userInputTag,
         [string]$justTesting = "n"
     )
-
     # Extract a list of docker tags for the specific repo
     $dockerTags = (docker images --filter "reference=$repositoryName" --format "{{.Tag}}") -join ", "
     $tagArr = $dockerTags.split(", ")
@@ -62,9 +61,6 @@ function test-dockerImageTag{
     $latestTag = $tagArr[$tagArr.Length -1]
 
     if ($justTesting -eq "y") {
-        # write-host "Stoping and removing any running docker containers"
-        # docker-compose down
-        # docker rmi $repositoryName":test"
         return "test"
     }
 
@@ -131,8 +127,15 @@ write-host("prodBackendBaseURL: " + $prodBackendBaseURL)
 #Note: this is only done for the prod-local env.
 if ( $userEnv -eq "prod-local" ) {
     $justTesting = read-host "Are you testing the repo $repositoryName ? (y/n)" 
-    $backend_image_tag =  test-dockerImageTag -repositoryName "flask-backend-planner-app" -userInputTag $backend_image_tag -justTesting $justTesting
+    $backend_image_tag =  test-dockerImageTag -repositoryName "flask-backend-planner-app" -userInputTag $backend_image_tag -justTesting $justTesting 
     $frontend_image_tag = test-dockerImageTag -repositoryName "react-frontend-planner-app" -userInputTag $frontend_image_tag -justTesting $justTesting
+    write-host backend_image_tag : $backend_image_tag
+    write-host frontend_image_tag: $frontend_image_tag
+}
+
+if ( $userEnv -eq "prod" ) {
+    $backend_image_tag =  "latest"
+    $frontend_image_tag = "latest"
     write-host backend_image_tag : $backend_image_tag
     write-host frontend_image_tag: $frontend_image_tag
 }
@@ -154,17 +157,15 @@ function Update-RootEnv{
     #update backend port 
     $content = $content -replace "(backend_host_port=).*", "backend_host_port=$backendHostPort"
 
+    #empty the tag values
+    $content = $content -replace "(backend_repo_and_image_tag=).*", "`$1"
+    $content = $content -replace "(frontend_repo_and_image_tag=).*", "`$1"
+
     #update the docker image repo and repo tag
-    if ($appEnv -eq "prod-local"){
+    if (($appEnv -eq "prod-local") -or ($appEnv -eq "prod")){
         $content = $content -replace "(backend_repo_and_image_tag=).*", "`$1flask-backend-planner-app:$($backend_image_tag)"
         $content = $content -replace "(frontend_repo_and_image_tag=).*", "`$1react-frontend-planner-app:$($frontend_image_tag)"
-    }  elseif ($appEnv -eq "prod"){
-        $content = $content -replace "(backend_repo_and_image_tag=).*", "`$1flask-backend-planner-app:latest"
-        $content = $content -replace "(frontend_repo_and_image_tag=).*", "`$1react-frontend-planner-app:latest"
-    } else {
-        $content = $content -replace "(backend_repo_and_image_tag=).*", "`$1"
-        $content = $content -replace "(frontend_repo_and_image_tag=).*", "`$1"
-    }
+    } 
     # Write the updated content back to the file
     Set-Content -Path $rootEnvFilePath -Value $content
     Write-Host "Updated VITE_APP_ENV variable in /.env to '$appEnv' and backend_host_port to '$backendHostPort'"
@@ -192,7 +193,8 @@ $prodLocalDockerCommands = @"
 "@ #6 #7
 
 $prodDockerCommands = @"
-    docker-compose down && docker-compose build --no-cache
+    docker rmi $backend_image_tag $frontend_image_tag
+    docker-compose build
 "@ #6 #7
 
 if ($userEnv -eq "dev") {
