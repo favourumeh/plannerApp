@@ -32,7 +32,7 @@ RUN sed -i "s/listen\s.*/listen $PORT;/" /etc/nginx/conf.d/default.conf
 RUN if [[ $APP_ENV = "dev" ]] || [[ $APP_ENV = "prod-local" ]]; then \
         server_name="localhost"; \
     elif [[ $APP_ENV = "prod" ]]; then \
-        server_name="$FRONTEND_CONTAINER_APP_SERVICE_DOMAIN"; \
+        server_name=$FRONTEND_CONTAINER_APP_SERVICE_DOMAIN; \
     else \
         echo "APP_ENV is not 'dev', 'prod-local' or 'prod'"; \
     fi; \

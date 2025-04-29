@@ -26,7 +26,7 @@ services:
         VITE_APP_ENV: ${VITE_APP_ENV}
         VITE_DEV_BACKEND_API_URL: ${local_host_backend_base_url}${backend_host_port}
         VITE_PROD_BACKEND_API_URL: ${VITE_PROD_BACKEND_API_URL}
-        FRONTEND_CONTAINER_APP_SERVICE_DOMAIN: ${FRONTEND_CONTAINER_APP_SERVICE_DOMAIN}
+        frontend_container_app_service_domain: ${FRONTEND_CONTAINER_APP_SERVICE_DOMAIN}
     ports:
       - "${frontend_host_port}:${frontend_container_port}"
     restart: unless-stopped
