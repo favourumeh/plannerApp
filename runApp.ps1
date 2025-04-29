@@ -186,12 +186,13 @@ $backendCommands = @"
 "@
 
 $prodLocalDockerCommands = @"
+    docker-compose down
     docker rmi $backend_image_tag $frontend_image_tag
     docker-compose build --no-cache && docker-compose up
 "@ #6 #7
 
 $prodDockerCommands = @"
-    docker-compose build --no-cache
+    docker-compose down && docker-compose build --no-cache
 "@ #6 #7
 
 if ($userEnv -eq "dev") {
@@ -212,8 +213,8 @@ elseif ($userEnv -eq "prod-local") {
 
 elseif ($userEnv -eq "prod") {
     write-host "Building docker images for prod env"
-    write-host frontend-url: "http://localhost:$env:frontend_host_port"
-    write-host backend-url: $devBackendBaseURL
+    write-host frontend-url: "$env:FRONTEND_CONTAINER_APP_SERVICE_DOMAIN"
+    write-host backend-url: "$env:VITE_PROD_BACKEND_API_URL"
     Start-Process wt -ArgumentList @"
         new-tab --profile "Ubuntu" wsl bash -c $prodDockerCommands
 "@
