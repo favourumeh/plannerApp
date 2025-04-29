@@ -2,3 +2,6 @@ notes/
 temp*
 .env
 .vscode/
+
+#docker image build logfile
+compose-build.log
