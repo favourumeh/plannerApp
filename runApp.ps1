@@ -193,7 +193,7 @@ $prodLocalDockerCommands = @"
 "@ #6 #7
 
 $prodDockerCommands = @"
-    docker rmi $backend_image_tag $frontend_image_tag
+    echo building prod containers
     docker-compose build
 "@ #6 #7
 
