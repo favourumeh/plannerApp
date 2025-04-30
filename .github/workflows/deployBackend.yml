@@ -2,9 +2,9 @@ name: Deploy Flask Backend to Azure Web App
 
 on:
   push:
-    branches: ["main"]  #. can add more branches if you want
+    branches: ["main"] 
     paths:
-      - 'b/**'  # Only trigger if changes are in the backend/ directory. For more info on wildcards or other paterns see https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#patterns-to-match-file-paths 
+      - 'b/**'
 env:
     web_app_name: plannerAppBackendNC
     python_version: 3.12
@@ -23,13 +23,10 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ env.python_version }} 
-        #   cache: 'pip'  # Cache pip dependencies
-        #   cache-dependency-path: 'backend/requirements.txt'
 
       #Step 3: install python venv in linux 
       - name: Install Python vevn
-        run: |
-          sudo apt install python${{ env.python_version }}-venv -y
+        run: sudo apt install python${{ env.python_version }}-venv -y
 
      # Step 4: create and activate venv
       - name: Create and activate env
@@ -38,7 +35,7 @@ jobs:
             python -m venv .venv
             source .venv/bin/activate
 
-      # Step 5: Install dependencies
+      # Step 5: Install python dependencies
       - name: Install dependencies
         working-directory: b/
         run: |
@@ -50,11 +47,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.web_app_name }}
-          slot-name: 'production'  # Optional: Specify a deployment slot
-          package: ${{ 'b/' }}  # Path to the backend files (i.e., file you want to deploy)
-          publish-profile: ${{ secrets.AZURE_WEB_APP_PUBLISH_PROFILE_FOR_PLANNER_APP }}  # Optional: Use publish profile instead of service principal
-
-
-      # Optional: Post-deployment step (e.g., smoke test or notification)
-      - name: Post-deployment step
-        run: echo "Flask backend deployed successfully!"
+          slot-name: 'production'
+          package: 'b/'
+          publish-profile: ${{ secrets.AZURE_WEB_APP_PUBLISH_PROFILE_FOR_PLANNER_APP }}
