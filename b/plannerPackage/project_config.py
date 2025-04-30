@@ -5,7 +5,8 @@ from azure.identity import ClientSecretCredential
 allowed_origins= [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://plannerappfrontend-daedfdg4fgg6bfgs.uksouth-01.azurewebsites.net/"
+    "https://plannerappfrontend-daedfdg4fgg6bfgs.uksouth-01.azurewebsites.net",
+    "https://lively-meadow-088461003.6.azurestaticapps.net"
     ]
 
 access_token_dur = float(os.environ["accessTokenDurationMins"])
