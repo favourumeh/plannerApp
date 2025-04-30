@@ -1,4 +1,6 @@
 node_modules
 dist
 
+#capture both .env.production and .env.development
+.env.* 
 
