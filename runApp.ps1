@@ -2,7 +2,10 @@
     #it takes 2 params: env and rdbms. 
         # env: the environment in which the app is run. 
                 # env = dev: backend flask app runs WSGI dev server and frontend flask app runs the dev env (npm run dev)
-                # env = prod-local: a docker imamge is build and run where the backend flask app runs gunicorn server and the frontend flask app is built (npm run build) and served by nginx.
+                # env = prod-local-docker: a docker imamge is build and run where the backend flask app runs gunicorn server and the frontend flask app is built (npm run build) and served by nginx.
+                # env = prod-local: a gunicorn backend and a built react app running locally 
+                # env = prod: same as prod-local but with backend url matching Azure App Service (source = code) Resource
+                # env = prod-docker: same as prod-local but with backend url matching Azure App Service (source=container) resouce
                 #note: the point of the prod env is to test the app in a prod-like env. 
         # rdbms: determines what database is used to store the apps user data: sqlite, mysql or az_mysql. 
                 #note: by default the if the env is dev the local my_sql db is used. If the env = prod then the test az_msql db is used. 
@@ -15,100 +18,18 @@ Import-Module ".\runAndDeployDependencies\runModule.psm1" -Force
 Update-Environment
 
 #allowed param inputs
-$allowed_env = "dev prod-local prod"
+$allowed_env = "dev prod-local-docker prod-local prod prod-docker"
 $allowed_rdbms = "sqlite mysql az_mysql"
-
-function Update-FrontendDirEnv{
-    #Changes the VITE_PROD_BACKEND_API_URL, VITE_DEV_BACKEND_API_URL in f/.env to allign with /.env file
-    #Also changes VITE_APP_ENV to allign with env param of Script. this variable determines the backendBaseURL used in f/project_config.js 
-    #funciton params 
-    param (
-        [string]$appEnv,
-        [string]$devBackendUrl,
-        [string]$prodBackendUrl
-    )  
-    #get the content of  project_config.js
-    $frontendEnvFilePath = $PWD.path + "\f\.env"
-    $content = Get-Content -Path $frontendEnvFilePath -Raw
-
-    #Update frontend/.env (so it is consistent with project_config)
-    $content = $content -replace "(VITE_PROD_BACKEND_API_URL=).*", "`$1$($prodBackendUrl)"
-    $content = $content -replace "(VITE_DEV_BACKEND_API_URL=).*", "`$1$($devBackendUrl)"
-
-    #Change VITE_APP_ENV environment variable in frontend/.env depending on appEnv param
-    $content = $content -replace "(VITE_APP_ENV=).*", "`$1$($appEnv)"
-
-    # Write the updated content back to the file
-    Set-Content -Path $frontendEnvFilePath -Value $content
-    Write-Host "Updated backendBaseURL variable in f/project_config.js to $devBackendUrl"
-}
-function test-dockerImageTag{
-    #checks if the docker image is valid (i.e., is it empty, does it already exist )
-    param (
-        [string]$repositoryName,
-        [string]$userInputTag,
-        [string]$justTesting = "n"
-    )
-    # Extract a list of docker tags for the specific repo
-    $dockerTags = (docker images --filter "reference=$repositoryName" --format "{{.Tag}}") -join ", "
-    $tagArr = $dockerTags.split(", ")
-    if ($tagArr.Length -eq 0) {
-        Write-Host "No tags found for the repository $repositoryName. So using 'test' as tag"
-        return "test"
-    }
-
-    #get the latest tag
-    $latestTag = $tagArr[$tagArr.Length -1]
-
-    if ($justTesting -eq "y") {
-        return "test"
-    }
-
-    $tagIsEmpty = $userInputTag -eq ""
-    $tagAlreadyExist = $dockerTags -like "*$userInputTag"
-    $tagIsBeingUpdated = $userInputTag -ne $latestTag
-    while ($tagIsEmpty -and $tagAlreadyExist -and $tagIsBeingUpdated ) {
-        Write-Host "Docker image $repositoryName : $imageTag already exists. Choose a different tag"
-        Write-host "See existing tags: $dockerTags"
-        $userInputTag = Read-Host "Enter a new tag for the docker image $repositoryName"
-        $tagAlreadyExist = ($dockerTags -like "*$userInputTag")
-        $tagIsEmpty = $userInputTag -eq ""
-        $tagIsBeingUpdated = $userInputTag -ne $latestTag
-    } 
-    return $userInputTag
-}
-
-# Function to display usage instructions
-function Show-Usage {
-    # Write-Host "Usage: .\runApp.ps1 [-var1 <value> -var2 <value> ...]"
-    Write-Host "Usage Example: .\runApp.ps1 -b_env dev -f_env dev -rdbms my_sql"
-}
 
 #vars for the key script params (R: avoids changing the value of the script param)
 $userEnv = $env 
 $userRDBMS = $rdbms
-function test-spelling{
-    #checks the spelling of the user-inputeed param value
-    param (
-        [string]$userInput,
-        [string]$allowedInputs,
-        [string]$promptMessage
-    )
-    if ($userInput -notin  $allowedInputs.split(" ")){
-        Show-Usage
-        $userInput = Read-Host "$promptMessage"
-    }
-    while ($userInput -notin $allowedInputs.split(" ")) { #prompt a user to imput the correct spelling of the param value options
-        Show-Usage
-        $userInput = Read-Host "Check Spelling! $promptMessage"
-    }
-    return $userInput
-}
 
 $allowed_env_prompt_format = ($allowed_env.split(" ")) -join "|"
 $allowed_rdbms_prompt_format = ($allowed_rdbms.split(" ")) -join "/"
 
 $userEnv = test-spelling -userInput $userEnv -allowedInputs $allowed_env -promptMessage "[Param env] Please enter one of - $allowed_env_prompt_format"
+
 #Automatically set rdbms if the user did not specify one.
 if ($rdbms -eq "") {
     $userRDBMS = ($userEnv -eq "dev") ? "mysql" : "az_mysql"
@@ -117,63 +38,27 @@ if ($rdbms -eq "") {
 }
 
 #Determine backend port 
-$backendPort = ($userEnv -eq "dev") -or ($userEnv -eq "prod") ? 5000 : 5001
+$backendPort = ($userEnv -in @("dev", "prod", "prod-docker") ) ? 5000 : ($userEnv -eq "prod-local") ?  5001 : 5002
+
 #Determine backend url 
-$devBackendBaseURL = $env:local_host_backend_base_url + $backendPort
-$prodBackendBaseURL = $env:VITE_PROD_BACKEND_API_URL
-write-host("prodBackendBaseURL: " + $prodBackendBaseURL)
+$localBackendBaseURL = $env:local_host_backend_base_url + $backendPort
+$prodBackendBaseURL = $env:VITE_PROD_NC_BACKEND_API_URL
+$prodDockerBackendBaseURL = $env:VITE_PROD_C_BACKEND_API_URL
 
-#check if the docker image tag is already in use. If it is, prompt the user to enter a new tag or use latest tag (not called "latest").
-#Note: this is only done for the prod-local env.
-if ( $userEnv -eq "prod-local" ) {
-    $justTesting = read-host "Are you testing the repo $repositoryName ? (y/n)" 
-    $backend_image_tag =  test-dockerImageTag -repositoryName "flask-backend-planner-app" -userInputTag $backend_image_tag -justTesting $justTesting 
-    $frontend_image_tag = test-dockerImageTag -repositoryName "react-frontend-planner-app" -userInputTag $frontend_image_tag -justTesting $justTesting
+#check if the docker image tag is already in use. If it is, prompt the user to enter a new tag or use the newest tag. If in prod-docker use the tag "latest".
+if ( $userEnv -in @("prod-local-docker", "prod-docker") ) {
+    if ($userEnv -eq "prod-local-docker") {
+        $justTesting = read-host "Are you testing the repo ? (y/n)" }
+
+    $backend_image_tag =  test-dockerImageTag -appEnv $userEnv -repositoryName "flask-backend-planner-app" -userInputTag $backend_image_tag -justTesting $justTesting 
+    $frontend_image_tag = test-dockerImageTag -appEnv $userEnv -repositoryName "react-frontend-planner-app" -userInputTag $frontend_image_tag -justTesting $justTesting
     write-host backend_image_tag : $backend_image_tag
     write-host frontend_image_tag: $frontend_image_tag
-}
-
-if ( $userEnv -eq "prod" ) {
-    $backend_image_tag =  "latest"
-    $frontend_image_tag = "latest"
-    write-host backend_image_tag : $backend_image_tag
-    write-host frontend_image_tag: $frontend_image_tag
-}
-
-function Update-RootEnv{
-    # Updated the VITE_APP_ENV variable in .env file root directory to allign with the env param of this script. 
-    # This variable controls the docker image build
-    param (
-        [string] $appEnv,
-        [string] $backendHostPort
-    )
-
-    $rootEnvFilePath = $PWD.path + "\.env"
-    $content = Get-Content -Path $rootEnvFilePath -Raw
-
-    #update VITE_APP_ENV var
-    $content = $content -replace "(VITE_APP_ENV=).*", "`$1$($appEnv)"
-
-    #update backend port 
-    $content = $content -replace "(backend_host_port=).*", "backend_host_port=$backendHostPort"
-
-    #empty the tag values
-    $content = $content -replace "(backend_repo_and_image_tag=).*", "`$1"
-    $content = $content -replace "(frontend_repo_and_image_tag=).*", "`$1"
-
-    #update the docker image repo and repo tag
-    if (($appEnv -eq "prod-local") -or ($appEnv -eq "prod")){
-        $content = $content -replace "(backend_repo_and_image_tag=).*", "`$1flask-backend-planner-app:$($backend_image_tag)"
-        $content = $content -replace "(frontend_repo_and_image_tag=).*", "`$1react-frontend-planner-app:$($frontend_image_tag)"
-    } 
-    # Write the updated content back to the file
-    Set-Content -Path $rootEnvFilePath -Value $content
-    Write-Host "Updated VITE_APP_ENV variable in /.env to '$appEnv' and backend_host_port to '$backendHostPort'"
 }
 
 #update f/.env and /.env 
-Update-FrontendDirEnv -appEnv $userEnv -devBackendUrl $devBackendBaseURL -prodBackendUrl $prodBackendBaseURL
-Update-RootEnv -appEnv $userEnv -backendHostPort $backendPort
+Update-FrontendDirEnv -cwd $PWD.path -appEnv $userEnv -localBackendBaseURL $localBackendBaseURL -prodBackendBaseURL $prodBackendBaseURL -prodDockerBackendBaseURL $prodDockerBackendBaseURL
+Update-RootEnv -cwd $PWD.path -appEnv $userEnv -backendHostPort $backendPort -backend_image_tag $backend_image_tag -frontend_image_tag $frontend_image_tag
 
 # --------------------------------------------------------------------Execution----------------------------------------------------------------------------
 # Execute the Python script with the user-defined variable as an argument
@@ -190,31 +75,31 @@ $prodLocalDockerCommands = @"
     docker-compose down
     docker rmi $backend_image_tag $frontend_image_tag
     docker-compose build --no-cache && docker-compose up
-"@ #6 #7
+"@
 
 $prodDockerCommands = @"
-    echo building prod containers
-    docker-compose build
-"@ #6 #7
+    echo building prod-docker containers
+    docker-compose build --no-cache react-frontend | tee compose-build.log
+"@ 
 
 if ($userEnv -eq "dev") {
     Start-Process wt -ArgumentList @"
     new-tab -d "$backendFolder" powershell -NoExit -Command $backendCommands
     ; split-pane -V -d "$frontendFolder" powershell -NoExit -Command "npm run dev"
-"@ #**
+"@
 }
 
-elseif ($userEnv -eq "prod-local") {
+elseif ($userEnv -eq "prod-local-docker") {
     write-host "Building docker images and running container for prod-local env"
     write-host frontend-url: "http://localhost:$env:frontend_host_port"
-    write-host backend-url: $devBackendBaseURL
+    write-host backend-url: $localBackendBaseURL
     Start-Process wt -ArgumentList @"
         new-tab --profile "Ubuntu" wsl bash -c $prodLocalDockerCommands
 "@
 }
 
-elseif ($userEnv -eq "prod") {
-    write-host "Building docker images for prod env"
+elseif ($userEnv -eq "prod-docker") {
+    write-host "Building docker images for prod-docker env"
     write-host frontend-url: "$env:FRONTEND_CONTAINER_APP_SERVICE_DOMAIN"
     write-host backend-url: "$env:VITE_PROD_BACKEND_API_URL"
     Start-Process wt -ArgumentList @"
