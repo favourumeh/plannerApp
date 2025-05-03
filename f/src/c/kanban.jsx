@@ -23,6 +23,7 @@ const Kanban = ({sitePage}) => {
     const [destColumn, setDestColumn] = useState("")
     const [remainingTaskTimeUnits, setRemainingTaskTimeUnits] = useState("hrs")
     const [remainingTaskTime, setRemainingTaskTime] = useState(0) //can be hours or minutes
+    const [totalTaskTimeUnits, setTotalTaskTimeUnits] = useState("mins")
     const [totalTaskTime, setTotalTaskTime] = useState(0)
 
     const [columns, setColumns] = useState([
@@ -36,12 +37,15 @@ const Kanban = ({sitePage}) => {
         const selectedDay = (new Date(currentDate)).toDateString()
         const taskScheduleDate = new Date(task.scheduledStart).toDateString()
         const isTaskScheduledForSelectedDay = (taskScheduleDate) === selectedDay
-        const isTaskFinishedToday = (new Date(task.finish).toDateString() === selectedDay )
+        const isTaskFinishedOnSelectedDay = (new Date(task.finish).toDateString() === selectedDay )
         const isTaskScheduledBeforeToday = new Date(taskScheduleDate).getTime() < new Date().getTime()
+        const isTodayEqualToSelectedDay = selectedDay === new Date().toDateString()
+        const isTaskOutstanding = task.status !== "Completed"
         var outputBool = false
         if (isTaskScheduledForSelectedDay) {outputBool = true}
-        if (isTaskFinishedToday) { outputBool = true}
-        if ( task.status !== "Completed" && isTaskScheduledBeforeToday ) {outputBool = true}
+        if (isTaskFinishedOnSelectedDay) { outputBool = true}
+        if ( isTaskOutstanding && isTaskScheduledForSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
+        if ( isTaskOutstanding && isTodayEqualToSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
         return outputBool
     }
 
@@ -151,10 +155,17 @@ const Kanban = ({sitePage}) => {
         const relevantTasks = entityArr.filter(filterOutBreaks)
         const totalTime = relevantTasks.reduce((acc, task) => acc + chooseTaskDuration(task), 0)
         const remainingTime = relevantTasks.reduce((acc, task) => acc + (task.status !== "Completed" ? chooseTaskDuration(task) : 0), 0)
-        setTotalTaskTime((totalTime/60).toFixed(1)) 
+        if (totalTime >=60) {
+            setTotalTaskTime((totalTime/60).toFixed(2))
+            setTotalTaskTimeUnits("hrs")
+        } else {
+            setTotalTaskTime(totalTime)
+            setTotalTaskTimeUnits("mins")
+        } 
+
         if (remainingTime >= 60){
             setRemainingTaskTimeUnits("hrs")
-            setRemainingTaskTime((remainingTime/60).toFixed(1))
+            setRemainingTaskTime((remainingTime/60).toFixed(2))
         } else {
             setRemainingTaskTimeUnits("mins")
             setRemainingTaskTime(remainingTime)
@@ -177,7 +188,7 @@ const Kanban = ({sitePage}) => {
                             <div onClick={() => setEntityName("objective")}> Objectives </div>
                             <div onClick={() => setEntityName("task")}> Tasks </div>
                         </Dropdown>
-                        <strong> {remainingTaskTime} {remainingTaskTimeUnits} left (total {totalTaskTime} hrs) </strong>
+                        <strong> {remainingTaskTime} {remainingTaskTimeUnits} left (total {totalTaskTime} {totalTaskTimeUnits}) </strong>
                     </div>
 
                     <button type="button" className="tomorrow-btn" onClick={() => handleDayNavigation("next-day")} > <i className="fa fa-arrow-right" aria-hidden="true"> </i> </button>
