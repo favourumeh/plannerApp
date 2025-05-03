@@ -66,9 +66,17 @@ Update-RootEnv -cwd $PWD.path -appEnv $userEnv -backendHostPort $backendPort -ba
 $frontendFolder =  $PWD.path.Replace("\", "/") + "/f"
 $backendFolder =  $PWD.path.Replace("\", "/") + "/b"
 
-$backendCommands = @"
+$backendDevCommands = @"
     .venv/Scripts/activate
     python main.py --env $userEnv --rdbms $userRDBMS
+"@
+
+$backendProdLocalCommands = @"
+    cd b && source .venv_wsl/bin/activate && gunicorn --bind 0.0.0.0:$backendPort --timeout 300 main:app 
+"@
+
+$frontendProdLocalCommands = @"
+    bash -c rm "dist"\; npm run build\; npm run start
 "@
 
 $prodLocalDockerCommands = @"
@@ -84,8 +92,17 @@ $prodDockerCommands = @"
 
 if ($userEnv -eq "dev") {
     Start-Process wt -ArgumentList @"
-    new-tab -d "$backendFolder" powershell -NoExit -Command $backendCommands
+    new-tab -d "$backendFolder" powershell -NoExit -Command $backendDevCommands
     ; split-pane -V -d "$frontendFolder" powershell -NoExit -Command "npm run dev"
+"@
+}
+
+elseif ( $userEnv -eq "prod-local") {
+    write-host frontend-url: "http://localhost:3000"
+    write-host backend-url: $localBackendBaseURL
+    Start-Process wt -ArgumentList @"
+    new-tab -d "$backendFolder" --profile "Ubuntu" wsl bash -c $backendProdLocalCommands
+    ; split-pane -V -d "$frontendFolder" powershell -NoExit -Command $frontendProdLocalCommands
 "@
 }
 
