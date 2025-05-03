@@ -6,7 +6,7 @@ import { useState, useEffect, useContext } from "react"
 export default function KanbanCard ({entity, entityName}) {
     const {objectives, projects, setCurrentTask, setCurrentObjective, 
            setCurrentProject, setIsModalOpen, setForm, handleDeleteEntity,
-            getProject, getObjective} = useContext(globalContext)
+            getProject, getObjective, currentDate} = useContext(globalContext)
     const [projectNumber, setProjectNumber] = useState()
     const [objectiveNumber, setObjectiveNumber] = useState()
 
@@ -46,6 +46,11 @@ export default function KanbanCard ({entity, entityName}) {
     
     // Signal Parent task (P) (i.e., a task is not derived from another task )
     const signalParentTask = () => !!entity.parentTaskId?  "" : "(P)"
+
+    //indicate outstanding task
+    const selectedDate = new Date(currentDate).toDateString()
+    const entityScheduledDate = new Date(entity.scheduledStart).toDateString()
+    const kanbanContentStyle = {"color": entityName!="task" ? "white": selectedDate === entityScheduledDate ? "white": "red"}
     return (
         <div 
             style ={style}
@@ -55,7 +60,7 @@ export default function KanbanCard ({entity, entityName}) {
             className="kanban-card-overlay"
         >
             <button onPointerDown={onClickEditBtn} > <i className="fa fa-pencil" aria-hidden="true"></i></button>
-            <div className="kanban-card-content">
+            <div style={kanbanContentStyle} className="kanban-card-content">
                 {generateEntityNumbers(entityName)} {entityName==="task"? signalParentTask() + " " + entity.description: entity.title}
             </div>
             <button onPointerDown ={onClickDeleteBtn}> &times;</button>
