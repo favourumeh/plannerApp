@@ -2,8 +2,8 @@ div.modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    min-width: 100%;
+    min-height: 100%;
     background: rgba(0,0,0,0.5);
     display: flex;
     align-items: center;
@@ -19,10 +19,11 @@ div.modal-content {
     padding: 1.5rem;
     max-width: 90%;
     width: 550px;
+    min-width: 307px;
     border: 1px solid;
     border-radius: 8px;
-    background-color: white;
-    color: black;
+    background-color: black;
+    color: white;
     /* border: 3px solid;
     border-color: red; */
 }
@@ -36,5 +37,5 @@ button.modal-close-btn{
     height: 10px;
     width: 10px;
     padding: 0 0;
-    color:black;
+    color:white;
 }

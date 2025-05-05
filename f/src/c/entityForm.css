@@ -1,112 +1,130 @@
-.form-overlay {
-    position: relative;
-    text-align: left;
-    /* border: 1px solid; */
-    width: 100%;
-}
-
-
-div.form-header-overlay{
-    /* border: 1px solid; */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* background-color: rgba(84, 84, 128, 0.466); */
-    margin-bottom: 4px;
-    /* border-radius: 10px; */
-    border-top: 1px solid;
-    border-bottom: 1px solid;
-    width: 400px;
-
-}
-
-div.form-title {
-    font-weight: bold;
-}
-
-div.form-header-buttons {
-    display: flex;
-    justify-content: flex-start;
-}
-
-div.form-header-buttons button{
-
-    background: white;
-    border: 1px solid black;
-    color: black;
-    color: black;
-    padding: 4px;
-    margin: 4px;
-}
-
-div.form-header-buttons button:focus,
-button:focus-visible {
-  outline: none;
-}
-
-
-div.form-body {
+/* form title + field alignment and column order */
+div.form-body div.form-group {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    margin: 0px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-bottom: 5px;
+    /* border: 1px solid; */
+}
+
+div.form-body div.other-entity-configs {
+    display: flex;
+    justify-content: space-between;
+}
+
+div.form-body div.other-entity-configs input {
+    width: 250px; 
+}
+
+div.other-entity-configs div.form-left-column {
+    margin-right: 5px;
+}
+
+/* Form title */
+div.form-header .form-title{
+    font-weight: 600;
+    font-size: larger;
+}
+
+div.form-body .field-title{
+    font-weight: 600;
+}
+
+
+/* Title and Description fields */
+div.form-body textarea{
+    background-color: black;
+    color: white;
+    resize: none;
+    border-radius: 4px;
+    border: 1px solid rgb(221, 221, 221);
+}
+
+div.form-body textarea.entity-description {    
+    width: 525px;
+    height: 59px;
+}
+
+div.form-body textarea.entity-title {    
+    width: 525px;
+    height: 20px;
+    font-size: larger;
+}
+
+/* status (btn) field  */
+div.form-body div#form-status-field button {
+    background: black;
+    border: 1px solid rgb(221, 221, 221);
+    color: white;
+    padding: 4px;
+    text-align: left;
+    width: 531px;
+}
+
+div.form-body div#form-status-field .dropbtn-content {
+    background-color: black;
+    color: white;
     border: 1px solid;
     border-radius: 5px;
-    width: 400px;
+    width: 525px;
+} 
+
+/* all input tags  */
+div.form-body input {
+    border: 1px solid rgb(221, 221, 221);
+    border-radius: 4px;
+    background-color: black;
+    color: white;
 }
 
-
-form.form {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 5px;
+/* entity query result style */
+div#Project-field ol.query-result-list{
+    translate: -5px -15px;
+    background-color: black;
     border: 1px solid;
-    width: 400px;
-
+    border-radius: 5px;
+    width: 250px;
 }
 
-.form-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* border: 1px solid; */
-    width: 100%;
+div#Project-field ol.query-result-list li {
+    color: white;
+    border: none;
 }
 
-.form-group.searchfield {
+div#Objective-field ol.query-result-list{
+    translate: -5px -15px;
+    background-color: black;
     border: 1px solid;
-
-}
-input {
-    background-color: white;
-    color: black;
-    width: 100%;
-    /* border: none; */
+    border-radius: 5px;
+    width: 250px;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(1); /* Invert colours to make calendar picker visible on white backgrounds */
+div#Objective-field ol.query-result-list li {
+    color: white;
+    border: none;
 }
 
-label {
-    text-align: right;
-    width: 190px;
-    margin-right:2px;
-    /* border: 1px dotted; */
-}
-
-div.btn-div {
+/* form footer button arrangment */
+div.form-body .form-buttons {
     display: flex;
-    justify-content: left;
+    justify-content: flex-end;
+    margin-top: 5px;
 }
 
-button.submit-btn {
-    position: relative;
-    width: 100px;
-
+div.form-body .form-buttons button{
+    margin-left: 5px;
 }
-span.required-asterisk {
-    color: red;
+
+/* clear button/dropdown */
+div.form-body .form-buttons button.form-clear-btn{
+    color: white;
+    border: 1px solid black;
+}
+
+div.form-body div.form-buttons .dropbtn-content {
+    background-color: black;
+    color: white;
+    border: 1px solid;
+    border-radius: 5px;
 }
