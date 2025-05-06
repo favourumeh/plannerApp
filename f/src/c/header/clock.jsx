@@ -1,6 +1,6 @@
 import "./clock.css"
 import { useState, useEffect, useContext } from "react"
-import globalContext from "../context"
+import globalContext from "../../context"
 
 const Clock = () => {
     const [todayDateTime, setTodayDateTime] = useState(new Date())

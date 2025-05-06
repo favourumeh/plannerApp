@@ -1,7 +1,7 @@
 import globalContext from "../../context"
 import "./kanban.css"
 import { useContext, useState, useEffect } from "react"
-import Header from "../header"
+import Header from "../header/header"
 import ToolBar from "../toolbar/toolbar"
 import KanbanColumn from "./kanbanColumn"
 import {DndContext} from "@dnd-kit/core"

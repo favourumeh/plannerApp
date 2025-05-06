@@ -1,6 +1,6 @@
 import "./header.css"
 import Clock from "./clock.jsx"
-import globalContext from "../context.js";
+import globalContext from "../../context.js";
 import {useContext} from "react"
 
 const Header = () => {

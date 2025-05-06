@@ -7,7 +7,7 @@ import AddEntity from "../toolbar/addEntity"
 import ViewPage from "../toolbar/viewPage"
 import RefreshEntities from "../toolbar/refreshEntities"
 import FilterPage from "../toolbar/filterPage"
-import Header from "../header"
+import Header from "../header/header"
 import Dropdown from "../dropdown"
 
 export default function ProgressPage ({sitePage}) {

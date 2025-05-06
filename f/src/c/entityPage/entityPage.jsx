@@ -1,7 +1,7 @@
 import "./entityPage.css"
 import { useContext, useEffect } from "react"
 import globalContext from "../../context"
-import Header from "../header"
+import Header from "../header/header"
 import EntityCard from "./entityCard"
 import ToolBar from "../toolbar/toolbar"
 import AddEntity from "../toolbar/addEntity"
