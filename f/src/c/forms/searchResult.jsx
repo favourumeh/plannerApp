@@ -1,6 +1,6 @@
 import "./searchResult.css"
 import { useState, useEffect, useContext} from "react";
-import globalContext from "../context";
+import globalContext from "../../context";
 
 function SearchResult({searchFieldLabel, query, setQuery, entityArray}) {
     /*Queries a field ["title"] of an array of objects [entityArray] and returns the object(s) from the array that match the query*/
