@@ -9,10 +9,10 @@ import SignUp from './c/signUp.jsx'
 import Login from "./c/login.jsx"
 import NotificationBar from './c/notificationBar.jsx'
 import HomePage from './c/homePage.jsx'
-import TaskForm from "./c/taskForm.jsx"
-import ProjectForm from "./c/projectForm.jsx"
+import TaskForm from "./c/forms/taskForm.jsx"
+import ProjectForm from "./c/forms/projectForm.jsx"
 import EntityPage from './c/entityPage.jsx'
-import ObjectiveForm from './c/objectiveForm.jsx'
+import ObjectiveForm from './c/forms/objectiveForm.jsx'
 import Kanban from './c/kanban/kanban.jsx'
 import ProgressPage from './c/progressPage/progressPage.jsx'
 import { defaultTask, defaultObjective, defaultProject } from './staticVariables.js'

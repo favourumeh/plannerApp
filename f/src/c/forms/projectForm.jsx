@@ -1,8 +1,8 @@
 import "./entityForm.css"
 import {useContext, useEffect} from "react"
-import globalContext from "../context"
-import Dropdown from "./dropdown"
-import { defaultProject } from "../staticVariables"
+import globalContext from "../../context"
+import Dropdown from "../dropdown"
+import { defaultProject } from "../../staticVariables"
 
 function ProjectForm () {
     const {form, currentProject, setCurrentProject, handleEntitySubmit, formatDateFields} = useContext(globalContext)
