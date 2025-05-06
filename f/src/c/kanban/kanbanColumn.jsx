@@ -2,7 +2,7 @@ import "./kanbanColumn.css"
 import { useState, useEffect, useContext } from "react"
 import KanbanCard from "./kanbanCard"
 import { useDroppable } from "@dnd-kit/core"
-import globalContext from "../context"
+import globalContext from "../../context"
 
 export default function KanbanColumn ({columnId, columnTitle, entityArr, entityName}) {
     if (entityName !=="task" && columnId ===  "Paused") return

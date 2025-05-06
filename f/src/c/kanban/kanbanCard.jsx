@@ -1,5 +1,5 @@
 import { useDraggable } from "@dnd-kit/core"
-import globalContext from "../context"
+import globalContext from "../../context"
 import "./kanbanCard.css"
 import { useState, useEffect, useContext } from "react"
 

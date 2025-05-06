@@ -1,6 +1,6 @@
 import "./hoverText.css"
 import { useContext } from "react"
-import globalContext from "../context"
+import globalContext from "../../context"
 
 const HoverText = ({width}) => {
     const {hoverText, isShowHoverText} = useContext(globalContext)

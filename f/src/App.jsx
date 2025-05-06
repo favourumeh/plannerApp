@@ -13,7 +13,7 @@ import TaskForm from "./c/taskForm.jsx"
 import ProjectForm from "./c/projectForm.jsx"
 import EntityPage from './c/entityPage.jsx'
 import ObjectiveForm from './c/objectiveForm.jsx'
-import Kanban from './c/kanban.jsx'
+import Kanban from './c/kanban/kanban.jsx'
 import ProgressPage from './c/progressPage/progressPage.jsx'
 import { defaultTask, defaultObjective, defaultProject } from './staticVariables.js'
 const persistState = (sessionName, default_) => {
