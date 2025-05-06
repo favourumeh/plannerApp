@@ -104,11 +104,11 @@ function TaskForm () {
                     name = {inputName} // used in the request made to the server
                     value = {currentTask[inputName]}
                     onChange = {handleChange}
-                    min={["Duration (est)", "Duration (acc)"].includes(labelName)? "10":"1"}
+                    min={inputName === "durationEst" ? "10" : 1}
                     max={labelName === "Priority"? 5: undefined}
-                    step={["Duration (est)", "Duration (acc)"].includes(labelName)? "10": undefined} 
+                    step={inputName === "durationEst" ? "10": undefined} 
                     autoComplete="off"
-                    disabled = {["Duration (acc)"].includes(labelName)? true:false} />
+                />
             </div>
         )
     }
