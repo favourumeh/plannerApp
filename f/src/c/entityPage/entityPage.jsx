@@ -1,13 +1,13 @@
 import "./entityPage.css"
 import { useContext, useEffect } from "react"
-import globalContext from "../context"
-import Header from "./header"
+import globalContext from "../../context"
+import Header from "../header"
 import EntityCard from "./entityCard"
-import ToolBar from "./toolbar/toolbar"
-import AddEntity from "./toolbar/addEntity"
-import FilterPage from "./toolbar/filterPage" 
-import ViewPage from "./toolbar/viewPage"
-import RefreshEntities from "./toolbar/refreshEntities"
+import ToolBar from "../toolbar/toolbar"
+import AddEntity from "../toolbar/addEntity"
+import FilterPage from "../toolbar/filterPage" 
+import ViewPage from "../toolbar/viewPage"
+import RefreshEntities from "../toolbar/refreshEntities"
 
 function EntityPage ({sitePage}) {
 

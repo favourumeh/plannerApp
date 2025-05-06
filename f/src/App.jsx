@@ -11,7 +11,7 @@ import NotificationBar from './c/notificationBar.jsx'
 import HomePage from './c/homepage/homePage.jsx'
 import TaskForm from "./c/forms/taskForm.jsx"
 import ProjectForm from "./c/forms/projectForm.jsx"
-import EntityPage from './c/entityPage.jsx'
+import EntityPage from './c/entityPage/entityPage.jsx'
 import ObjectiveForm from './c/forms/objectiveForm.jsx'
 import Kanban from './c/kanban/kanban.jsx'
 import ProgressPage from './c/progressPage/progressPage.jsx'

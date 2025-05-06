@@ -1,9 +1,9 @@
 import "./entityCard.css"
 import { useContext} from "react"
-import globalContext from "../context"
-import TaskInfoCard from "./InfoCards/taskInfoCard"
-import ObjectiveInfoCard from "./InfoCards/objectiveInfoCard"
-import ProjectInfoCard from "./InfoCards/projectInfoCard"
+import globalContext from "../../context"
+import TaskInfoCard from "../InfoCards/taskInfoCard"
+import ObjectiveInfoCard from "../InfoCards/objectiveInfoCard"
+import ProjectInfoCard from "../InfoCards/projectInfoCard"
 
 function EntityCard ({entity, entityName}) {
     const {
