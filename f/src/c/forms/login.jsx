@@ -1,7 +1,7 @@
 import "./login.css"
 import {useState, useContext} from "react"
-import globalContext from "../context"
-import { backendBaseUrl } from "../../project_config"
+import globalContext from "../../context"
+import { backendBaseUrl } from "../../../project_config"
 
 const Login = ({isLoggedIn}) => {
     const {setIsModalOpen, setSitePage, form, setForm, handleNotification, handleLogin} = useContext(globalContext)

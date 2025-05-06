@@ -5,8 +5,8 @@ import { fetchAllUserContent} from './fetch_entities'
 import GuestPage from './c/guestPage'
 import globalContext from './context'
 import Modal from "./c/modal.jsx"
-import SignUp from './c/signUp.jsx'
-import Login from "./c/login.jsx"
+import SignUp from './c/forms/signUp.jsx'
+import Login from "./c/forms/login.jsx"
 import NotificationBar from './c/notificationBar.jsx'
 import HomePage from './c/homePage.jsx'
 import TaskForm from "./c/forms/taskForm.jsx"
