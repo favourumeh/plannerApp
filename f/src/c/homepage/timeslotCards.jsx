@@ -1,6 +1,5 @@
 import "./timeslotCards.css";
-import { useState, useEffect, useContext } from "react";
-import globalContext from "../context";
+import { useState} from "react";
 
 function TimeslotCards({dayStart, dayEnd, timeIntervalInMinutes}) {
 

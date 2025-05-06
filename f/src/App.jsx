@@ -8,7 +8,7 @@ import Modal from "./c/modal.jsx"
 import SignUp from './c/forms/signUp.jsx'
 import Login from "./c/forms/login.jsx"
 import NotificationBar from './c/notificationBar.jsx'
-import HomePage from './c/homePage.jsx'
+import HomePage from './c/homepage/homePage.jsx'
 import TaskForm from "./c/forms/taskForm.jsx"
 import ProjectForm from "./c/forms/projectForm.jsx"
 import EntityPage from './c/entityPage.jsx'

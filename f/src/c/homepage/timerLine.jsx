@@ -1,6 +1,6 @@
 import "./timerLine.css"
 import {useState, useEffect, useContext} from 'react'
-import globalContext from "../context"
+import globalContext from "../../context"
 
 const TimerLine = () => {
     const {userSettings} = useContext(globalContext)

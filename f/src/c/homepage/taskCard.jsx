@@ -1,7 +1,7 @@
 import "./taskCard.css"
 import {useContext} from "react"
-import globalContext from "../context"
-import TaskInfoCard from "./InfoCards/taskInfoCard"
+import globalContext from "../../context"
+import TaskInfoCard from "../InfoCards/taskInfoCard"
 
 const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
 const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
