@@ -36,14 +36,14 @@ const Kanban = ({sitePage}) => {
     const tasksShownOnKanban = (task) => {
         const selectedDay = (new Date(currentDate)).toDateString()
         const taskScheduleDate = new Date(task.scheduledStart).toDateString()
-        const isTaskScheduledForSelectedDay = (taskScheduleDate) === selectedDay
+        const isTaskScheduledForSelectedDay = taskScheduleDate === selectedDay
         const isTaskFinishedOnSelectedDay = (new Date(task.finish).toDateString() === selectedDay )
         const isTaskScheduledBeforeToday = new Date(taskScheduleDate).getTime() < new Date().getTime()
         const isTodayEqualToSelectedDay = selectedDay === new Date().toDateString()
         const isTaskOutstanding = task.status !== "Completed"
         var outputBool = false
-        if (isTaskScheduledForSelectedDay) {outputBool = true}
-        if (isTaskFinishedOnSelectedDay) { outputBool = true}
+        if ( isTaskScheduledForSelectedDay && isTodayEqualToSelectedDay ) {outputBool = true}
+        if ( isTaskFinishedOnSelectedDay ) {outputBool = true}
         if ( isTaskOutstanding && isTaskScheduledForSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
         if ( isTaskOutstanding && isTodayEqualToSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
         return outputBool

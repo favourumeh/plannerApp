@@ -48,9 +48,14 @@ export default function KanbanCard ({entity, entityName}) {
     const signalParentTask = () => !!entity.parentTaskId?  "" : "(P)"
 
     //indicate outstanding task
-    const selectedDate = new Date(currentDate).toDateString()
-    const entityScheduledDate = new Date(entity.scheduledStart).toDateString()
-    const kanbanContentStyle = {"color": entityName!="task" ? "white": selectedDate === entityScheduledDate ? "white": "red"}
+    const selectedDate = new Date(new Date(currentDate).toDateString())
+    const taskFinishDt = new Date(new Date(entity.finish).toDateString())
+    const taskScheduledDt = new Date(new Date(entity.scheduledStart).toDateString())
+    const taskFinishedAfterScheduledDate = (taskFinishDt > taskScheduledDt)
+    const taskScheduledOnOrBeforeSelectedDate = (taskScheduledDt <= selectedDate)
+    const taskNotCompleted =  entity.status !== "Completed"
+    const taskIsScheduledForToday = new Date(entity.scheduledStart).toDateString() === new Date().toDateString()
+    const kanbanContentStyle = {"color": entityName!="task" ? "white":  taskIsScheduledForToday ? "white" : taskFinishedAfterScheduledDate || (taskScheduledOnOrBeforeSelectedDate &&  taskNotCompleted) ? "red": "white"}
     return (
         <div 
             style ={style}
