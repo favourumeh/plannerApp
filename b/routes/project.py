@@ -2,10 +2,12 @@
 import os 
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
+from flask_sqlalchemy.query import Query
+from flask_sqlalchemy.pagination import Pagination
 from models import Project, Objective, Task
 from plannerPackage import login_required, token_required, generate_entity_number, generate_all_project_content, convert_date_str_to_datetime
 from config import db, app, serializer
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from datetime import datetime, timezone
 from pytz import timezone
 
@@ -27,7 +29,7 @@ project_title_limit = int(os.environ["project_title_limit"])
 @token_required(app=app, serializer=serializer)
 def create_project() -> Tuple[Response, int]:
     resp_dict = {"message":""}
-    content: dict = request.json
+    content: Dict = request.json
     project_number: int = content.get("projectNumber", None)
     status: str = content.get("status", "To-Do")
     title: str = content.get("title", None)
@@ -93,14 +95,39 @@ def read_projects():
         resp_dict["message"] = f"Failure: Could not read user's projects! Reason: {e}"
         return jsonify(resp_dict), 404
 
+    #paginated read-projects
+@project.route("/read-projects-pag", methods=["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def read_projects_pag():
+    resp_dict = {"message":"", "projects":""}
+    user_id: int = session["userId"]
+    page: int = request.args.get("page", 1, type=int)
+    per_page: int = request.args.get("per_page", 30, type=int)
+    pagination: Pagination = Project.query.filter_by(user_id=user_id).paginate(page=page, per_page=per_page, error_out=False)
+    try:
+        projects: List[Project] = pagination.items
+        resp_dict["projects"] = [project.to_dict() for project in projects]
+        resp_dict["message"] = "Success: user's projects loaded"
+        resp_dict["_pages"] = pagination.pages # "_" put so the pagination metadata appears before the messge and objectives keys in the JSON response
+        resp_dict["_currentPage"] = pagination.page
+        resp_dict["_perPage"] = pagination.per_page
+        resp_dict["_hasNext"] = pagination.has_next
+        resp_dict["_hasPrev"] = pagination.has_prev
+        resp_dict["_itemsCount"] = len(pagination.items)
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not read user's projects! Reason: {e}"
+        return jsonify(resp_dict), 404
+    
 #update
 @project.route("/update-project/<int:project_id>", methods=["PATCH"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def update_project(project_id: int) -> Tuple[Response, int]: 
     resp_dict = {"message":""}
-    content: dict = request.json
-    user_id = session["userId"]
+    content: Dict = request.json
+    user_id: int = session["userId"]
     project = Project.query.filter_by(id=project_id, user_id=user_id).first()
 
     if not project:

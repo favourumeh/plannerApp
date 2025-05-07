@@ -2,6 +2,8 @@
 import os 
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
+from flask_sqlalchemy.pagination import Pagination
+from flask_sqlalchemy.query import Query
 from models import User, Project, Objective, Task
 from plannerPackage import login_required, token_required, generate_all_user_content, generate_user_content, generate_entity_number, convert_date_str_to_datetime 
 from config import db, app, serializer
@@ -24,7 +26,7 @@ task_description_limit = int(os.environ["task_description_limit"])
 @token_required(app=app, serializer=serializer)
 def create_task() -> Tuple[Response, int]:
     resp_dict = {"message":"", "task":""}
-    user_id = session["userId"]
+    user_id: int = session["userId"]
     content = request.json
     task_number = content.get("taskNumber", None)
     status = content.get("status", "To-Do")
@@ -100,11 +102,39 @@ def create_task() -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def read_tasks(): 
     resp_dict = {"message":"", "tasks":""}
-    user_id = session["userId"]
+    user_id: int = session["userId"]
     try:
         tasks: List[Task] = generate_user_content(user_id=user_id, content="tasks")
         resp_dict["message"] = "Success: user's tasks loaded"
         resp_dict["tasks"] = [task.to_dict() for task in tasks]
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not read user task! Reason: {e}"
+        return jsonify(resp_dict), 404
+
+    # paginated read-tasks   
+@task.route("/read-tasks-pag", methods=["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def read_tasks_pag(): 
+    resp_dict = {"message":"", "tasks":""}
+    user_id: int = session["userId"]
+    page: int = request.args.get("page", 1, type=int)
+    per_page: int = request.args.get("per_page", 30, type=int)
+
+    user_task: Query = Task.query.join(Objective).join(Project).filter(Project.user_id == user_id)
+    pagination: Pagination = user_task.paginate(page=page, per_page=per_page, error_out=False)
+
+    try:
+        tasks: List[Task]  = pagination.items
+        resp_dict["message"] = "Success: user's tasks loaded"
+        resp_dict["tasks"] = [task.to_dict() for task in tasks]
+        resp_dict["_pages"] = pagination.pages
+        resp_dict["_currentPage"] = pagination.page
+        resp_dict["_perPage"] = pagination.per_page
+        resp_dict["_hasNext"] = pagination.has_next
+        resp_dict["_hasPrev"] = pagination.has_prev
+        resp_dict["_itemsCount"] = len(pagination.items)
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not read user task! Reason: {e}"
@@ -117,7 +147,7 @@ def read_tasks():
 def read_all():
     """Reads all user's projects, objectives and tasks."""
     resp_json = {"message":"", "tasks":"", "objectives":"", "projects":""}
-    user_id = session["userId"]
+    user_id: int = session["userId"]
     try:
         rts, projects, objectives, tasks = generate_all_user_content(user_id)
         projects = [project.to_dict() for project in projects]
@@ -138,7 +168,7 @@ def read_all():
 @token_required(app=app, serializer=serializer)
 def update_task(task_id: int) -> Tuple[Response, int]:
     resp_dict = {"message":"", "task":""} 
-    user_id = session["userId"]
+    user_id: int = session["userId"]
     task = Task.query.filter_by(id=task_id).first()
 
     if not task:
@@ -195,7 +225,7 @@ def update_task(task_id: int) -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def delete_task(task_id: int) -> Tuple[Response, int]:
     resp_dict = {"message":""}
-    user_id = session["userId"]
+    user_id: int = session["userId"]
     task = Task.query.filter_by(id=task_id).first()
     if not task:
         resp_dict["message"] = "Failure: The task referenced does not exist."
