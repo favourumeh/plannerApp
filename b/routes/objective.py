@@ -2,6 +2,8 @@
 import os 
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, session, request
+from flask_sqlalchemy.query import Query
+from flask_sqlalchemy.pagination import Pagination
 from models import Project, Objective, Task
 from plannerPackage import login_required, token_required, flatten_2d_list, generate_entity_number, convert_date_str_to_datetime
 from config import db, app, serializer
@@ -87,16 +89,56 @@ def create_objective() -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def read_objectives(): 
     resp_dict = {"message":"", "objectives":""}
-    user_id = session["userId"]
-    projects = Project.query.filter_by(user_id=user_id).all() #remember: each user has at least one project: the default project that is created on sign up
+    user_id: int = session["userId"]
+    projects: List[Project] = Project.query.filter_by(user_id=user_id).all() #remember: each user has at least one project: the default project that is created on sign up
     try:
-        objectives = [Objective.query.filter_by(project_id=project.id).all() for project in projects]
-        objectives_flattened = flatten_2d_list(objectives)
-        resp_dict["objectives"] = [objective.to_dict() for objective in objectives_flattened]
+        objectives: List[List[Objective]] = [Objective.query.filter_by(project_id=project.id).all() for project in projects]
+        objectives_flattened: List[Objective] = flatten_2d_list(objectives)
+        resp_dict["objectives"] = [objective.to_dict() for objective in objectives_flattened] #List[Dict]
         resp_dict["message"] = "Success: user's objectives loaded"
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not read user's objectives! Reason: {e}"
+        return jsonify(resp_dict), 404
+
+    # Query read-objectives   
+@objective.route("/query-objectives", methods=["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def query_objectives(): 
+    resp_dict = {"message":"", "objectives":""}
+    user_id: int = session["userId"]
+    query: Query = Objective.query.join(Project).filter(Project.user_id == user_id) #users_objectives
+
+    #query params
+    pagination = None
+    page: int = request.args.get("page", default=None, type=int)
+    per_page: int = request.args.get("perPage", default=None, type=int)
+    project_id: int = request.args.get("projectId", default=None, type=int)
+    status: int = request.args.get("status", default=None, type=str)
+
+    if project_id:
+        query: Query = query.filter(Objective.project_id == project_id)
+        resp_dict["_projectId"] = project_id
+    if status:
+        query: Query = query.filter(Objective.status == status)
+        resp_dict["_status"] = status
+
+    if page and per_page:
+        pagination: Pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        resp_dict["_pages"] = pagination.pages
+        resp_dict["_currentPage"] = pagination.page
+        resp_dict["_perPage"] = pagination.per_page
+        resp_dict["_hasNext"] = pagination.has_next
+        resp_dict["_hasPrev"] = pagination.has_prev
+    try:
+        objectives: List[Objective] = pagination.items if pagination else query.all()
+        resp_dict["message"] = "Success: user's objectives loaded"
+        resp_dict["objectives"] = [objective.to_dict() for objective in objectives]
+        resp_dict["_itemCount"] = len(objectives)
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not read user objective! Reason: {e}"
         return jsonify(resp_dict), 404
 
 #update
@@ -105,7 +147,7 @@ def read_objectives():
 @token_required(app=app, serializer=serializer)
 def update_objective(objective_id: int) -> Tuple[Response, int]: 
     resp_dict = {"message":""}
-    user_id = session["userId"] 
+    user_id: int = session["userId"] 
     content = request.json
     
     objective = Objective.query.filter_by(id=objective_id).first()
@@ -169,7 +211,7 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def delete_objective(objective_id: int) -> Tuple[Response, int]:
     resp_dict = {"message":""}
-    user_id = session["userId"]
+    user_id: int = session["userId"]
 
     objective = Objective.query.filter_by(id=objective_id).first()
     if not objective:
