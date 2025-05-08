@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect} from 'react'
+import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import './App.css'
 import { backendBaseUrl } from '../project_config.js'
 import { fetchAllUserContent} from './fetch_entities'
@@ -16,11 +18,11 @@ import ObjectiveForm from './c/forms/objectiveForm.jsx'
 import Kanban from './c/kanban/kanban.jsx'
 import ProgressPage from './c/progressPage/progressPage.jsx'
 import { defaultTask, defaultObjective, defaultProject } from './staticVariables.js'
+
 const persistState = (sessionName, default_) => {
     var state = JSON.parse(sessionStorage.getItem(sessionName))
     return state!=null? state:default_ 
 }
-
 function App() {
     const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",false))
     const [isLoggedIn, setIsLoggedIn] = useState(() => persistState("isLoggedIn",false))
@@ -311,24 +313,30 @@ function App() {
         handleDayNavigation
     }
 
+    //react query client 
+    const queryClient = new QueryClient({
+        queryCache: new QueryCache({onError: handleLogout}),
+        })
+
     return (
-        <>
-        <globalContext.Provider value={globalProps}>
-            <NotificationBar/>
-            <GuestPage isLoggedIn={isLoggedIn}/>
-            <Modal>
-                <SignUp/>
-                <Login isLoggedIn={isLoggedIn}/>
-                <TaskForm/>
-                <ProjectForm/>
-                <ObjectiveForm/>
-            </Modal>
-            <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage} homePageTasks={homePageTasks} setHomePageTasks={setHomePageTasks}/>
-            <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
-            <Kanban sitePage={sitePage}/>
-            <ProgressPage sitePage={sitePage}/>
-        </globalContext.Provider>
-        </>
+        <QueryClientProvider client={queryClient}>
+            <globalContext.Provider value={globalProps}>
+                <NotificationBar/>
+                <GuestPage isLoggedIn={isLoggedIn}/>
+                <Modal>
+                    <SignUp/>
+                    <Login isLoggedIn={isLoggedIn}/>
+                    <TaskForm/>
+                    <ProjectForm/>
+                    <ObjectiveForm/>
+                </Modal>
+                <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage} homePageTasks={homePageTasks} setHomePageTasks={setHomePageTasks}/>
+                <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
+                <Kanban sitePage={sitePage}/>
+                <ProgressPage sitePage={sitePage}/>
+            </globalContext.Provider>
+            <ReactQueryDevtools/>
+        </QueryClientProvider>
     )
     }
 

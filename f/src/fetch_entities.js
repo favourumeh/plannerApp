@@ -85,7 +85,8 @@ const fetchUserObjectives = async (setObjectives, handleNotification, setFormObj
     }
 }
 
-const fetchUserTasks = async (setTasks, handleNotification) => {
+const fetchAllUserTasks = async (setTasks, handleNotification) => {
+    //fetch user task w/o pagination
     const url = `${backendBaseUrl}/read-tasks`
     const options = {
         method:"GET",
@@ -105,4 +106,41 @@ const fetchUserTasks = async (setTasks, handleNotification) => {
     }
 }
 
-export {fetchAllUserContent, fetchUserProjects,fetchUserObjectives, fetchUserTasks}
+const fetchUserEntityPage = async (entityName, handleNotification, page, perPage=23) => {
+    //fetch user task, objectives or projects w/ pagination
+
+    try{
+        const baseUrl =  `${backendBaseUrl}/query-${entityName}s?`
+        const query = new URLSearchParams({"page":page, "perPage":perPage})
+        const url = baseUrl + query
+        const options = {
+            method:"GET",
+            headers: {"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + `. Failed to READ ${entityName}. Either DB connection error or error not prevented by api unit test.`, "failure")
+    }
+
+    if  (resp.status === 401 ) {
+        console.log(resp_json.message)
+        const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
+        const resp_ref_json = await resp_ref.json()
+        handleNotification(resp_json.message + ". Refreshing...try again", "failure")
+        if (resp_ref.status !=200) {
+            console.log(resp_ref_json.message)
+            handleLogout()
+            handleNotification(resp_ref_json.message, "failure")
+            return resp_json
+        } else {
+            // handleNotification(resp_ref_json.message, "success")
+            console.log(resp_ref_json.message)
+            fetchUserEntityPage(entityName, page, perPage)
+        }
+    }
+    return resp_json
+}
+
+export {fetchAllUserContent, fetchUserProjects,fetchUserObjectives, fetchAllUserTasks, fetchUserEntityPage}
