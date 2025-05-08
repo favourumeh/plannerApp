@@ -14,13 +14,20 @@ div.entity-page-header{
 
 .entity-page-header-row2{
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
     margin: 4px 0px;
     background-color: rgba(48, 48, 100, 0.137);
     border-radius: 10px;
     border: 1px solid rgba(0, 0, 0, 0);
 }
 
+.entity-page-header-row2:hover{
+    border: 1px solid;
+}
+.entity-page-header-row2 button{
+    background: none;
+}
 .entity-page-header-row2:hover{
     border: 1px solid;
 }
@@ -32,7 +39,7 @@ div.entity-page-body {
     display: flex;
     justify-content: center;
     align-content: flex-start;
-    height: 900px;
+    height: 450px;
 }
 
 ol.entity-list{

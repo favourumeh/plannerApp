@@ -1,6 +1,7 @@
 import "./entityPage.css"
-import { useContext, useEffect } from "react"
+import { useContext, useEffect, useState } from "react"
 import globalContext from "../../context"
+import {useQuery, keepPreviousData} from "@tanstack/react-query"
 import Header from "../header/header"
 import EntityCard from "./entityCard"
 import ToolBar from "../toolbar/toolbar"
@@ -8,24 +9,36 @@ import AddEntity from "../toolbar/addEntity"
 import FilterPage from "../toolbar/filterPage" 
 import ViewPage from "../toolbar/viewPage"
 import RefreshEntities from "../toolbar/refreshEntities"
+import { fetchUserEntityPage } from "../../fetch_entities"
 
 function EntityPage ({sitePage}) {
 
-    if (!["view-projects", "view-objectives", "view-tasks"].includes(sitePage)) {
-        return null
+    if (!["view-projects", "view-objectives", "view-tasks"].includes(sitePage)) return null
+
+    const [page, setPage] = useState(1)
+    const {handleNotification} = useContext(globalContext)
+    useEffect(() => setPage(1), [sitePage])
+    const entityName = sitePage==="view-projects"? "project" : sitePage==="view-objectives"? "objective" : "task"
+    const { isPending, data, refetch } = useQuery({
+        queryKey: [`${entityName}s`, page],
+        queryFn: () => fetchUserEntityPage(entityName, handleNotification, page),
+        placeholderData: keepPreviousData,
+        retry: 3,
+    })
+
+    if (isPending) return "Loading..."
+
+    const  entityArr = sitePage==="view-projects"? data?.projects : sitePage==="view-objectives" ? data?.objectives : data?.tasks 
+
+    const onClickNextPage = () => {
+        if (page===data["_pages"]) return
+        setPage(page+1)
     }
-    
-    const {tasks, projects, objectives, entityName, setEntityName, entity,setEntity} = useContext(globalContext)
 
-    useEffect(() => {
-        setEntityName(sitePage==="view-projects"? "project": sitePage==="view-objectives"? "objective":"task")
-        setEntity(sitePage==="view-projects"? projects: sitePage==="view-objectives"? objectives:tasks)
-    }, [sitePage])
-
-    useEffect(() => {
-        setEntity(sitePage==="view-projects"? projects: sitePage==="view-objectives"? objectives:tasks)
-    }, [projects, objectives, tasks])
-
+    const onClickPrevPage = () => {
+        if (page===1) return
+        setPage(page-1)
+    }
     return (
         <div className="entity-page">
             <div className="entity-page-header"> 
@@ -34,14 +47,16 @@ function EntityPage ({sitePage}) {
                 </div>
 
                 <div className="entity-page-header-row2">
-                    <strong> {entityName.toUpperCase()}S </strong>
+                    <button type="button" className="next-pg-btn" onClick={onClickPrevPage}> <i className="fa fa-arrow-left" aria-hidden="true"></i> </button>
+                    <strong> {entityName.toUpperCase()}S ({`${page}/${data["_pages"]}`})</strong>
+                    <button type="button" className="prev-pg-btn" onClick={onClickNextPage}> <i className="fa fa-arrow-right" aria-hidden="true"></i> </button>
                 </div>
                 
                 <div className="entity-page-header-row3">
                     <ToolBar> 
                         <AddEntity/>
                         <ViewPage/>
-                        <RefreshEntities/>
+                        <RefreshEntities refetch={refetch}/>
                         <FilterPage/>
                     </ToolBar>
                 </div>
@@ -49,9 +64,9 @@ function EntityPage ({sitePage}) {
 
             <div className="entity-page-body"> 
                 <ol id="entity-list" className="entity-list">
-                    {entity?.map((item)=> 
-                        <li align="left" key={item.id}>
-                            <EntityCard entity={item} entityName={entityName}/>
+                    {entityArr?.map((entity)=> 
+                        <li align="left" key={entity.id}>
+                            <EntityCard entity={entity} entityName={entityName}/>
                         </li>
                     )}
                 </ol>
@@ -60,5 +75,4 @@ function EntityPage ({sitePage}) {
         </div>
     )
 }
-
 export default EntityPage
