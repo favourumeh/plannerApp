@@ -84,10 +84,10 @@ const fetchUserEntityPage = async (entityName, handleNotification, handleLogout,
     return resp_json
 }
 
-const fetchTaskByStartDate = async (selectedDate, handleNotification, handleLogout) => {
+const fetchHomepageTasks = async (selectedDate, handleNotification, handleLogout) => {
     try{
         const baseUrl =  `${backendBaseUrl}/query-tasks?`
-        const query = new URLSearchParams({"selectedDate":selectedDate})
+        const query = new URLSearchParams({"selectedDate":selectedDate, "sitePage":"homepage"})
         const url = baseUrl + query
         const options = {
             method:"GET",
@@ -97,9 +97,9 @@ const fetchTaskByStartDate = async (selectedDate, handleNotification, handleLogo
         var resp = await fetch(url, options)
         var resp_json = await resp.json()
     } catch (err) {
-        handleNotification(err.message + `. Failed to fetch task by start date (fetchTaskByStartDate()).  Either DB connection error or error not prevented by api unit test.`, "failure")
+        handleNotification(err.message + `. Failed to fetch task by start date (fetchHomepageTasks()).  Either DB connection error or error not prevented by api unit test.`, "failure")
     }
-    const requestFn = async() => fetchTaskByStartDate(selectedDate, handleNotification, handleLogout)
+    const requestFn = async() => fetchHomepageTasks(selectedDate, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
 }
@@ -122,4 +122,4 @@ const fetchTasksObjectiveAndProject = async (taskId, handleNotification, handleL
     return resp_json
 }
 
-export {fetchAllUserContent, fetchUserEntityPage, fetchTaskByStartDate, fetchTasksObjectiveAndProject}
+export {fetchAllUserContent, fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject}

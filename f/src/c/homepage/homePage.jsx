@@ -11,7 +11,7 @@ import FilterPage from "../toolbar/filterPage"
 import ViewPage from "../toolbar/viewPage"
 import RefreshEntities from "../toolbar/refreshEntities"
 import TimerLine from "./timerLine"
-import readTaskByDateQueryOptions from "../../queryOptions/readTaskByDateQueryOptions"
+import homepageTasksQueryOptions from "../../queryOptions/readHomepageTasksQueryOption"
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todaysDate = new Date().toDateString()
@@ -23,7 +23,7 @@ function HomePage ({isLoggedIn, sitePage}) {
     const {currentDate, userSettings, handleDayNavigation, handleNotification, handleLogout} = useContext(globalContext)
     const currentDay = daysOfWeek[new Date(currentDate).getDay()]
     const selectedDay = new Date(currentDate).toISOString().split("T")[0]
-    const { isPending, data, refetch } = useQuery( readTaskByDateQueryOptions(selectedDay, handleNotification, handleLogout) )
+    const { isPending, data, refetch } = useQuery( homepageTasksQueryOptions(selectedDay, handleNotification, handleLogout) )
 
     if (isPending) return "Loading ..."
     const homePageTasks = data.tasks
