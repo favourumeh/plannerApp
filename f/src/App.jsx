@@ -74,7 +74,7 @@ function App() {
     } 
 
     // create fetch functions that interact with app's state
-    const fetchAllContent = () => fetchAllUserContent(setProjects, setFormProject, setObjectives, setFormObjective, setTasks, handleNotification)
+    const fetchAllContent = () => fetchAllUserContent(setProjects, setFormProject, setObjectives, setFormObjective, setTasks, handleNotification, handleLogout)
 
     const handleLogin = async (user) => {
         setCurrentUser(user)
@@ -105,12 +105,16 @@ function App() {
 
     const handleRefresh = async (hideNoti=true) => {
         const resp_status = await fetchAllContent()
+        console.log("resp_status (handleRefresh())", resp_status)
         if (resp_status === 500){
-            return 
+            handleNotification("Failed to Fetch All Entities. Either DB connection error or error not prevented by api unit test.", "failure")
+            handleLogout()
         } else if (resp_status === 200 ) {
             hideNoti  ||  handleNotification("User content refreshed", "success")
+        } else if (resp_status === 401 ) {
+            handleNotification("Refresh Token Expired", "failure")
         } else {
-            handleLogout()
+            console.log("reps_status", resp_status)
             handleNotification("Could not refresh User Content", "failure")
         }
     }
@@ -146,7 +150,6 @@ function App() {
             var resp_json = await resp.json()
         } catch (err) {
             handleNotification(err.message + `. Failed to DELETE ${entityName}. Either connection error or error not prevented by api unit test.`, "failure")
-            handleRefresh()
         }
 
         if (resp.status==200){
@@ -192,7 +195,6 @@ function App() {
             var resp_json = await resp.json()
         } catch (err) {
             handleNotification(err.message + `. Failed to ${action} ${entityName}. Either connection error or error not prevented by api unit test.`, "failure")
-            handleRefresh()
         }
 
         if ([200, 201].includes(resp.status)){

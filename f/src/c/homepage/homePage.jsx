@@ -1,5 +1,6 @@
 import "./homePage.css"
-import { useState, useContext, useEffect, useRef } from "react"
+import { useContext} from "react"
+import { useQuery } from "@tanstack/react-query"
 import globalContext from "../../context"
 import TaskCard from "./taskCard"
 import Header from "../header/header"
@@ -10,21 +11,22 @@ import FilterPage from "../toolbar/filterPage"
 import ViewPage from "../toolbar/viewPage"
 import RefreshEntities from "../toolbar/refreshEntities"
 import TimerLine from "./timerLine"
+import readTaskByDateQueryOptions from "../../queryOptions/readTaskByDateQueryOptions"
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todaysDate = new Date().toDateString()
-function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
+function HomePage ({isLoggedIn, sitePage}) {
 
     if (!isLoggedIn || sitePage!=="view-homepage") {
         return null
     }
-    const {currentDate, setCurrentDate,  tasks, objectives, projects, userSettings, handleDayNavigation} = useContext(globalContext)
+    const {currentDate, userSettings, handleDayNavigation, handleNotification, handleLogout} = useContext(globalContext)
     const currentDay = daysOfWeek[new Date(currentDate).getDay()]
+    const selectedDay = new Date(currentDate).toISOString().split("T")[0]
+    const { isPending, data, refetch } = useQuery( readTaskByDateQueryOptions(selectedDay, handleNotification, handleLogout) )
 
-    // filter the tasks to be displayed on the homepage
-    useEffect(() => {
-        setHomePageTasks(tasks.filter(task => new Date(task.start).toDateString() ===  new Date(currentDate).toDateString()))
-    }, [currentDate, tasks, objectives, projects])
+    if (isPending) return "Loading ..."
+    const homePageTasks = data.tasks
 
     // change the colour of (the text of) the day if it is not today's date
     const todayIndicator = () => todaysDate === new Date(currentDate).toDateString()? "rgb(0, 230, 0)" : "red"
@@ -33,7 +35,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
         <div className="homepage">
             <div  className="homepage-header"> 
                 <div className="homepage-header-row1">
-                    <Header setCurrentDate={setCurrentDate}/>
+                    <Header/>
                 </div>
 
                 <div className="homepage-header-row2">
@@ -46,7 +48,7 @@ function HomePage ({isLoggedIn, sitePage, homePageTasks, setHomePageTasks}) {
                     <ToolBar> 
                         <AddEntity/>
                         <ViewPage/>
-                        <RefreshEntities/>
+                        <RefreshEntities refetch={refetch}/>
                         <FilterPage/>
                     </ToolBar>
                 </div>

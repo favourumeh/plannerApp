@@ -1,17 +1,15 @@
 import "./taskCard.css"
 import {useContext} from "react"
+import { useQuery } from "@tanstack/react-query"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
-
-const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
-const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
+import readTasksObjectiveAndProjectQueryOption from "../../queryOptions/readTasksObjectiveAndProjectQueryOption"
 
 function TaskCard ({task}) {
-    const {setForm, setIsModalOpen, objectives, projects, setCurrentTask, handleDeleteEntity, userSettings } = useContext(globalContext)
-    const taskObjective  = findTaskObjective(objectives, task)
-    const taskProject = findObjectiveProject(projects, taskObjective)
-    const projectNumber  = taskProject.projectNumber
-    const objectiveNumber  = taskObjective.objectiveNumber
+    const {setForm, setIsModalOpen, setCurrentTask, handleDeleteEntity, userSettings, handleNotification, handleLogout } = useContext(globalContext)
+    const {data, isPending}  = useQuery(readTasksObjectiveAndProjectQueryOption(task.id, handleNotification, handleLogout))
+    const getTasksProject = () =>  isPending ? "*" : data.project.projectNumber
+    const getTasksObjective = () => isPending ? "*" : data.objective.objectiveNumber
 
     const handleEditTask = (e) => {
         e.stopPropagation()
@@ -32,13 +30,11 @@ function TaskCard ({task}) {
     const cardHeight  = String(15*taskDuration/10) + "px"
     const taskIdentifierStyle = {"color": task.status === "Completed"? "rgb(0, 230, 0)": "white"}
 
-    //calculate the position of the task row card relative to the top of the homepage body 
+    //calculate the position of the task row card relative to the top of the homepage body (purple box with timeslots)
     const taskPosition = () => {
         const dayStartMs = new Date(task.start).setHours(userSettings.dayStartTime.split(":")[0], userSettings.dayStartTime.split(":")[1], 0, 0)
         const taskStartMs = new Date(task.start).getTime()
         const deltaMinutes = (taskStartMs - dayStartMs)/(1000*60) + new Date().getTimezoneOffset()
-        // console.log(`deltaMinutes (${projectNumber}.${objectiveNumber}.${task.taskNumber})`, task.scheduledStart, deltaMinutes)
-        // console.log(deltaMinutes*15/10)
         return String(deltaMinutes*15/10) // convert minutes to px
     }
     const taskRowCardStyle = { "position": "absolute", "top":taskPosition()+ "px"}
@@ -46,11 +42,11 @@ function TaskCard ({task}) {
     //generate the text on the task card
     const generateTaskCardText = () => {
         if (taskDuration<10) return ""
-        return `Task ${projectNumber}.${objectiveNumber}.${task.taskNumber} ${task.description}`
+        return `Task ${getTasksProject()}.${getTasksObjective()}.${task.taskNumber} ${task.description}`
     }
     return (
         <div  style={taskRowCardStyle} id={`row-id-${task.id}`} className="task-row">
-            <TaskInfoCard task={task} translate ={"122% 0%"} taskObjective={taskObjective} taskProject={taskProject}/>
+            <TaskInfoCard task={task} translate ={"122% 0%"} taskObjective={getTasksObjective()} taskProject={getTasksProject()}/>
             <button> 
                 <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"/>
             </button>

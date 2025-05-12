@@ -8,7 +8,7 @@ from models import User, Project, Objective, Task
 from plannerPackage import login_required, token_required, generate_all_user_content, generate_user_content, generate_entity_number, convert_date_str_to_datetime 
 from config import db, app, serializer
 from typing import Tuple, List
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from pytz import timezone
 
 #create blueprint
@@ -117,6 +117,7 @@ def read_tasks():
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def query_tasks(): 
+    """Queries the user's tasks."""
     resp_dict = {"message":"", "tasks":""}
     user_id: int = session["userId"]
     query: Query = Task.query.join(Objective).join(Project).filter(Project.user_id == user_id) #users_tasks
@@ -155,6 +156,32 @@ def query_tasks():
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not read user task! Reason: {e}"
         return jsonify(resp_dict), 404
+
+@app.route("/get-tasks-objective-and-project/<int:task_id>", methods=["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def get_tasks_objective_and_project(task_id: int):
+    """Returns the objective and project of a given task"""
+    resp_dict = {"message":"", "objective":"", "project":""}
+    user_id: int = session["userId"]
+    users_tasks: Query = Task.query.join(Objective).join(Project).filter(Project.user_id == user_id)
+
+    task = Task.query.filter(Task.id == task_id).first()
+    if not task:
+        resp_dict["message"] = "Failure: The requested task is not in the database. Choose another one."
+        return jsonify(resp_dict), 403
+    
+    task = users_tasks.filter(Task.id == task_id).first()
+    if not task:
+        resp_dict["message"] = "Failure: The requested task does not belong to the user. Choose another one."
+        return jsonify(resp_dict), 403
+    
+    objective: Objective = Objective.query.filter(Objective.id == task.objective_id).first()
+    project: Project = Project.query.filter( Project.id == objective.project_id ).first()
+    resp_dict["message"] = "Success: Task's objective and project was retrieved."
+    resp_dict["objective"] = objective.to_dict()
+    resp_dict["project"] = project.to_dict()
+    return jsonify(resp_dict), 200
 
 #read - all projects, objectives and tasks
 @app.route("/read-all", methods=["GET"])
