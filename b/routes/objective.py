@@ -8,7 +8,7 @@ from models import Project, Objective, Task
 from plannerPackage import login_required, token_required, flatten_2d_list, generate_entity_number, convert_date_str_to_datetime
 from config import db, app, serializer
 from typing import Tuple, List
-from datetime import datetime, timezone
+from datetime import datetime
 from pytz import timezone
 
 #create blueprint

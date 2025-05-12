@@ -5,7 +5,7 @@ import jwt
 from itsdangerous import URLSafeTimedSerializer
 from models import Refresh_Token
 from functools import wraps
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from . import refresh_token_dur, decrypt_bespoke_session_cookie #alternative: from plannerPackage import refre...
 from . import session_key
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -92,7 +92,7 @@ def login_required(serializer: URLSafeTimedSerializer):
             
             #check if user's token has expired
             now: datetime = datetime.now(tz=timezone('Europe/London'))
-            refresh_token_exp: datetime = refresh_token_obj.exp.replace(tzinfo = timezone('Europe/London'))
+            refresh_token_exp: datetime = refresh_token_obj.exp.astimezone(timezone('Europe/London'))
             # print("now: ", now)
             # print("refresh_token_exp: ", refresh_token_exp)
             if  refresh_token_exp < now:

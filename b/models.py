@@ -121,7 +121,7 @@ class Task(db.Model):
     is_recurring, was_paused, parent_task_id, tag, objective_id"""
     id = db.Column(db.Integer, primary_key=True)
     task_number = db.Column(db.Integer, nullable=False)
-    type = db.Column(db.String(12), default="project task") # 2 types: "free task" and "project task"
+    type = db.Column(db.String(12), default="project task") # 2 types: "example task" and "project task"
     status = db.Column(db.String(50), default="To-Do") #5 types: To-Do, In-Progress, Paused, Completed, Is-Cancelled
     description = db.Column(db.String(200))
     duration = db.Column(db.Integer) # actual task duration (minutes)
