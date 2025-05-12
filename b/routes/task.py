@@ -127,19 +127,31 @@ def query_tasks():
     page: int = request.args.get("page", default=None, type=int)
     per_page: int = request.args.get("perPage", default=None, type=int)
     objective_id: int = request.args.get("objectiveId", default=None, type=int)
-    status: int = request.args.get("status", default=None, type=str)
-    selected_date: str = request.args.get("selectedDate", default=None)
-    selected_date: datetime = convert_date_str_to_datetime(selected_date, "%Y-%m-%d")
-
+    status: str = request.args.get("status", default=None, type=str) #can be a string list
+    selected_date: str = request.args.get("selectedDate", default=None, type=str)
+    site_page: str = request.args.get("sitePage", default=None, type=str)
+    
     if objective_id:
         query: Query = query.filter(Task.objective_id == objective_id)
         resp_dict["_objectiveId"] = objective_id
     if status:
-        query: Query = query.filter(Task.status == status)
+        statusList: List[str] = status.split(",")
+        query: Query = query.filter(Task.status.in_(statusList))
         resp_dict["_status"] = status
-    if selected_date:
+    if site_page == "homepage":
+        selected_date: datetime = convert_date_str_to_datetime(selected_date, "%Y-%m-%d")
         query: Query = query.filter(db.func.date(Task.start) == selected_date.date())
         resp_dict["_selectedDate"] =  selected_date.strftime("%Y-%m-%d")
+    if site_page == "kanban":
+        selected_date: datetime = convert_date_str_to_datetime(selected_date, "%Y-%m-%d")
+        query: Query = query.filter(
+            db.or_(
+                db.func.date(Task.finish) == selected_date.date(),
+                db.func.date(Task.scheduled_start) == selected_date.date(), 
+                Task.status != "Completed"
+            )
+        )
+        resp_dict["_selectedDate"] = selected_date.strftime("%Y-%m-%d")
     if page and per_page:
         pagination: Pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         resp_dict["_pages"] = pagination.pages
