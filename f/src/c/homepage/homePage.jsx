@@ -22,8 +22,8 @@ function HomePage ({isLoggedIn, sitePage}) {
     }
     const {currentDate, userSettings, handleDayNavigation, handleNotification, handleLogout} = useContext(globalContext)
     const currentDay = daysOfWeek[new Date(currentDate).getDay()]
-    const selectedDay = new Date(currentDate).toISOString().split("T")[0]
-    const { isPending, data, refetch } = useQuery( homepageTasksQueryOptions(selectedDay, handleNotification, handleLogout) )
+    const selectedDate = new Date(currentDate).toISOString().split("T")[0]
+    const { isPending, data, refetch } = useQuery( homepageTasksQueryOptions(selectedDate, handleNotification, handleLogout) )
 
     if (isPending) return "Loading ..."
     const homePageTasks = data.tasks
