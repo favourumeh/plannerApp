@@ -1,6 +1,7 @@
 import globalContext from "../../context"
 import "./kanban.css"
 import { useContext, useState, useEffect } from "react"
+import { useQuery, keepPreviousData} from "@tanstack/react-query"
 import Header from "../header/header"
 import ToolBar from "../toolbar/toolbar"
 import KanbanColumn from "./kanbanColumn"
@@ -11,12 +12,12 @@ import FilterPage from "../toolbar/filterPage"
 import ViewPage from "../toolbar/viewPage"
 import RefreshEntities from "../toolbar/refreshEntities"
 import HoverText from "./hoverText"
+import { fetchKanbanTasks } from "../../fetch_entities"
 
 const Kanban = ({sitePage}) => {
     if (sitePage!=="view-kanban") return 
-    const {tasks, objectives, projects, handleEntitySubmit, formatDateFields, currentDate, setCurrentDate, handleDayNavigation} = useContext(globalContext)
+    const {objectives, projects, handleEntitySubmit, formatDateFields, currentDate, setCurrentDate, handleDayNavigation, handleNotification, handleLogout} = useContext(globalContext)
     const [entityName, setEntityName] = useState("task")
-    const [entityArr, setEntityArr] = useState([])
     const [updatedEntity, setUpdatedEntity] = useState([])
     const [updatedEntityIdAndStatus, setUpdatedEntityIdAndStatus] = useState({})
     const [sourceColumn, setSourceColumn] = useState("")
@@ -32,7 +33,14 @@ const Kanban = ({sitePage}) => {
         {id:"Paused", title:"Paused"}, 
         {id:"Completed", title:"Completed"}
     ])
-
+    const selectedDate = new Date(currentDate).toISOString().split("T")[0]
+    const {data, isPending, refetch} = useQuery({
+        queryKey: [`kanban-${entityName}-${selectedDate}`],
+        queryFn: () => fetchKanbanTasks(selectedDate, handleNotification, handleLogout),
+        placeholderData: keepPreviousData, 
+        retry: 3,
+    })
+    
     const tasksShownOnKanban = (task) => {
         const selectedDay = (new Date(currentDate)).toDateString()
         const taskScheduleDate = new Date(task.scheduledStart).toDateString()
@@ -49,22 +57,26 @@ const Kanban = ({sitePage}) => {
         return outputBool
     }
 
+    if (isPending) return "Loading ..."
+    const tasks = data.tasks
+    var entityArr =  tasks.filter(tasksShownOnKanban)
+
     //Allows kaban page to switch between entities (task, objective and project). Also updates kanban board upon updaete sto tasks, objectives and projects arrays. 
-    useEffect( () => {
-        switch (entityName) {
-            case "task":
-                setEntityArr( tasks.filter(tasksShownOnKanban) ) 
-                break
-            case "objective":
-                setEntityArr(objectives)
-                break
-            case "project":
-                setEntityArr(projects)
-                break
-            default:
-                throw new Error("Invalid entity name. Must be one of 'task', 'objective', or 'project'.")
-        } 
-    }, [tasks, objectives, projects, entityName, currentDate])
+    // useEffect( () => {
+    //     switch (entityName) {
+    //         case "task":
+    //             setEntityArr( tasks.filter(tasksShownOnKanban) ) 
+    //             break
+    //         case "objective":
+    //             setEntityArr(objectives)
+    //             break
+    //         case "project":
+    //             setEntityArr(projects)
+    //             break
+    //         default:
+    //             throw new Error("Invalid entity name. Must be one of 'task', 'objective', or 'project'.")
+    //     } 
+    // }, [objectives, projects, entityName, currentDate])
 
     const handleDragEnd = (e) => { //dnd
         const {active, over} = e
@@ -116,25 +128,25 @@ const Kanban = ({sitePage}) => {
         return entity
     }
 
-    useEffect(() => {
-        if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
-            let updatedEntity_ = entityArr.find((entity) => entity.id ===  updatedEntityIdAndStatus.id)
-            // console.log("updatedEntity_:", updatedEntity_)
-            updatedEntity_.status = updatedEntityIdAndStatus.status
-            updatedEntity_ = handleDateFieldsAndStatus(updatedEntity_)
-            updatedEntity_ = formatDateFields(updatedEntity_)
-            setUpdatedEntity(updatedEntity_)
-        }
-    }, [updatedEntityIdAndStatus])
+    // useEffect(() => {
+    //     if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
+    //         let updatedEntity_ = entityArr.find((entity) => entity.id ===  updatedEntityIdAndStatus.id)
+    //         // console.log("updatedEntity_:", updatedEntity_)
+    //         updatedEntity_.status = updatedEntityIdAndStatus.status
+    //         updatedEntity_ = handleDateFieldsAndStatus(updatedEntity_)
+    //         updatedEntity_ = formatDateFields(updatedEntity_)
+    //         setUpdatedEntity(updatedEntity_)
+    //     }
+    // }, [updatedEntityIdAndStatus])
 
-    useEffect(() => {
-        if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
-            setUpdatedEntityIdAndStatus({})
-            const newEntity = entityArr.map(entity => entity.id === updatedEntityIdAndStatus.id? updatedEntity : entity)
-            setEntityArr(newEntity) // put here to speed up DnD action (but can be removed)
-            handleEntitySubmit(null, "update", entityName, updatedEntity)
-        }
-    }, [updatedEntity])
+    // useEffect(() => {
+    //     if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
+    //         setUpdatedEntityIdAndStatus({})
+    //         const newEntity = entityArr.map(entity => entity.id === updatedEntityIdAndStatus.id? updatedEntity : entity)
+    //         entityArr = newEntity // put here to speed up DnD action (but can be removed)
+    //         handleEntitySubmit(null, "update", entityName, updatedEntity)
+    //     }
+    // }, [updatedEntity])
 
     const getInfoCardWidth = () => {
         return entityName==="task"? "926.6px": "695px"
@@ -172,7 +184,7 @@ const Kanban = ({sitePage}) => {
         }
     }
 
-    useEffect(()=> {calculateTaskTime()}, [entityArr])
+    // useEffect(()=> {calculateTaskTime()}, [entityArr])
 
     return (
         <div className="kanban-page">
@@ -182,21 +194,22 @@ const Kanban = ({sitePage}) => {
                 <div className="kanban-page-header-2">
                     <button type="button" className="yesterday-btn" onClick={() => handleDayNavigation("previous-day")}> <i className="fa fa-arrow-left" aria-hidden="true"></i> </button>
                     <div className="kanbnan-page-header-2-text">
-                        <strong className="kanban-page-title" onClick={()=> setCurrentDate(new Date())} > {`Kanban (${entityName}s)`}</strong>
-                        <Dropdown buttonContent={<i className="fa fa-chevron-down" aria-hidden="true"></i>} translate="0% 50%">
+                        <strong className="kanban-page-title" onClick={()=> setCurrentDate(new Date())} 
+                        > 
+                            {`Kanban ${entityName}s | ${remainingTaskTime} ${remainingTaskTimeUnits} left (total ${totalTaskTime} ${totalTaskTimeUnits}`} 
+                        </strong>
+                        {/* <Dropdown buttonContent={<i className="fa fa-chevron-down" aria-hidden="true"></i>} translate="0% 50%">
                             <div onClick={() => setEntityName("project")}> Projects </div>
                             <div onClick={() => setEntityName("objective")}> Objectives </div>
                             <div onClick={() => setEntityName("task")}> Tasks </div>
-                        </Dropdown>
-                        <strong> {remainingTaskTime} {remainingTaskTimeUnits} left (total {totalTaskTime} {totalTaskTimeUnits}) </strong>
+                        </Dropdown> */}
                     </div>
-
                     <button type="button" className="tomorrow-btn" onClick={() => handleDayNavigation("next-day")} > <i className="fa fa-arrow-right" aria-hidden="true"> </i> </button>
                 </div>
                 <ToolBar> 
                     <AddEntity/>
                     <ViewPage/>
-                    <RefreshEntities/>
+                    <RefreshEntities refetch={refetch}/>
                     <FilterPage/>
                 </ToolBar>
             </div>

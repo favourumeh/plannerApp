@@ -97,7 +97,7 @@ const fetchHomepageTasks = async (selectedDate, handleNotification, handleLogout
         var resp = await fetch(url, options)
         var resp_json = await resp.json()
     } catch (err) {
-        handleNotification(err.message + `. Failed to fetch task by start date (fetchHomepageTasks()).  Either DB connection error or error not prevented by api unit test.`, "failure")
+        handleNotification(err.message + `. Failed to fetch homepage tasks (fetchHomepageTasks()).  Either DB connection error or error not prevented by api unit test.`, "failure")
     }
     const requestFn = async() => fetchHomepageTasks(selectedDate, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
@@ -122,4 +122,25 @@ const fetchTasksObjectiveAndProject = async (taskId, handleNotification, handleL
     return resp_json
 }
 
-export {fetchAllUserContent, fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject}
+const fetchKanbanTasks = async (selectedDate, handleNotification, handleLogout) => {
+    try{
+        const baseUrl =  `${backendBaseUrl}/query-tasks?`
+        const query = new URLSearchParams({"selectedDate":selectedDate, "sitePage":"kanban"})
+        const url = baseUrl + query
+        const options = {
+            method:"GET",
+            headers: {"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + `. Failed to fetch kanban tasks (fetchKanbanTasks()).  Either DB connection error or error not prevented by api unit test.`, "failure")
+    }
+    const requestFn = async() => fetchKanbanTasks(selectedDate, handleNotification, handleLogout)
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+
+}
+
+export {fetchAllUserContent, fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject, fetchKanbanTasks}
