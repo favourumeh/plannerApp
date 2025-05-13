@@ -115,6 +115,7 @@ def query_objectives():
     page: int = request.args.get("page", default=None, type=int)
     per_page: int = request.args.get("perPage", default=None, type=int)
     project_id: int = request.args.get("projectId", default=None, type=int)
+    objective_id: int = request.args.get("objectiveId", default=None, type=int)
     status: int = request.args.get("status", default=None, type=str)
 
     if project_id:
@@ -140,6 +141,31 @@ def query_objectives():
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not read user objective! Reason: {e}"
         return jsonify(resp_dict), 404
+
+    #get the project dict of an objective
+@objective.route("/get-objectives-project/<int:objective_id>", methods=["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def get_objectives_project(objective_id: int): 
+    resp_dict = {"message":""}
+    user_id: int = session["userId"]
+    users_objectives: Query = Objective.query.join(Project).filter(Project.user_id == user_id) #users_objectives
+
+    objective: Objective = Objective.query.filter(Objective.id == objective_id).first()
+    if not objective:
+        resp_dict["message"] = "Failure: The requested objective is not in the database. Choose another one."
+        return jsonify(resp_dict), 404
+    
+    objective: Objective = users_objectives.filter(Objective.id == objective_id).first()
+    if not objective:
+        resp_dict["message"] = "Failure: The requested objective does not belong to the user. Choose another one."
+        return jsonify(resp_dict), 403
+
+    project: Project = Project.query.filter(Project.id == objective.project_id).first()
+    resp_dict["message"] = "Success: Objective's project was retrieved."
+    resp_dict["objective"] = objective.to_dict()
+    resp_dict["project"] = project.to_dict()
+    return jsonify(resp_dict), 200
 
 #update
 @objective.route("/update-objective/<int:objective_id>", methods=["PATCH"])

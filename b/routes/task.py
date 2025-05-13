@@ -178,19 +178,20 @@ def get_tasks_objective_and_project(task_id: int):
     user_id: int = session["userId"]
     users_tasks: Query = Task.query.join(Objective).join(Project).filter(Project.user_id == user_id)
 
-    task = Task.query.filter(Task.id == task_id).first()
+    task: Task = Task.query.filter(Task.id == task_id).first()
     if not task:
         resp_dict["message"] = "Failure: The requested task is not in the database. Choose another one."
-        return jsonify(resp_dict), 403
+        return jsonify(resp_dict), 404
     
-    task = users_tasks.filter(Task.id == task_id).first()
+    task: Task = users_tasks.filter(Task.id == task_id).first()
     if not task:
         resp_dict["message"] = "Failure: The requested task does not belong to the user. Choose another one."
         return jsonify(resp_dict), 403
-    
+
     objective: Objective = Objective.query.filter(Objective.id == task.objective_id).first()
     project: Project = Project.query.filter( Project.id == objective.project_id ).first()
     resp_dict["message"] = "Success: Task's objective and project was retrieved."
+    resp_dict["task"] = task.to_dict()
     resp_dict["objective"] = objective.to_dict()
     resp_dict["project"] = project.to_dict()
     return jsonify(resp_dict), 200
