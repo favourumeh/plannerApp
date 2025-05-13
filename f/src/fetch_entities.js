@@ -117,7 +117,36 @@ const fetchTasksObjectiveAndProject = async (taskId, handleNotification, handleL
     } catch (err) {
         handleNotification(`Failed in to fetch Task's project and objective (fetchTasksObjectiveAndProject()). Either DB connection error or error not prevented by api unit test.`, "failure")
     }
+    if ([400, 403, 404].includes(resp.status)) {
+        console.log(resp_json.message)
+        handleNotification(resp_json.message, "failure")
+        return resp_json
+    }
     const requestFn = async() => fetchTasksObjectiveAndProject(taskId, handleNotification, handleLogout)
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+}
+
+export async function fetchObjectivesProject(objectiveId, handleNotification, handleLogout) {
+    try{
+        const url =  `${backendBaseUrl}/get-objectives-project/${objectiveId}`
+        const options = {
+            method:"GET",
+            headers: {"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } 
+    catch (err) {
+        handleNotification(`Failed in to fetch Objective's project (fetchObjectivesProject()). Either DB connection error or error not prevented by api unit test.`, "failure")
+    }   
+    if ([400, 403, 404].includes(resp.status)) {
+        console.log(resp_json.message)
+        handleNotification(resp_json.message, "failure")
+        return resp_json
+    }
+    const requestFn = async() => fetchObjectivesProject(objectiveId, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
 }
@@ -136,6 +165,11 @@ const fetchKanbanTasks = async (selectedDate, handleNotification, handleLogout) 
         var resp_json = await resp.json()
     } catch (err) {
         handleNotification(err.message + `. Failed to fetch kanban tasks (fetchKanbanTasks()).  Either DB connection error or error not prevented by api unit test.`, "failure")
+    }
+    if ([400, 403, 404].includes(resp.status)) {
+        console.log(resp_json.message)
+        handleNotification(resp_json.message, "failure")
+        return resp_json
     }
     const requestFn = async() => fetchKanbanTasks(selectedDate, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)

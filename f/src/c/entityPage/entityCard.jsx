@@ -1,5 +1,8 @@
 import "./entityCard.css"
 import { useContext} from "react"
+import { useQuery } from "@tanstack/react-query"
+import readTasksObjectiveAndProjectQueryOption from "../../queryOptions/readTasksObjectiveAndProjectQueryOption"
+import readObjectivesProjectQueryOption from "../../queryOptions/readObjectivesProjectQueryOption"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
 import ObjectiveInfoCard from "../InfoCards/objectiveInfoCard"
@@ -7,12 +10,19 @@ import ProjectInfoCard from "../InfoCards/projectInfoCard"
 
 function EntityCard ({entity, entityName}) {
     const {
-        setForm, setIsModalOpen, objectives, projects, 
+        setForm, setIsModalOpen, 
         setCurrentTask, setCurrentProject, setCurrentObjective, 
-        handleDeleteEntity, getObjective, getProject} = useContext(globalContext)
+        handleDeleteEntity,
+        handleNotification, handleLogout} = useContext(globalContext)
 
-    const project = getProject(entity, entityName, projects, objectives)
-    const objective  = getObjective(entity, entityName, objectives)
+    if (entityName==="task") {
+        var {data, isPending} = useQuery( readTasksObjectiveAndProjectQueryOption(entity.id, handleNotification, handleLogout) )
+        var project = isPending? {} : data.project
+        var objective = isPending? {} : data.objective
+    } else if (entityName==="objective"){
+         var {data, isPending} = useQuery( readObjectivesProjectQueryOption(entity.id, handleNotification, handleLogout) )
+         var project = isPending? {} : data.project
+    }
 
     const handleEditEntity = (e) => {
         e.stopPropagation()
@@ -23,9 +33,9 @@ function EntityCard ({entity, entityName}) {
 
     const generateCardContent = () => {
         if (entityName==="task") {
-            return `Task ${project.projectNumber}.${objective.objectiveNumber}.${entity.taskNumber}`
+            return `Task ${isPending? "*" : project.projectNumber}.${isPending? "*" : objective.objectiveNumber}.${entity.taskNumber}`
         } else if (entityName==="objective") {
-            return `Objective ${project.projectNumber}.${entity.objectiveNumber}`
+            return `Objective ${isPending? "*" : project.projectNumber}.${entity.objectiveNumber}`
         } else {
             return `Project ${entity.projectNumber}`
         }
