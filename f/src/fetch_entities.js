@@ -1,6 +1,6 @@
 import { backendBaseUrl } from "../project_config"
 
-const retryRequestOnUpdatedAT = async (resp, resp_json, requestFn, handleNotification, handleLogout) => {
+export async function retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout) {
     if  ( resp.status === 401 ) {
         console.log(resp_json.message)
         const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
@@ -142,5 +142,34 @@ const fetchKanbanTasks = async (selectedDate, handleNotification, handleLogout) 
     return resp_json
 
 }
+
+export async function mutateEntityRequest(action, entityName, currentEntity, handleNotification, handleLogout) {
+    //Makes a (POST or PATCH) request to the backend to to create or update an entity
+    //action: one of: create or update or delete
+    //enityName: one of project, objective or task
+    //currentEntity: for update and delete actions these are the entiteis (task, objective or project) to edit or delete
+    try {
+        const url = `${backendBaseUrl}/${ action + "-" + entityName + (action == "create"? "": "/" + currentEntity.id) }`
+        const options = {
+            method:action==="create"? "POST": action==="update"? "PATCH": "DELETE",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(currentEntity),
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + `. Failed to ${action} ${entityName}. Either connection error or error not prevented by api unit test.`, "failure")
+    }
+    if ([400, 403, 404].includes(resp.status)) {
+        console.log(resp_json.message)
+        handleNotification(resp_json.message, "failure")
+        return resp_json
+    }
+    const requestFn = async() => postEntity(action, entityName, currentEntity, handleNotification, handleLogout)
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+
+} 
 
 export {fetchAllUserContent, fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject, fetchKanbanTasks}
