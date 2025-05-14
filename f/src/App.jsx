@@ -328,7 +328,7 @@ function App() {
                 <Modal>
                     <SignUp/>
                     <Login isLoggedIn={isLoggedIn}/>
-                    <TaskForm/>
+                    <TaskForm form={form}/>
                     <ProjectForm/>
                     <ObjectiveForm/>
                 </Modal>

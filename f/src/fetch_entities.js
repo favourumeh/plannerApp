@@ -177,6 +177,32 @@ const fetchKanbanTasks = async (selectedDate, handleNotification, handleLogout) 
 
 }
 
+export async function fetchProjectsObjectives(projectId, handleNotification, handleLogout) {
+    //gets all objectives that belong to a project
+    try{
+        const baseUrl =  `${backendBaseUrl}/query-objectives?`
+        const query = new URLSearchParams({"projectId":projectId})
+        const url = baseUrl + query
+        const options = {
+            method:"GET",
+            headers: {"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + `. Failed to fetch kanban tasks (fetchProjectsObjectives()).  Either DB connection error or error not prevented by api unit test.`, "failure")
+    }
+    if ([400, 403, 404].includes(resp.status)) {
+        console.log(resp_json.message)
+        handleNotification(resp_json.message, "failure")
+        return resp_json
+    }
+    const requestFn = async() => fetchProjectsObjectives(projectId, handleNotification, handleLogout)
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+}
+
 export async function mutateEntityRequest(action, entityName, currentEntity, handleNotification, handleLogout) {
     //Makes a (POST or PATCH) request to the backend to to create or update an entity
     //action: one of: create or update or delete

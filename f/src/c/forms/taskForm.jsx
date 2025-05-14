@@ -1,61 +1,72 @@
 import "./entityForm.css"
-import {useState, useContext, useEffect, useRef} from "react"
+import {useState, useContext, useEffect} from "react"
+import { useQuery } from "@tanstack/react-query"
 import globalContext from "../../context"
 import SearchResult from "./searchResult"
 import Dropdown from "../dropdown"
 import {defaultTask} from "../../staticVariables"
+import { readTasksObjectiveAndProjectQueryOption, readProjectsObjectivesQueryOption} from "../../queryOptions"
 
-function TaskForm () {
-    const {
-        form, currentTask, setCurrentTask, 
-        showProjectQueryResult, setShowProjectQueryResult,
-        showObjectiveQueryResult, setShowObjectiveQueryResult,
-        formProject, formObjective,
-        projects, objectives, handleEntitySubmit, formatDateFields} = useContext(globalContext)
 
+function TaskForm ({form}) {
     if (!["create-task", "update-task"].includes(form)) {
         return null
     }
+    const {
+        currentTask, setCurrentTask, 
+        showProjectQueryResult, setShowProjectQueryResult,
+        showObjectiveQueryResult, setShowObjectiveQueryResult,
+        formProject, formObjective,
+        projects, handleEntitySubmit, formatDateFields,
+        handleNotification, handleLogout} = useContext(globalContext)
 
-    const findTaskObjective = () => objectives.find( (objective)=> objective.id===currentTask.objectiveId )  || {"title":""}
-    const findTaskProject = (objective) => projects.find( (project)=> project.id===objective.projectId) || {"title":""}
+    const [projectQuery, setProjectQuery] = useState(formProject.title)
+    const [objectiveQuery, setObjectiveQuery] = useState(formObjective.title)
+    const {data, isPending} = useQuery(
+        {...readTasksObjectiveAndProjectQueryOption(currentTask.id, handleNotification, handleLogout), 
+            "enabled": form === "update-task"})
 
-    const projectTitles = useRef(projects.map(project=>project.title))
-    const [taskProject, setTaskProject] = useState(form=="create-task"? formProject:findTaskProject(findTaskObjective()))
-    const [taskObjective, setTaskObjective] = useState(form=="create-task"? formObjective:findTaskObjective())
+    useEffect(() => {
+        // console.log("isPending", isPending)
+        if (!isPending && form==="update-task") {
+            setProjectQuery(data.project.title)
+            setObjectiveQuery(data.objective.title)
+        } 
+    }, [isPending]);
 
-    const [projectQuery, setProjectQuery] = useState(taskProject.title)
-    const [relevantObjectives, setRelevantObjetives] = useState(objectives.filter(objective=> objective.projectId == taskProject.id))
-    const [objectiveQuery, setObjectiveQuery] = useState(taskObjective.title)
-    const [objectiveTitles, setObjectiveTitles] = useState(relevantObjectives.map(objective=> objective.title))
+    const projectTitles = projects.map(project=>project.title)
+    const taskProject = projectTitles.includes(projectQuery)? projects.find(project=> project.title==projectQuery) : {}
+    const {data: objectivesData , isPending: isPendingObjectives } = useQuery(
+        {...readProjectsObjectivesQueryOption(taskProject.id, handleNotification, handleLogout),
+            "enabled": !!taskProject
+        }
+    )
+    const objectives = isPendingObjectives? [{"title":"..."}] : objectivesData.objectives
+    const relevantObjectives = objectives.filter(objective=> objective.projectId == taskProject?.id)
+    const objectiveTitles = relevantObjectives.map(objective=> objective?.title)
+    const taskObjective = objectiveTitles.includes(objectiveQuery)?
+        objectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ) : {}
 
-    // add console prints here (see #1)
-
-    //#region: search field useEffect updates
-    useEffect( () => projectTitles.current.includes(projectQuery)?
-            setTaskProject(projects.find(project=> project.title==projectQuery)):
-            setTaskProject({}), 
-    [projectQuery])
-
-    useEffect( () => {
-        setRelevantObjetives(objectives.filter(objective=> objective.projectId == taskProject.id))
-        if (!projectTitles.current.includes(projectQuery)) {
+    useEffect( () => { //clear objective input field if project field is not valid
+        if (!projectTitles.includes(projectQuery)) {
             setObjectiveQuery("")
-        }}, [taskProject])
+        }}, [projectQuery])
 
-    useEffect(() => setObjectiveTitles(relevantObjectives.map(objective=> objective.title)), [relevantObjectives])
-
-    useEffect(() => objectiveTitles.includes(objectiveQuery)?
-                        setTaskObjective(objectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ))
-                        :setTaskObjective({}), 
-    [objectiveQuery])
-
-    useEffect(() => objectiveTitles.includes(objectiveQuery)? 
+    useEffect(() => objectiveTitles.includes(objectiveQuery)?  // set the objectiveId field of the currentTask when a valid objective is clicked or typed
         setCurrentTask({...currentTask, "objectiveId":taskObjective.id}) : 
         setCurrentTask({...currentTask, "objectiveId":""})
-    , [taskObjective])
-    //#endregion
+    , [objectiveQuery, isPendingObjectives])
 
+    useEffect(() => {// generate duration of a task when start and finish dates are present and updated
+        if (!!currentTask.start && !!currentTask.finish){
+            const durationAccMs = new Date (currentTask.finish).getTime() - new Date(currentTask.start).getTime()
+            const durationAccMin = Math.round(durationAccMs/(60*1000))
+            setCurrentTask({...currentTask, "duration":durationAccMin})
+        }
+    }, [currentTask.start, currentTask.finish])
+
+    useEffect(()=> {setCurrentTask( prev => (formatDateFields(prev))) }, [] )
+    
     const mandatoryIndicator = (fieldStateVar, indicator) => {
         return (typeof fieldStateVar==="undefined" || fieldStateVar==="")? <span className="required-asterisk">{indicator}</span>: undefined
     }
@@ -75,16 +86,6 @@ function TaskForm () {
         setShowProjectQueryResult(false)
         setShowObjectiveQueryResult(false)
     }
-
-    useEffect(() => {
-        if (!!currentTask.start && !!currentTask.finish){
-            const durationAccMs = new Date (currentTask.finish).getTime() - new Date(currentTask.start).getTime()
-            const durationAccMin = Math.round(durationAccMs/(60*1000))
-            setCurrentTask({...currentTask, "duration":durationAccMin})
-        }
-        setCurrentTask( prev => (formatDateFields(prev)) )
-    }, [])
-
     const handleChange = (e) => {
         const {name, value} = e.target
         setCurrentTask(prev => ({...prev, [name]:value}))
@@ -120,12 +121,12 @@ function TaskForm () {
             <div id={`${labelName}-field`} className="form-group">
                 <div className="field-title"> {labelName}{mandatoryIndicator(queryField,"*")} </div>
                 <input 
-                    style = {{"color": labelName =="Project"? (projectTitles.current.includes(queryField)? "green":"red"): (objectiveTitles.includes(queryField)? "green":"red") }}
+                    style = {{"color": labelName =="Project"? (projectTitles.includes(queryField)? "green":"red"): (objectiveTitles.includes(queryField)? "green":"red") }}
                     type = "text"
                     id = {inputName}
                     className="form-input"
                     name = {inputName} // used in the request made to the server
-                    value = {queryField}
+                    value = {(isPending && form==="update-task")? "...": queryField}
                     autoComplete="off"
                     onChange = {e => setQueryField(e.target.value)}
                     onClick = {(e) => toggleShowSearchResult(e, labelName)}/>
