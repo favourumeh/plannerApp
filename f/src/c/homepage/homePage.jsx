@@ -1,5 +1,5 @@
 import "./homePage.css"
-import { useContext} from "react"
+import { useContext, useEffect} from "react"
 import { useQuery } from "@tanstack/react-query"
 import globalContext from "../../context"
 import TaskCard from "./taskCard"
@@ -20,17 +20,22 @@ function HomePage ({isLoggedIn, sitePage}) {
     if (!isLoggedIn || sitePage!=="view-homepage") {
         return null
     }
-    const {currentDate, userSettings, handleDayNavigation, handleNotification, handleLogout} = useContext(globalContext)
+    const {currentDate, userSettings, handleDayNavigation, handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
     const currentDay = daysOfWeek[new Date(currentDate).getDay()]
     const selectedDate = new Date(currentDate).toISOString().split("T")[0]
-    const { isPending, data, refetch } = useQuery( homepageTasksQueryOptions(selectedDate, handleNotification, handleLogout) )
+    const { isPending, data, refetch:refetchHomePageTasks } = useQuery( homepageTasksQueryOptions(selectedDate, handleNotification, handleLogout) )
+
+    useEffect(() => {// refetchHomePageTasks after exiting an entity form
+        if (!isModalOpen && !isPending) {
+            refetchHomePageTasks()
+        }
+    }, [isModalOpen])
 
     if (isPending) return "Loading ..."
     const homePageTasks = data.tasks
 
     // change the colour of (the text of) the day if it is not today's date
     const todayIndicator = () => todaysDate === new Date(currentDate).toDateString()? "rgb(0, 230, 0)" : "red"
-
     return (
         <div className="homepage">
             <div  className="homepage-header"> 
@@ -48,7 +53,7 @@ function HomePage ({isLoggedIn, sitePage}) {
                     <ToolBar> 
                         <AddEntity/>
                         <ViewPage/>
-                        <RefreshEntities refetch={refetch}/>
+                        <RefreshEntities refetch={refetchHomePageTasks}/>
                         <FilterPage/>
                     </ToolBar>
                 </div>
@@ -57,7 +62,7 @@ function HomePage ({isLoggedIn, sitePage}) {
                 <TimerLine/>
                 <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
                 <div style={{"position":"relative"}} className="task-card-overlay">
-                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task}/>)}
+                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task} refetchHomePageTasks={refetchHomePageTasks}/>)}
                 </div>
 
             </div>

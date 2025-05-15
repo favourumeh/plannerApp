@@ -318,7 +318,7 @@ function App() {
     //react query client 
     const queryClient = new QueryClient({
         queryCache: new QueryCache({onError: handleLogout}),
-        })
+    })
 
     return (
         <QueryClientProvider client={queryClient}>
@@ -332,7 +332,7 @@ function App() {
                     <ProjectForm/>
                     <ObjectiveForm/>
                 </Modal>
-                <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage} homePageTasks={homePageTasks} setHomePageTasks={setHomePageTasks}/>
+                <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage}/>
                 <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
                 <Kanban sitePage={sitePage}/>
                 <ProgressPage sitePage={sitePage}/>

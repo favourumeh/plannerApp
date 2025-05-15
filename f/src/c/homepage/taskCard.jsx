@@ -1,13 +1,34 @@
 import "./taskCard.css"
-import {useContext} from "react"
-import { useQuery } from "@tanstack/react-query"
+import {useContext, useEffect} from "react"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
 import readTasksObjectiveAndProjectQueryOption from "../../queryOptions/readTasksObjectiveAndProjectQueryOption"
+import { mutateEntityRequest } from "../../fetch_entities"
+function TaskCard ({task, refetchHomePageTasks}) {
+    const {setForm, isModalOpen, setIsModalOpen, setCurrentTask, userSettings, handleNotification, handleLogout } = useContext(globalContext)
+    const {data, isPending, refetch: refetchTasksProjectAndObjective}  = useQuery(readTasksObjectiveAndProjectQueryOption(task.id, handleNotification, handleLogout))
+    const deleteTaskMutation = useMutation({ 
+        mutationFn: mutateEntityRequest,
+        onSuccess: refetchHomePageTasks,
+    })
 
-function TaskCard ({task}) {
-    const {setForm, setIsModalOpen, setCurrentTask, handleDeleteEntity, userSettings, handleNotification, handleLogout } = useContext(globalContext)
-    const {data, isPending}  = useQuery(readTasksObjectiveAndProjectQueryOption(task.id, handleNotification, handleLogout))
+    useEffect(() => { // refresh the project and objective numbers shown on the task card task is moved.
+        if (!isModalOpen && !isPending){
+            refetchTasksProjectAndObjective()
+        }
+    }, [isModalOpen, isPending])
+
+    const handleDeleteTask = (e) =>  {
+        e.preventDefault()
+        deleteTaskMutation.mutate({
+            action: "delete",
+            entityName: "task",
+            currentEntity: task,
+            handleNotification: handleNotification,
+            handleLogout: handleLogout
+        })
+    }
     const getTasksProject = () =>  isPending ? "*" : data.project.projectNumber
     const getTasksObjective = () => isPending ? "*" : data.objective.objectiveNumber
 
@@ -56,7 +77,7 @@ function TaskCard ({task}) {
                     <div style={taskIdentifierStyle} className="task-description"> {generateTaskCardText()} </div>
                 </div>
             </div>
-            <button onClick={(e) => handleDeleteEntity(e, "task", task.id)}> 
+            <button onClick={handleDeleteTask}> 
                 <i id={`add-task-id-${task.id}`}  className="fa fa-times" aria-hidden="true"/>
             </button>
         </div>        

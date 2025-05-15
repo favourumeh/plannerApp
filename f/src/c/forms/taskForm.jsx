@@ -1,12 +1,12 @@
 import "./entityForm.css"
 import {useState, useContext, useEffect} from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation} from "@tanstack/react-query"
 import globalContext from "../../context"
 import SearchResult from "./searchResult"
 import Dropdown from "../dropdown"
 import {defaultTask} from "../../staticVariables"
 import { readTasksObjectiveAndProjectQueryOption, readProjectsObjectivesQueryOption} from "../../queryOptions"
-
+import { mutateEntityRequest } from "../../fetch_entities"
 
 function TaskForm ({form}) {
     if (!["create-task", "update-task"].includes(form)) {
@@ -17,17 +17,37 @@ function TaskForm ({form}) {
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
         formProject, formObjective,
-        projects, handleEntitySubmit, formatDateFields,
-        handleNotification, handleLogout} = useContext(globalContext)
+        projects, formatDateFields,
+        handleNotification, handleLogout, setIsModalOpen, setForm} = useContext(globalContext)
 
     const [projectQuery, setProjectQuery] = useState(formProject.title)
     const [objectiveQuery, setObjectiveQuery] = useState(formObjective.title)
-    const {data, isPending} = useQuery(
-        {...readTasksObjectiveAndProjectQueryOption(currentTask.id, handleNotification, handleLogout), 
-            "enabled": form === "update-task"})
 
-    useEffect(() => {
-        // console.log("isPending", isPending)
+    const {data, isPending} = useQuery({ //requests the projects and objectives of the task being updated (for use in the form's project/objective field)
+        ...readTasksObjectiveAndProjectQueryOption(currentTask.id, handleNotification, handleLogout), 
+        "enabled": form === "update-task"
+    })
+
+    const createOrEditTaskMutation = useMutation({ //defines the useMutationResult obj that is used to call the mutation function and onsuccess behaviour
+        mutationFn: mutateEntityRequest,
+        onSuccess: () => {
+            setIsModalOpen(false)
+            setForm("")
+        }
+    })
+
+    const onSubmitForm = (e) => {// call mutate function to create/update a task
+        e.preventDefault()
+        createOrEditTaskMutation.mutate({
+            action: form.split("-")[0], 
+            entityName: form.split("-")[1], 
+            currentEntity: currentTask, 
+            handleNotification: handleNotification, 
+            handleLogout: handleLogout
+        })
+    }
+
+    useEffect(() => { // sets intial content of the project/objective fields of an update-task form to the project/objective titles of task being updated
         if (!isPending && form==="update-task") {
             setProjectQuery(data.project.title)
             setObjectiveQuery(data.objective.title)
@@ -36,12 +56,11 @@ function TaskForm ({form}) {
 
     const projectTitles = projects.map(project=>project.title)
     const taskProject = projectTitles.includes(projectQuery)? projects.find(project=> project.title==projectQuery) : {}
-    const {data: objectivesData , isPending: isPendingObjectives } = useQuery(
-        {...readProjectsObjectivesQueryOption(taskProject.id, handleNotification, handleLogout),
-            "enabled": !!taskProject
-        }
-    )
-    const objectives = isPendingObjectives? [{"title":"..."}] : objectivesData.objectives
+    const {data: objectivesData , isPending: isPendingObjectives } = useQuery({ // requests the objectives of the project in the form's project field
+        ...readProjectsObjectivesQueryOption(taskProject.id, handleNotification, handleLogout),
+        "enabled": !!taskProject
+    })
+    const objectives = isPendingObjectives? [{}] : objectivesData.objectives
     const relevantObjectives = objectives.filter(objective=> objective.projectId == taskProject?.id)
     const objectiveTitles = relevantObjectives.map(objective=> objective?.title)
     const taskObjective = objectiveTitles.includes(objectiveQuery)?
@@ -66,7 +85,7 @@ function TaskForm ({form}) {
     }, [currentTask.start, currentTask.finish])
 
     useEffect(()=> {setCurrentTask( prev => (formatDateFields(prev))) }, [] )
-    
+
     const mandatoryIndicator = (fieldStateVar, indicator) => {
         return (typeof fieldStateVar==="undefined" || fieldStateVar==="")? <span className="required-asterisk">{indicator}</span>: undefined
     }
@@ -197,9 +216,16 @@ function TaskForm ({form}) {
                         <div className="btn-div">
                             <button type="submit" 
                                 className="submit-btn" 
-                                onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentTask)}
-                                disabled ={!taskProject.title || !taskObjective || !currentTask.description || !(currentTask.durationEst >=  10) ? true:false}>
-                                {form == "create-task"? "Create":"Update"}
+                                // onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentTask)}
+                                onClick={(e) => onSubmitForm(e)}
+                                disabled ={
+                                    !taskProject.title 
+                                    || !taskObjective 
+                                    || !currentTask.description 
+                                    || !(currentTask.durationEst >=  10
+                                    || createOrEditTaskMutation.isPending
+                                    ) ? true:false}>
+                                { createOrEditTaskMutation.isPending? "sending..." : form==="create-task"? "Create":"Update"}
                             </button>
                         </div>
                     </div>
@@ -210,13 +236,3 @@ function TaskForm ({form}) {
 }
 
 export default TaskForm
-
-
-
-// Notes
-
-    /*
-        #1:prev enfornces the use of previous currentTask state. (without this the currentTask state will be the initial state)
-        #2: the use of the for loop to update currentTask is only possible because of the use of (prev) => ({...prev }) to update the state of currentTask in formatDateTime.
-            prev => ({ ...prev }) ensures each update uses the latest state, even if other updates are pending. Without this, all updates in the loop reference the same initial state, leading to overwrites.
-    */

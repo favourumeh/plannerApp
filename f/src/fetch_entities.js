@@ -203,7 +203,7 @@ export async function fetchProjectsObjectives(projectId, handleNotification, han
     return resp_json
 }
 
-export async function mutateEntityRequest(action, entityName, currentEntity, handleNotification, handleLogout) {
+export async function mutateEntityRequest({action, entityName, currentEntity, handleNotification, handleLogout}) {
     //Makes a (POST or PATCH) request to the backend to to create or update an entity
     //action: one of: create or update or delete
     //enityName: one of project, objective or task
@@ -221,10 +221,12 @@ export async function mutateEntityRequest(action, entityName, currentEntity, han
     } catch (err) {
         handleNotification(err.message + `. Failed to ${action} ${entityName}. Either connection error or error not prevented by api unit test.`, "failure")
     }
+    if ([200, 201].includes(resp.status)) {
+        handleNotification(resp_json.message, "success")
+    }
     if ([400, 403, 404].includes(resp.status)) {
         console.log(resp_json.message)
         handleNotification(resp_json.message, "failure")
-        return resp_json
     }
     const requestFn = async() => postEntity(action, entityName, currentEntity, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
