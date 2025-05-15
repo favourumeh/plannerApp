@@ -272,7 +272,7 @@ def update_task(task_id: int) -> Tuple[Response, int]:
         resp_dict["task"] = task.to_dict()
         return jsonify(resp_dict), 200
     except Exception as e:
-        resp_dict["message"] = "Failure: Task could not be updated!"
+        resp_dict["message"] = f"Failure: Task could not be updated! Reason: {e}"
         return jsonify(resp_dict), 404
 
 #delete
@@ -304,5 +304,5 @@ def delete_task(task_id: int) -> Tuple[Response, int]:
         resp_dict["message"] = "Success: The task was deleted!"
         return jsonify(resp_dict), 200
     except Exception as e:
-        resp_dict["message"] = f"Failure: The task could not be deleted. {e}"
+        resp_dict["message"] = f"Failure: The task could not be deleted. Reason {e}"
         return jsonify(resp_dict), 404
