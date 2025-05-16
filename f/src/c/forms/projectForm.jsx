@@ -1,14 +1,35 @@
 import "./entityForm.css"
 import {useContext, useEffect} from "react"
+import { useMutation } from "@tanstack/react-query"
+import { mutateEntityRequest } from "../../fetch_entities"
 import globalContext from "../../context"
 import Dropdown from "../dropdown"
 import { defaultProject } from "../../staticVariables"
 
-function ProjectForm () {
-    const {form, currentProject, setCurrentProject, handleEntitySubmit, formatDateFields} = useContext(globalContext)
-
+function ProjectForm ({form}) {
     if (!["create-project", "update-project"].includes(form)) {
         return null
+    }
+    const {currentProject, setCurrentProject, formatDateFields, handleNotification, handleLogout, setIsModalOpen} = useContext(globalContext)
+
+    // useMutation to create/edit objective
+    const createOrEditObjectiveMutation = useMutation({ //defines the useMutationResult obj that is used to call the mutation function and onsuccess behaviour
+        mutationFn: mutateEntityRequest,
+        onSuccess: () => {
+            setIsModalOpen(false)
+            setForm("")
+        }
+    })
+
+    const onSubmitForm = (e) => {// call mutate function to create/update a task
+        e.preventDefault()
+        createOrEditObjectiveMutation.mutate({
+            action: form.split("-")[0], 
+            entityName: form.split("-")[1], 
+            currentEntity: currentProject, 
+            handleNotification: handleNotification, 
+            handleLogout: handleLogout
+        })
     }
 
     const mandatoryIndicator = (fieldStateVar, indicator) => {
@@ -103,7 +124,7 @@ function ProjectForm () {
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 
-                            onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentProject)}
+                            onClick={(e)=>onSubmitForm(e)}
                             disabled ={(!currentProject.description || !currentProject.title )? true:false}>
                             {form == "create-project"? "Create":"Update"}
                         </button>
