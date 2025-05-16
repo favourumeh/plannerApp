@@ -57,6 +57,31 @@ const fetchAllUserContent = async (setProjects, setFormProject, setObjectives, s
     return resp.status
 }
 
+export async function fetchUserProjects(showNoti=false, handleNotification, handleLogout) { //fetches all user's projects
+    try{
+        const url = `${backendBaseUrl}/read-projects`
+        const options = {
+            method:"GET",
+            headers: {"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + `. Failed to Get all ${entityName}s. Either DB connection error or error not prevented by api unit test.`, "failure")
+    }
+    if ([200, 201].includes(resp.status)) {
+        showNoti && handleNotification(resp_json.message, "success")
+    }
+    if ([400, 403, 404].includes(resp.status)) {
+        console.log(resp_json.message)
+        handleNotification(resp_json.message, "failure")
+    }
+    const requestFn = async() => fetchUserProjects(showNoti, handleNotification, handleLogout)
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+}
+
 const fetchUserEntityPage = async (entityName, handleNotification, handleLogout, page, perPage=23) => {
     //fetch user task, objectives or projects w/ pagination
     try{

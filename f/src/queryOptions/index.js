@@ -2,3 +2,4 @@ export { default as readProjectsObjectivesQueryOption }  from "./readProjectsObj
 export { default as readTasksObjectiveAndProjectQueryOption }  from "./readTasksObjectiveAndProjectQueryOption"
 export { default as readObjectivesProjectQueryOption }  from "./readObjectivesProjectQueryOption"
 export { default as homepageTasksQueryOptions }  from "./readHomepageTasksQueryOption"
+export { default as readProjectsQueryOption} from "./readProjectsQueryOption"

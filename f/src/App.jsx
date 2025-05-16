@@ -329,8 +329,8 @@ function App() {
                     <SignUp/>
                     <Login isLoggedIn={isLoggedIn}/>
                     <TaskForm form={form}/>
-                    <ProjectForm/>
-                    <ObjectiveForm/>
+                    <ProjectForm form={form}/>
+                    <ObjectiveForm form={form}/>
                 </Modal>
                 <HomePage isLoggedIn={isLoggedIn} sitePage = {sitePage}/>
                 <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>

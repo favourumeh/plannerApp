@@ -1,38 +1,64 @@
 import "./entityForm.css"
-import {useState, useContext, useEffect, useRef} from "react"
+import { useState, useContext, useEffect } from "react"
+import { useQuery, useMutation} from "@tanstack/react-query"
 import globalContext from "../../context"
 import SearchResult from "./searchResult"
 import Dropdown from "../dropdown"
 import { defaultObjective } from "../../staticVariables"
+import { readProjectsQueryOption } from "../../queryOptions"
+import { mutateEntityRequest } from "../../fetch_entities"
 
-function ObjectiveForm () {
-    const {
-        form, currentObjective, setCurrentObjective, 
-        showProjectQueryResult, setShowProjectQueryResult,
-        showObjectiveQueryResult, setShowObjectiveQueryResult,
-        formProject, projects, handleEntitySubmit, formatDateFields} = useContext(globalContext)
-
+function ObjectiveForm ({form}) {
     if (!["create-objective", "update-objective"].includes(form)) {
         return null
     }
+    const {
+        currentObjective, setCurrentObjective, 
+        showProjectQueryResult, setShowProjectQueryResult,
+        showObjectiveQueryResult, setShowObjectiveQueryResult,
+        formProject, formatDateFields,
+        handleNotification, handleLogout, setIsModalOpen} = useContext(globalContext)
 
-    const findTaskProject = (objective) => projects.find( (project)=> project.id===objective.projectId) || {"title":""}
+    const [projectQuery, setProjectQuery] = useState(formProject.title)
 
-    const projectTitles = useRef(projects.map(project=>project.title))
-    const [taskProject, setTaskProject] = useState(form=="create-task"? formProject:findTaskProject(currentObjective))
-    const [projectQuery, setProjectQuery] = useState(taskProject.title)
+    //get user's projects 
+    const getProjectsQuery = useQuery(readProjectsQueryOption(false, handleNotification, handleLogout))
+    const projects = getProjectsQuery.isSuccess ? getProjectsQuery.data.projects : [{"title":""}]
+    useEffect(() => { // sets initial content of the project field of an update-object form to the project/objective titles of objective being updated
+        if (!getProjectsQuery.isPending && form==="update-objective") {
+            const project = projects.find((project) => project.id === currentObjective.projectId )
+            setProjectQuery(project.title)
+        } 
+    }, [getProjectsQuery.isPending]);
+
+    const projectTitles = projects.map(project=>project.title)
+    const taskProject= projectTitles.includes(projectQuery)? projects.find(project=> project.title==projectQuery) : {}
     
-    //#region: search field useEffect updates
-    useEffect( () => projectTitles.current.includes(projectQuery)?
-            setTaskProject(projects.find(project=> project.title==projectQuery)):
-            setTaskProject({}), 
-    [projectQuery])
+    //Change the projectId field of the currentObjective obj when value in the project field exactly matches a project in the db. 
+    useEffect(() => projectTitles.includes(projectQuery)? 
+        setCurrentObjective({...currentObjective, "projectId":taskProject.id})
+        : setCurrentObjective({...currentObjective, "projectId":""})
+    , [projectQuery, getProjectsQuery.isPending])
 
-    useEffect(() => projectTitles.current.includes(projectQuery)? 
-        setCurrentObjective({...currentObjective, "projectId":taskProject.id}) : 
-        setCurrentObjective({...currentObjective, "projectId":""})
-    , [taskProject])
-    //#endregion
+    // useMutation to create/edit objective
+        const createOrEditObjectiveMutation = useMutation({ //defines the useMutationResult obj that is used to call the mutation function and onsuccess behaviour
+            mutationFn: mutateEntityRequest,
+            onSuccess: () => {
+                setIsModalOpen(false)
+                setForm("")
+            }
+        })
+    
+        const onSubmitForm = (e) => {// call mutate function to create/update a task
+            e.preventDefault()
+            createOrEditObjectiveMutation.mutate({
+                action: form.split("-")[0], 
+                entityName: form.split("-")[1], 
+                currentEntity: currentObjective, 
+                handleNotification: handleNotification, 
+                handleLogout: handleLogout
+            })
+        }
 
     const mandatoryIndicator = (fieldStateVar, indicator) => {
         return (typeof fieldStateVar==="undefined" || fieldStateVar==="")? <span className="required-asterisk">{indicator}</span>: undefined
@@ -86,7 +112,7 @@ function ObjectiveForm () {
             <div id={`${labelName}-field`} className="form-group">
                 <div className="field-title"> {labelName}{mandatoryIndicator(queryField,"*")}:</div>
                 <input 
-                    style = {{"color": (projectTitles.current.includes(queryField)? "green":"red")}}
+                    style = {{"color": (projectTitles.includes(queryField)? "green":"red")}}
                     type = "text"
                     id = {inputName}
                     className="form-input"
@@ -166,7 +192,7 @@ function ObjectiveForm () {
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 
-                            onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentObjective)} 
+                            onClick={(e)=>onSubmitForm(e)} 
                             disabled ={!taskProject.title || !currentObjective.description ? true:false}>
                             {form == "create-objective"? "Create":"Update"}
                         </button>
