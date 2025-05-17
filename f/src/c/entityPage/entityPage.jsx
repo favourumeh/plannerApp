@@ -12,19 +12,23 @@ import RefreshEntities from "../toolbar/refreshEntities"
 import { fetchUserEntityPage } from "../../fetch_entities"
 
 function EntityPage ({sitePage}) {
-
     if (!["view-projects", "view-objectives", "view-tasks"].includes(sitePage)) return null
-
     const [page, setPage] = useState(1)
-    const {handleNotification, handleLogout} = useContext(globalContext)
+    const {handleNotification, handleLogout,isModalOpen} = useContext(globalContext)
     useEffect(() => setPage(1), [sitePage])
     const entityName = sitePage==="view-projects"? "project" : sitePage==="view-objectives"? "objective" : "task"
-    const { isPending, data, refetch } = useQuery({
+    const { isPending, data, refetch: refetchEntityPageContent } = useQuery({
         queryKey: [`${entityName}s`, page],
         queryFn: () => fetchUserEntityPage(entityName, handleNotification, handleLogout, page),
         placeholderData: keepPreviousData,
         retry: 3,
     })
+
+    useEffect(() => { //refetch the entityPage's content when the create/edit entity form modal is closed
+        if (!isModalOpen && !isPending) {
+            refetchEntityPageContent()
+        }
+    }, [isModalOpen])
 
     if (isPending) return "Loading..."
 
@@ -56,7 +60,7 @@ function EntityPage ({sitePage}) {
                     <ToolBar> 
                         <AddEntity/>
                         <ViewPage/>
-                        <RefreshEntities refetch={refetch}/>
+                        <RefreshEntities refetch={refetchEntityPageContent}/>
                         <FilterPage/>
                     </ToolBar>
                 </div>
@@ -66,7 +70,7 @@ function EntityPage ({sitePage}) {
                 <ol id="entity-list" className="entity-list">
                     {entityArr?.map((entity)=> 
                         <li align="left" key={entity.id}>
-                            <EntityCard entity={entity} entityName={entityName}/>
+                            <EntityCard entity={entity} entityName={entityName} refetchEntityPageContent = {refetchEntityPageContent}/>
                         </li>
                     )}
                 </ol>
