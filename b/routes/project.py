@@ -194,28 +194,37 @@ def update_project(project_id: int) -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def delete_project(project_id: int) -> Tuple[Response, int]:
     resp_dict = {"message":""}
+    user_id: int = session["userId"]
     project = Project.query.filter_by(id=project_id).first()
     if not project:
         resp_dict["message"] = "Failure: The project you are trying to delete does not exist"
         return jsonify(resp_dict), 404
-    
+
+    project = Project.query.filter(db.and_(Project.id == project_id, Project.user_id == user_id)).first()
+    if not project:
+        resp_dict["message"] = "Failure: The project you are trying to delete does not belong to the user"
+        return jsonify(resp_dict), 403
+
     if project.type == "default project":
         resp_dict["message"] = "Failure: User is attempting to delete the default project which is not allowed."
         return jsonify(resp_dict), 403
-    
-    objectives, tasks = generate_all_project_content(project_id)
-    content_to_delete: List[Objective, Task] = [project] + objectives + tasks
-    
+
+    objectives: Query = Objective.query.filter(Objective.project_id == project.id) #deleting all objectives that belong to the project
+    objective_ids: List[int] = [objective.id for objective in objectives.all()]
+    tasks: Query = Task.query.filter(Task.objective_id.in_(objective_ids))
+
     try:
-        for instance in content_to_delete:
-            db.session.delete(instance)
+        tasks.delete()
+        objectives.delete()
+        db.session.delete(project)
         db.session.commit()
         resp_dict["message"] = "Success: The project was successfully deleted!"
         return jsonify(resp_dict), 200
     except Exception as e:
-        resp_dict["message"] = f"Failure: Could not delte the project! Reason: {e}"
+        resp_dict["message"] = f"Failure: Could not delete the project! Reason: {e}"
         return jsonify(resp_dict), 404
     
+
 
 
 

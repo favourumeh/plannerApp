@@ -253,13 +253,12 @@ def delete_objective(objective_id: int) -> Tuple[Response, int]:
         resp_dict["message"] = "Failure: User is attempting to delete a default objective which is not allowed."
         return jsonify(resp_dict),  403
     
-    tasks: List[Task] = Task.query.filter_by(objective_id=objective_id).all()
+    # tasks: List[Task] = Task.query.filter_by(objective_id=objective_id).delete()
     try:
+        Task.query.filter_by(objective_id=objective_id).delete()
         db.session.delete(objective)
-        for task in tasks:
-            db.session.delete(task)
         db.session.commit()
-        resp_dict["message"] = "Success: The objective was successfully deleted!"
+        resp_dict["message"] = "Success: The objective -- and its tasks -- were successfully deleted!"
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not delete the objective! Reason: {e}"
