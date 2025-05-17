@@ -158,8 +158,8 @@ function ObjectiveForm ({form}) {
     return (
         <>
         <div id="objective-form-overlay" className="form-overlay" onClick={closeSearchResult}>
-            <div className="form-header-overlay">
-                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} ({currentObjective.id}) </div>
+            <div className="form-header">
+                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} {form==="create-objective"? undefined :`#${currentObjective.objectiveNumber} (${currentObjective.id})`} </div>
             </div>
 
             <div className="form-body">

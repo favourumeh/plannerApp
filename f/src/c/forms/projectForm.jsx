@@ -91,8 +91,8 @@ function ProjectForm ({form}) {
     return (
         <>
         <div className="form-overlay">
-            <div className="form-header-overlay">
-                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} ({currentProject.id}) </div>
+            <div className="form-header">
+                <div className="form-title"> {form.split("-").join(" ").toUpperCase()} {form==="create-project"? undefined :`#${currentProject.projectNumber} (${currentProject.id})`} </div>
             </div>
 
             <div className="form-body">

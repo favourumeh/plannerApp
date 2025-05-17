@@ -164,7 +164,7 @@ function TaskForm ({form}) {
         <>
         <div className="form-overlay" onClick={closeSearchResult}>
             <div className="form-header">
-                <div className="form-title"> {form.split("-").join(" ").toUpperCase()}  #{currentTask.id} </div>
+                <div className="form-title"> {form.split("-").join(" ").toUpperCase()}  {form==="create-task"? undefined :`#${currentTask.taskNumber} (${currentTask.id})`} </div>
             </div>
 
             <div className="form-body">
