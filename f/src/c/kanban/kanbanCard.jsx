@@ -1,22 +1,25 @@
 import { useDraggable } from "@dnd-kit/core"
+import { useQuery, useMutation } from "@tanstack/react-query"
 import globalContext from "../../context"
 import "./kanbanCard.css"
-import { useState, useEffect, useContext } from "react"
+import { useContext } from "react"
+import { mutateEntityRequest } from "../../fetch_entities"
+import { readTasksObjectiveAndProjectQueryOption } from "../../queryOptions"
 
-export default function KanbanCard ({entity, entityName}) {
-    const {objectives, projects, setCurrentTask, setCurrentObjective, 
-           setCurrentProject, setIsModalOpen, setForm, handleDeleteEntity,
-            getProject, getObjective, currentDate} = useContext(globalContext)
-    const [projectNumber, setProjectNumber] = useState()
-    const [objectiveNumber, setObjectiveNumber] = useState()
+export default function KanbanCard ({entity, entityName, refetchKanbanContent}) {
+    const {setCurrentTask, setCurrentObjective, 
+           setCurrentProject, setIsModalOpen, setForm, 
+           currentDate, handleNotification, handleLogout} = useContext(globalContext)
 
-    // calculate the project and objective numbers for each entity 
-    const handleEntityNumbers = () => {
-        setProjectNumber(getProject(entity, entityName, projects, objectives)?.projectNumber)
-        setObjectiveNumber(getObjective(entity, entityName, objectives)?.objectiveNumber)
-    }
+    // get the project and objective numbers for each entity 
+    const taskParentQuery = useQuery(readTasksObjectiveAndProjectQueryOption(entity.id, handleNotification, handleLogout))
+    const projectNumber = taskParentQuery.isPending? "*" : taskParentQuery.data.project.projectNumber
+    const objectiveNumber = taskParentQuery.isPending? "*" : taskParentQuery.data.objective.objectiveNumber
 
-    useEffect(()=>handleEntityNumbers(), [entity]) // very important
+    const deleteEntityMutation = useMutation({
+        mutationFn: mutateEntityRequest,
+        onSuccess: refetchKanbanContent,
+    })
 
     const generateEntityNumbers = () => {
         if (entityName==="task") {
@@ -37,7 +40,13 @@ export default function KanbanCard ({entity, entityName}) {
     }
     const onClickDeleteBtn = (e) => {
         e.stopPropagation()
-        handleDeleteEntity(e, entityName, entity.id)
+        deleteEntityMutation.mutate({
+            action: "delete",
+            entityName: entityName,
+            currentEntity: entity, 
+            handleNotification: handleNotification, 
+            handleLogout: handleLogout,
+        })
     }
 
     // DnD - Make enitity cards draggable

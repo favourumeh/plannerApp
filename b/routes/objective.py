@@ -117,14 +117,18 @@ def query_objectives():
     project_id: int = request.args.get("projectId", default=None, type=int)
     objective_id: int = request.args.get("objectiveId", default=None, type=int)
     status: int = request.args.get("status", default=None, type=str)
-
+    type: str = request.args.get("type", default=None, type=str)
     if project_id:
         query: Query = query.filter(Objective.project_id == project_id)
         resp_dict["_projectId"] = project_id
     if status:
         query: Query = query.filter(Objective.status == status)
         resp_dict["_status"] = status
-
+    if type:
+        query: Query = query.filter(Objective.type == type)
+        resp_dict["_type"] = type
+        break_objective: Objective = query.first() 
+        resp_dict["breakObjective"] = break_objective.to_dict()
     if page and per_page:
         pagination: Pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         resp_dict["_pages"] = pagination.pages

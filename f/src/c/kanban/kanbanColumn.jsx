@@ -4,7 +4,7 @@ import KanbanCard from "./kanbanCard"
 import { useDroppable } from "@dnd-kit/core"
 import globalContext from "../../context"
 
-export default function KanbanColumn ({columnId, columnTitle, entityArr, entityName}) {
+export default function KanbanColumn ({columnId, columnTitle, entityArr, entityName, refetchKanbanContent}) {
     if (entityName !=="task" && columnId ===  "Paused") return
     const [columnEntityArr, setColumnEntityArr] = useState([])
     const {onShowHoverText, onHideHoverText} = useContext(globalContext)
@@ -31,7 +31,7 @@ export default function KanbanColumn ({columnId, columnTitle, entityArr, entityN
                             onMouseEnter={() => onShowHoverText(getHoverText(columnEntity))}
                             onMouseLeave={onHideHoverText}
                         >
-                            <KanbanCard entity={columnEntity} entityName={entityName}/> 
+                            <KanbanCard entity={columnEntity} entityName={entityName} refetchKanbanContent={refetchKanbanContent}/> 
                         </div>
                     )}
             </div>

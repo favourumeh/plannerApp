@@ -82,6 +82,37 @@ export async function fetchUserProjects(showNoti=false, handleNotification, hand
     return resp_json
 }
 
+const handleNon401Requests = ({resp, resp_json, handleNotification, showSuccessNoti}) => {// handles the following requests: 200, 201, 400, 403, 404
+    if ([200, 201].includes(resp.status)) {
+        showSuccessNoti && handleNotification(resp_json.message, "success")
+    }
+    if ([400, 403, 404].includes(resp.status)) {
+        console.log(resp_json.message)
+        handleNotification(resp_json.message, "failure")
+    }
+}
+export async function fetchBreakObjective(handleNotification, handleLogout) { //fetches all user's projects
+    try{
+        const url = `${backendBaseUrl}/query-objectives?` + new URLSearchParams({"type":"break"})
+        const options = {
+            method:"GET",
+            headers: {"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + ". Failed to the break objective. Either DB connection error or error not prevented by api unit test.", "failure")
+    }
+    handleNon401Requests({
+        resp: resp, resp_json: resp_json, 
+        handleNotification: handleNotification, showSuccessNoti: false
+    })
+    const requestFn = async() => fetchBreakObjective(handleNotification, handleLogout)
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+}
+
 const fetchUserEntityPage = async (entityName, handleNotification, handleLogout, page, perPage=23) => {
     //fetch user task, objectives or projects w/ pagination
     try{
