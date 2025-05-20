@@ -58,13 +58,24 @@ export default function KanbanCard ({entity, entityName, refetchKanbanContent}) 
 
     //indicate outstanding task
     const selectedDate = new Date(new Date(currentDate).toDateString())
+    const isFinsishFieldEmpty = !!entity.finish
     const taskFinishDt = new Date(new Date(entity.finish).toDateString())
     const taskScheduledDt = new Date(new Date(entity.scheduledStart).toDateString())
     const taskFinishedAfterScheduledDate = (taskFinishDt > taskScheduledDt)
     const taskScheduledOnOrBeforeSelectedDate = (taskScheduledDt <= selectedDate)
     const taskNotCompleted =  entity.status !== "Completed"
-    const taskIsScheduledForToday = new Date(entity.scheduledStart).toDateString() === new Date().toDateString()
-    const kanbanContentStyle = {"color": entityName!="task" ? "white":  taskIsScheduledForToday ? "white" : taskFinishedAfterScheduledDate || (taskScheduledOnOrBeforeSelectedDate &&  taskNotCompleted) ? "red": "white"}
+    const taskIsScheduledForTodayOrFutureDate = taskScheduledDt.getTime() >= new Date(new Date().toDateString()).getTime()
+
+    const getKanbanCardColour =() => {
+        if (taskIsScheduledForTodayOrFutureDate) return "white"
+        if (taskFinishedAfterScheduledDate) return "red"
+        if (!isFinsishFieldEmpty) {
+            if (taskScheduledOnOrBeforeSelectedDate &&  taskNotCompleted) return "red"
+        }
+        return "white"
+    }   
+    const kanbanContentStyle = {"color": getKanbanCardColour()}
+
     return (
         <div 
             style ={style}

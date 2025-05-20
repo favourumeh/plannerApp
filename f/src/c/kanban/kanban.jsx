@@ -6,7 +6,6 @@ import Header from "../header/header"
 import ToolBar from "../toolbar/toolbar"
 import KanbanColumn from "./kanbanColumn"
 import {DndContext} from "@dnd-kit/core"
-import Dropdown from "../dropdown"
 import AddEntity from "../toolbar/addEntity"
 import FilterPage from "../toolbar/filterPage" 
 import ViewPage from "../toolbar/viewPage"
@@ -52,7 +51,7 @@ const Kanban = ({sitePage}) => {
         onSuccess: refetchKanbanContent,
     })
 
-    useEffect(()=> {//autorefetch whenever task is created/updated
+    useEffect(()=> {//autorefetch whenever task form is closed (i.e. to capture changes when task is created/updated)
         if (!isModalOpen && !isPending) {
             refetchKanbanContent()
         }
@@ -68,6 +67,7 @@ const Kanban = ({sitePage}) => {
         const isTaskOutstanding = task.status !== "Completed"
         var outputBool = false
         if ( isTaskScheduledForSelectedDay && isTodayEqualToSelectedDay ) {outputBool = true}
+        if ( isTaskScheduledForSelectedDay && !isTaskScheduledBeforeToday) {outputBool = true}
         if ( isTaskFinishedOnSelectedDay ) {outputBool = true}
         if ( isTaskOutstanding && isTaskScheduledForSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
         if ( isTaskOutstanding && isTodayEqualToSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
