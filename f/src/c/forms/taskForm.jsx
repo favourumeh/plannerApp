@@ -21,7 +21,6 @@ function TaskForm ({form}) {
         handleNotification, handleLogout, setIsModalOpen, setForm} = useContext(globalContext)
 
     const [projectQuery, setProjectQuery] = useState(formProject.title)
-    console.log("formProject", formProject.title)
     const [objectiveQuery, setObjectiveQuery] = useState(formObjective.title)
 
     const {data, isPending: isPendingTasksParents} = useQuery({ //requests the projects and objectives of the task in the form.
@@ -174,67 +173,67 @@ function TaskForm ({form}) {
             </div>
 
             <div className="form-body">
-                    <div id ="form-status-field" className="form-group">
-                        <div className="field-title"> Status</div>
-                        <Dropdown buttonContent={`${currentTask.status}`} translate={"0% 40%"}>
-                            <div onClick={() => setCurrentTask({...currentTask, "status":"To-Do"})}> To-Do</div>
-                            <div onClick={() => setCurrentTask({...currentTask, "status":"In-Progress"})}> In-Progress</div>
-                            <div onClick={() => setCurrentTask({...currentTask, "status":"Completed"})}> Completed</div>
-                        </Dropdown>
+                <div id ="form-status-field" className="form-group">
+                    <div className="field-title"> Status</div>
+                    <Dropdown buttonContent={`${currentTask.status}`} translate={"0% 40%"}>
+                        <div onClick={() => setCurrentTask({...currentTask, "status":"To-Do"})}> To-Do</div>
+                        <div onClick={() => setCurrentTask({...currentTask, "status":"In-Progress"})}> In-Progress</div>
+                        <div onClick={() => setCurrentTask({...currentTask, "status":"Completed"})}> Completed</div>
+                    </Dropdown>
+                </div>
+
+                <div className="form-group">
+                    <div className="field-title"> Task Description{mandatoryIndicator(currentTask["description"], "*")} </div>
+                    <textarea 
+                        type = "description"
+                        id = "description"
+                        className={`form-input entity-description`}
+                        name = "description" // used in the request made to the server
+                        value = {currentTask["description"]}
+                        onChange = {handleChange}
+                        autoComplete = "off"
+                        placeholder = "Task Description*"
+                    />
+                </div>
+
+                <div className="other-entity-configs">
+                    <div className="form-left-column">
+                        {formSearchField({labelName:"Project", inputName:"project", queryField:projectQuery, setQueryField:setProjectQuery, entityArray:projects})}
+                        {formField({labelName:"Scheduled Date", inputName:"scheduledStart", inputType:"date", currentTask:currentTask, mandatoryField:false})}
+                        {formField({labelName:"Priority", inputName:"priorityScore", inputType:"number", currentTask:currentTask, mandatoryField:false})}
+                        {formField({labelName:"Start", inputName:"start", inputType:"datetime-local", currentTask:currentTask, mandatoryField:false})}
                     </div>
 
-                    <div className="form-group">
-                        <div className="field-title"> Task Description{mandatoryIndicator(currentTask["description"], "*")} </div>
-                        <textarea 
-                            type = "description"
-                            id = "description"
-                            className={`form-input entity-description`}
-                            name = "description" // used in the request made to the server
-                            value = {currentTask["description"]}
-                            onChange = {handleChange}
-                            autoComplete = "off"
-                            placeholder = "Task Description*"
-                        />
+                    <div className="form-right-column">
+                        {formSearchField({labelName:"Objective", inputName:"objective", queryField:objectiveQuery, setQueryField:setObjectiveQuery, entityArray:relevantObjectives})}
+                        {formField({labelName:"Duration Est", inputName:"durationEst", inputType:"number", currentTask:currentTask, mandatoryField:true})}
+                        {/* {formField({labelName:"Duration (acc)", inputName:"duration", inputType:"number", currentTask:currentTask, mandatoryField:false})} */}
+                        {formField({labelName:"Tag", inputName:"tag", inputType:"text", currentTask:currentTask, mandatoryField:false})}
+                        {formField({labelName:"Finish", inputName:"finish", inputType:"datetime-local", currentTask:currentTask, mandatoryField:false})}
                     </div>
+                </div>
+                <div className="form-buttons">
+                    <Dropdown buttonContent={`Clear`} buttonClassName="form-clear-btn" translate={"-75% -10%"}>
+                        <div onClick={()=> handleClearAll(false)}> All fields</div>
+                        <div onClick={()=> handleClearAll(true)}> Excl. entity fields</div>
+                    </Dropdown>
 
-                    <div className="other-entity-configs">
-                        <div className="form-left-column">
-                            {formSearchField({labelName:"Project", inputName:"project", queryField:projectQuery, setQueryField:setProjectQuery, entityArray:projects})}
-                            {formField({labelName:"Scheduled Date", inputName:"scheduledStart", inputType:"date", currentTask:currentTask, mandatoryField:false})}
-                            {formField({labelName:"Priority", inputName:"priorityScore", inputType:"number", currentTask:currentTask, mandatoryField:false})}
-                            {formField({labelName:"Start", inputName:"start", inputType:"datetime-local", currentTask:currentTask, mandatoryField:false})}
-                        </div>
-
-                        <div className="form-right-column">
-                            {formSearchField({labelName:"Objective", inputName:"objective", queryField:objectiveQuery, setQueryField:setObjectiveQuery, entityArray:relevantObjectives})}
-                            {formField({labelName:"Duration Est", inputName:"durationEst", inputType:"number", currentTask:currentTask, mandatoryField:true})}
-                            {/* {formField({labelName:"Duration (acc)", inputName:"duration", inputType:"number", currentTask:currentTask, mandatoryField:false})} */}
-                            {formField({labelName:"Tag", inputName:"tag", inputType:"text", currentTask:currentTask, mandatoryField:false})}
-                            {formField({labelName:"Finish", inputName:"finish", inputType:"datetime-local", currentTask:currentTask, mandatoryField:false})}
-                        </div>
+                    <div className="btn-div">
+                        <button type="submit" 
+                            className="submit-btn" 
+                            // onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentTask)}
+                            onClick={(e) => onSubmitForm(e)}
+                            disabled ={
+                                !taskProject.title 
+                                || !taskObjective 
+                                || !currentTask.description 
+                                || !(currentTask.durationEst >=  10
+                                || createOrEditTaskMutation.isPending
+                                ) ? true:false}>
+                            { createOrEditTaskMutation.isPending? "sending..." : form==="create-task"? "Create":"Update"}
+                        </button>
                     </div>
-                    <div className="form-buttons">
-                        <Dropdown buttonContent={`Clear`} buttonClassName="form-clear-btn" translate={"-75% -10%"}>
-                            <div onClick={()=> handleClearAll(false)}> All fields</div>
-                            <div onClick={()=> handleClearAll(true)}> Excl. entity fields</div>
-                        </Dropdown>
-
-                        <div className="btn-div">
-                            <button type="submit" 
-                                className="submit-btn" 
-                                // onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentTask)}
-                                onClick={(e) => onSubmitForm(e)}
-                                disabled ={
-                                    !taskProject.title 
-                                    || !taskObjective 
-                                    || !currentTask.description 
-                                    || !(currentTask.durationEst >=  10
-                                    || createOrEditTaskMutation.isPending
-                                    ) ? true:false}>
-                                { createOrEditTaskMutation.isPending? "sending..." : form==="create-task"? "Create":"Update"}
-                            </button>
-                        </div>
-                    </div>
+                </div>
             </div>
         </div>
         </>
