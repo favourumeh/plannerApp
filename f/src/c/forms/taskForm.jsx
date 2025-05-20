@@ -23,9 +23,9 @@ function TaskForm ({form}) {
     const [projectQuery, setProjectQuery] = useState(formProject.title)
     const [objectiveQuery, setObjectiveQuery] = useState(formObjective.title)
 
-    const {data, isPending} = useQuery({ //requests the projects and objectives of the task being updated (for use in the form's project/objective field)
+    const {data, isPending: isPendingTasksParents} = useQuery({ //requests the projects and objectives of the task being updated (for use in the form's project/objective field)
         ...readTasksObjectiveAndProjectQueryOption(currentTask.id, handleNotification, handleLogout), 
-        "enabled": form === "update-task"
+        enabled: form==="update-task" // fire query only when opening an "update-task" form
     })
 
     const createOrEditTaskMutation = useMutation({ //defines the useMutationResult obj that is used to call the mutation function and onsuccess behaviour
@@ -40,7 +40,7 @@ function TaskForm ({form}) {
         e.preventDefault()
         createOrEditTaskMutation.mutate({
             action: form.split("-")[0], 
-            entityName: form.split("-")[1], 
+            entityName: "task", 
             currentEntity: currentTask, 
             handleNotification: handleNotification, 
             handleLogout: handleLogout
@@ -48,17 +48,17 @@ function TaskForm ({form}) {
     }
 
     useEffect(() => { // sets intial content of the project/objective fields of an update-task form to the project/objective titles of task being updated
-        if (!isPending && form==="update-task") {
+        if (!isPendingTasksParents && form==="update-task") {
             setProjectQuery(data.project.title)
             setObjectiveQuery(data.objective.title)
         } 
-    }, [isPending]);
+    }, [isPendingTasksParents]);
 
     const projectTitles = projects.map(project=>project.title)
     const taskProject = projectTitles.includes(projectQuery)? projects.find(project=> project.title==projectQuery) : {}
     const {data: objectivesData , isPending: isPendingObjectives } = useQuery({ // requests the objectives of the project in the form's project field
         ...readProjectsObjectivesQueryOption(taskProject.id, handleNotification, handleLogout),
-        "enabled": !!taskProject
+        enabled: !isPendingTasksParents,
     })
     const objectives = isPendingObjectives? [{}] : objectivesData.objectives
     const relevantObjectives = objectives.filter(objective=> objective.projectId == taskProject?.id)
@@ -71,10 +71,15 @@ function TaskForm ({form}) {
             setObjectiveQuery("")
         }}, [projectQuery])
 
-    useEffect(() => objectiveTitles.includes(objectiveQuery)?  // set the objectiveId field of the currentTask when a valid objective is clicked or typed
-        setCurrentTask({...currentTask, "objectiveId":taskObjective.id}) : 
-        setCurrentTask({...currentTask, "objectiveId":""})
-    , [objectiveQuery, isPendingObjectives])
+    useEffect(() => {
+        if (!isPendingObjectives) {
+            if  (objectiveTitles.includes(objectiveQuery)) {
+                setCurrentTask({...currentTask, "objectiveId":taskObjective.id}) // set the objectiveId field of the currentTask when a valid objective is clicked or typed in the form's objective field
+            } else {
+                setCurrentTask({...currentTask, "objectiveId":""})
+            }
+        }
+    }, [objectiveQuery, isPendingObjectives])
 
     useEffect(() => {// generate duration of a task when start and finish dates are present and updated
         if (!!currentTask.start && !!currentTask.finish){
@@ -145,7 +150,7 @@ function TaskForm ({form}) {
                     id = {inputName}
                     className="form-input"
                     name = {inputName} // used in the request made to the server
-                    value = {(isPending && form==="update-task")? "...": queryField}
+                    value = {(isPendingTasksParents && form==="update-task")? "...": queryField}
                     autoComplete="off"
                     onChange = {e => setQueryField(e.target.value)}
                     onClick = {(e) => toggleShowSearchResult(e, labelName)}/>
