@@ -21,11 +21,12 @@ function TaskForm ({form}) {
         handleNotification, handleLogout, setIsModalOpen, setForm} = useContext(globalContext)
 
     const [projectQuery, setProjectQuery] = useState(formProject.title)
+    console.log("formProject", formProject.title)
     const [objectiveQuery, setObjectiveQuery] = useState(formObjective.title)
 
-    const {data, isPending: isPendingTasksParents} = useQuery({ //requests the projects and objectives of the task being updated (for use in the form's project/objective field)
-        ...readTasksObjectiveAndProjectQueryOption(currentTask.id, handleNotification, handleLogout), 
-        enabled: form==="update-task" // fire query only when opening an "update-task" form
+    const {data, isPending: isPendingTasksParents} = useQuery({ //requests the projects and objectives of the task in the form.
+        ...readTasksObjectiveAndProjectQueryOption(currentTask.id, handleNotification, handleLogout),
+        enabled: !!currentTask.id  // only runs if the current task has an id field
     })
 
     const createOrEditTaskMutation = useMutation({ //defines the useMutationResult obj that is used to call the mutation function and onsuccess behaviour
@@ -48,7 +49,7 @@ function TaskForm ({form}) {
     }
 
     useEffect(() => { // sets intial content of the project/objective fields of an update-task form to the project/objective titles of task being updated
-        if (!isPendingTasksParents && form==="update-task") {
+        if (!isPendingTasksParents && !!currentTask.id) {
             setProjectQuery(data.project.title)
             setObjectiveQuery(data.objective.title)
         } 
@@ -58,7 +59,7 @@ function TaskForm ({form}) {
     const taskProject = projectTitles.includes(projectQuery)? projects.find(project=> project.title==projectQuery) : {}
     const {data: objectivesData , isPending: isPendingObjectives } = useQuery({ // requests the objectives of the project in the form's project field
         ...readProjectsObjectivesQueryOption(taskProject.id, handleNotification, handleLogout),
-        enabled: !isPendingTasksParents,
+        enabled: !isPendingTasksParents || !currentTask.id, // Cond: 1) for Update-project run if the task's project has been retrieved OR 2)For Create-project run if there is no currentId field in currentTask object
     })
     const objectives = isPendingObjectives? [{}] : objectivesData.objectives
     const relevantObjectives = objectives.filter(objective=> objective.projectId == taskProject?.id)
