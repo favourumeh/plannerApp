@@ -9,7 +9,7 @@ function SearchResult({searchFieldLabel, query, setQuery, entityArray}) {
     const [queryResults, setQueryResult] =  useState()
     useEffect(()=> {
         var result = entityArray.filter((item) => 
-                        item["title"].toLowerCase().includes(query.toLowerCase()) || 
+                        item["title"]?.toLowerCase().includes(query?.toLowerCase()) || 
                         item["title"]== (searchFieldLabel == "Project"?"No Project":"No Objective")).slice(0,5)
 
         if (query==="" || typeof query==="undefined") {

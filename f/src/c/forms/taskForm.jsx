@@ -5,7 +5,7 @@ import globalContext from "../../context"
 import SearchResult from "./searchResult"
 import Dropdown from "../dropdown"
 import {defaultTask} from "../../staticVariables"
-import { readTasksObjectiveAndProjectQueryOption, readProjectsObjectivesQueryOption} from "../../queryOptions"
+import { readProjectsQueryOption, readTasksObjectiveAndProjectQueryOption, readProjectsObjectivesQueryOption} from "../../queryOptions"
 import { mutateEntityRequest } from "../../fetch_entities"
 
 function TaskForm ({form}) {
@@ -17,15 +17,19 @@ function TaskForm ({form}) {
         showProjectQueryResult, setShowProjectQueryResult,
         showObjectiveQueryResult, setShowObjectiveQueryResult,
         formProject, formObjective,
-        projects, formatDateFields,
-        handleNotification, handleLogout, setIsModalOpen, setForm} = useContext(globalContext)
+        formatDateFields,handleNotification, handleLogout, setIsModalOpen, setForm} = useContext(globalContext)
 
     const [projectQuery, setProjectQuery] = useState(formProject.title)
     const [objectiveQuery, setObjectiveQuery] = useState(formObjective.title)
 
-    const {data, isPending: isPendingTasksParents} = useQuery({ //requests the projects and objectives of the task in the form.
+    const getProjectsQuery = useQuery(
+        readProjectsQueryOption(false, handleNotification, handleLogout)
+    )
+    const projects = getProjectsQuery.isPending? [] : getProjectsQuery.data.projects
+
+    const {data: taskParentData, isPending: isPendingTasksParents} = useQuery({ //requests the projects and objectives of the task in the form.
         ...readTasksObjectiveAndProjectQueryOption(currentTask.id, handleNotification, handleLogout),
-        enabled: !!currentTask.id  // only runs if the current task has an id field
+        enabled: !!currentTask.id, // only runs if the current task has an id field
     })
 
     const createOrEditTaskMutation = useMutation({ //defines the useMutationResult obj that is used to call the mutation function and onsuccess behaviour
@@ -49,13 +53,14 @@ function TaskForm ({form}) {
 
     useEffect(() => { // sets intial content of the project/objective fields of an update-task form to the project/objective titles of task being updated
         if (!isPendingTasksParents && !!currentTask.id) {
-            setProjectQuery(data.project.title)
-            setObjectiveQuery(data.objective.title)
+            setProjectQuery(taskParentData.project.title)
+            setObjectiveQuery(taskParentData.objective.title)
         } 
     }, [isPendingTasksParents]);
 
     const projectTitles = projects.map(project=>project.title)
     const taskProject = projectTitles.includes(projectQuery)? projects.find(project=> project.title==projectQuery) : {}
+
     const {data: objectivesData , isPending: isPendingObjectives } = useQuery({ // requests the objectives of the project in the form's project field
         ...readProjectsObjectivesQueryOption(taskProject.id, handleNotification, handleLogout),
         enabled: !isPendingTasksParents || !currentTask.id, // Cond: 1) for Update-project run if the task's project has been retrieved OR 2)For Create-project run if there is no currentId field in currentTask object
@@ -66,8 +71,8 @@ function TaskForm ({form}) {
     const taskObjective = objectiveTitles.includes(objectiveQuery)?
         objectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ) : {}
 
-    useEffect( () => { //clear objective input field if project field is not valid
-        if (!projectTitles.includes(projectQuery)) {
+    useEffect( () => { //clear objective if the project field is not valid (given that the projects have been )
+        if (!getProjectsQuery.isPending && !projectTitles.includes(projectQuery)) {
             setObjectiveQuery("")
         }}, [projectQuery])
 
@@ -164,7 +169,6 @@ function TaskForm ({form}) {
         excludeEntityFields? undefined : setProjectQuery("")
         setCurrentTask({...defaultTask, id:currentTask.id, objectiveId:currentTask.objectiveId})
     }
-
     return (
         <>
         <div className="form-overlay" onClick={closeSearchResult}>
