@@ -85,7 +85,7 @@ class Objective(db.Model):
     """Defines the properties of the 'Objective' entity: id, objective_number, type, status, title, description, scheduled_start/finish, tag, project_id"""
     id = db.Column(db.Integer, primary_key=True)
     objective_number = db.Column(db.Integer, nullable=False)
-    type = db.Column(db.String(40), default="project objective") # 4 types: "free objective" and "project objective", default project objective and "default user project objective"
+    type = db.Column(db.String(40), default="project objective") # 4 types: "free objective" and "project objective", "default project objective", "default user project objective" and "break"
     status = db.Column(db.String(50), default="To-Do") # 3 types = To-Do, In-Progress and Completed
     title = db.Column(db.String(80), default=f"Project {id}")
     description = db.Column(db.Text)

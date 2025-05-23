@@ -78,6 +78,8 @@ def signup() -> Tuple[Response, int]:
         description = "Stores all tasks that don't belong to a user-created project"
         default_objective = Objective(objective_number=0,  type="default project objective", title="No Objective", description=description, tag="default", project_id=project_id)
         db.session.add(default_objective)
+        break_objective = Objective(objective_number=1, type="break", title="Break", description="Stores all breaks", tag="break", project_id=project_id)
+        db.session.add(break_objective)
         objective_id = Objective.query.filter_by(type="default project objective", project_id=project_id).first().id #tag distinguishes user's default project objective 
         example_task = Task(task_number=0, description="Example Task", type="example task", duration_est=10, scheduled_start=datetime.now().date(), objective_id=objective_id)
         db.session.add(example_task)
