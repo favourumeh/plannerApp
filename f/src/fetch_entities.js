@@ -277,17 +277,10 @@ export async function mutateEntityRequest({action, entityName, currentEntity, ha
     } catch (err) {
         handleNotification(err.message + `. Failed to ${action} ${entityName}. Either connection error or error not prevented by api unit test.`, "failure")
     }
-    if ([200, 201].includes(resp.status)) {
-        handleNotification(resp_json.message, "success")
-    }
-    if ([400, 403, 404].includes(resp.status)) {
-        console.log(resp_json.message)
-        handleNotification(resp_json.message, "failure")
-    }
-    const requestFn = async() => postEntity(action, entityName, currentEntity, handleNotification, handleLogout)
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: true})
+    const requestFn = async() => mutateEntityRequest({action, entityName, currentEntity, handleNotification, handleLogout})
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
-
 } 
 
 export {fetchAllUserContent, fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject, fetchKanbanTasks}
