@@ -4,34 +4,27 @@ import KanbanCard from "./kanbanCard"
 import { useDroppable } from "@dnd-kit/core"
 import globalContext from "../../context"
 
-export default function KanbanColumn ({columnId, columnTitle, entityArr, entityName, refetchKanbanContent}) {
-    if (entityName !=="task" && columnId ===  "Paused") return
-    const [columnEntityArr, setColumnEntityArr] = useState([])
+export default function KanbanColumn ({columnId, columnTitle, taskArr, entityName, refetchKanbanContent}) {
+    const [columnTaskArr, setColumnTaskArr] = useState([])
     const {onShowHoverText, onHideHoverText} = useContext(globalContext)
 
     useEffect ( () => {
-        setColumnEntityArr(entityArr.filter((entity) => entity.status==columnId))
-    }, [entityArr])
+        setColumnTaskArr(taskArr.filter((task) => task.status==columnId))
+    }, [taskArr])
 
     const {setNodeRef} = useDroppable({ id: columnId }) //dnd
 
-    const getHoverText = (entity) => {
-        if (entityName !=="task") {
-            return "Title: " + entity.title + "\nDesc: " + entity.description
-        } 
-        return "Desc: " + entity.description
-    }
     return (
         <>
-            <div ref = {setNodeRef} id={columnId} className="kanban-column"> {`${columnTitle} [${columnEntityArr.length}]`} 
-                {columnEntityArr.map( 
-                    (columnEntity) => 
-                        <div key={columnEntity.id}
+            <div ref = {setNodeRef} id={columnId} className="kanban-column"> {`${columnTitle} [${columnTaskArr.length}]`} 
+                {columnTaskArr.map( 
+                    (columnTask) => 
+                        <div key={columnTask.id}
                             className="kanban-item-overlay"
-                            onMouseEnter={() => onShowHoverText(getHoverText(columnEntity))}
+                            onMouseEnter={() => onShowHoverText("Desc: " + columnTask.description)}
                             onMouseLeave={onHideHoverText}
                         >
-                            <KanbanCard entity={columnEntity} entityName={entityName} refetchKanbanContent={refetchKanbanContent}/> 
+                            <KanbanCard task={columnTask} entityName={entityName} refetchKanbanContent={refetchKanbanContent}/> 
                         </div>
                     )}
             </div>

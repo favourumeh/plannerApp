@@ -18,8 +18,8 @@ const Kanban = ({sitePage}) => {
     const {formatDateFields, currentDate, setCurrentDate, handleDayNavigation, 
             handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
     const entityName = "task"
-    const [updatedEntity, setUpdatedEntity] = useState([])
-    const [updatedEntityIdAndStatus, setUpdatedEntityIdAndStatus] = useState({})
+    const [updatedTask, setUpdatedTask] = useState([])
+    const [updatedTaskIdAndStatus, setUpdatedTaskIdAndStatus] = useState({})
     const [sourceColumn, setSourceColumn] = useState("")
     const [destColumn, setDestColumn] = useState("")
     const [remainingTaskTimeUnits, setRemainingTaskTimeUnits] = useState("hrs")
@@ -34,54 +34,58 @@ const Kanban = ({sitePage}) => {
         {id:"Completed", title:"Completed"}
     ]
     const selectedDate = new Date(currentDate).toISOString().split("T")[0]
-    const {data, isPending, refetch: refetchKanbanContent} = useQuery({
-        queryKey: ["kanban-entities", {"entityName":entityName, "selectedDate":selectedDate}],
+    const {data, isPending, refetch: refetchKanbanContent} = useQuery({ //get all the kanban tasks for the selected date
+        queryKey: ["kanban-tasks", {"entityName":entityName, "selectedDate":selectedDate}],
         queryFn: () => fetchKanbanTasks(selectedDate, handleNotification, handleLogout),
         placeholderData: keepPreviousData, 
         retry: 3,
     })
-    const breakObjectiveQuery = useQuery({
+    const breakObjectiveQuery = useQuery({ //get the "break" objective
         queryKey: ["break-objective"],
         queryFn: () => fetchBreakObjective(handleNotification, handleLogout),
         retry: 3,
     })
 
-    const dndUpdateTaskMutation = useMutation({
+    const dndUpdateTaskMutation = useMutation({ // update(mutate) the task when it is dnd
         mutationFn: mutateEntityRequest, 
         onSuccess: refetchKanbanContent,
     })
 
-    useEffect(()=> {//autorefetch whenever task form is closed (i.e. to capture changes when task is created/updated)
+    useEffect(()=> {//autorefetch kanban-tasks query whenever task form is closed (R: to capture changes when task is created/updated)
         if (!isModalOpen && !isPending) {
             refetchKanbanContent()
         }
     }, [isModalOpen, isPending])
 
-    const tasksShownOnKanban = (task) => {
+    const tasksShownOnKanban = (task) => { // filter the tasks show on the seleced date on the kanban board
         const selectedDay = (new Date(currentDate)).toDateString()
         const taskScheduleDate = new Date(task.scheduledStart).toDateString()
         const isTaskScheduledForSelectedDay = taskScheduleDate === selectedDay
         const isTaskFinishedOnSelectedDay = (new Date(task.finish).toDateString() === selectedDay )
         const isTaskScheduledBeforeToday = new Date(taskScheduleDate).getTime() < new Date().getTime()
         const isTodayEqualToSelectedDay = selectedDay === new Date().toDateString()
-        const isTaskOutstanding = task.status !== "Completed"
+        const isTaskStatusComplete = task.status === "Completed"
         var outputBool = false
         if ( isTaskScheduledForSelectedDay && isTodayEqualToSelectedDay ) {outputBool = true}
         if ( isTaskScheduledForSelectedDay && !isTaskScheduledBeforeToday) {outputBool = true}
-        if ( isTaskFinishedOnSelectedDay ) {outputBool = true}
-        if ( isTaskOutstanding && isTaskScheduledForSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
-        if ( isTaskOutstanding && isTodayEqualToSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
+        if ( isTaskFinishedOnSelectedDay && isTaskStatusComplete ) {outputBool = true}
+        if ( !isTaskStatusComplete && isTaskScheduledForSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
+        if ( !isTaskStatusComplete && isTodayEqualToSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
         return outputBool
     }
 
     const tasks = isPending? [{}] : data.tasks
-    var entityArr =   tasks.filter(tasksShownOnKanban)
+    var taskArr =  tasks.filter(tasksShownOnKanban)
     const breakObjective = breakObjectiveQuery.isPending? {} : breakObjectiveQuery.data.breakObjective
 
+    const chooseTaskDuration = (task) => {
+        return !!task.duration? task.duration : task.durationEst
+    }
+
     const calculateTaskTime = () => { //calculate duration of completed/outstanding tasks 
-        const relevantTasks = entityArr.filter(task => task.objectiveId!==breakObjective.id)
+        const relevantTasks = taskArr.filter(task => task.objectiveId!==breakObjective.id)
         const totalTime = relevantTasks.reduce((acc, task) => acc + chooseTaskDuration(task), 0)
-        const remainingTime = relevantTasks.reduce((acc, task) => acc + (task.status !== "Completed" ? chooseTaskDuration(task) : 0), 0)
+        const remainingTime = relevantTasks.reduce((acc, task) => acc + (task.status!=="Completed" ? chooseTaskDuration(task) : 0), 0)
         if (totalTime >=60) {
             setTotalTaskTime((totalTime/60).toFixed(2))
             setTotalTaskTimeUnits("hrs")
@@ -103,41 +107,39 @@ const Kanban = ({sitePage}) => {
         if (!isPending) {
             calculateTaskTime()
         }
-    }, [entityArr, isPending])
+    }, [taskArr])
 
-
-    const handleDateFieldsAndStatus = (entity) => {
-        //automatically adjusts the task fields when a task is dragged from one status column to another 
+    const handleDateFieldsAndStatus = (task) => {//automatically adjusts the task fields when a task is dragged from one status column to another 
             let now = new Date( new Date().getTime() - new Date().getTimezoneOffset()*60*1000 )
-            if (entity.status==="To-Do") {
-                entity.start = null
-                entity.finish = null
+            if (task.status==="To-Do") {
+                task.start = null
+                task.finish = null
             }
-            if (entity.status==="In-Progress") {
-                entity.start = !entity.start? now : entity.start
-                entity.finish = null
-                entity.duration = null
+            if (task.status==="In-Progress") {
+                task.start = !task.start? now : task.start
+                task.finish = null
+                task.duration = null
             }
-            if (entity.status==="Completed") {
-                entity.start = !!entity.start? entity.start: now
-                entity.finish = now
-                const durationMS  = new Date(entity.finish).getTime() - new Date(entity.start).getTime() // in MS
-                entity.duration  = Math.round(durationMS/(60*1000)) // in Mins
+            if (task.status==="Completed") {
+                task.start = !!task.start? task.start: now
+                task.finish = now
+                const durationMS  = new Date(task.finish).getTime() - new Date(task.start).getTime() // in MS
+                task.duration  = Math.round(durationMS/(60*1000)) // in Mins
             }
-            if (entity.status==="Paused") {
+            if (task.status==="Paused") {
                 //create paused task
-                entity.wasPaused = true
-                const getParentTaskId = () => !!entity.parentTaskId?  entity.parentTaskId : entity.id
-                let task = {...entity, "parentTaskId":getParentTaskId(), "start":null, "finish":null, "duration":null}
+                task.wasPaused = true
+                const getParentTaskId = () => !!task.parentTaskId?  task.parentTaskId : task.id
+                let task = {...task, "parentTaskId":getParentTaskId(), "start":null, "finish":null, "duration":null}
                 dndUpdateTaskMutation.mutate({action:"create", entityName, currentEntity: formatDateFields(task), handleNotification, handleLogout})
                 //create completed task
-                entity.start = !!entity.start? entity.start: now
-                entity.finish = !!entity.finish? entity.finish : now
-                const durationMS  = new Date(entity.finish).getTime() - new Date(entity.start).getTime() // in MS
-                entity.duration  = Math.round(durationMS/(60*1000)) 
-                entity.status = "Completed"
+                task.start = !!task.start? task.start: now
+                task.finish = !!task.finish? task.finish : now
+                const durationMS  = new Date(task.finish).getTime() - new Date(task.start).getTime() // in MS
+                task.duration  = Math.round(durationMS/(60*1000)) 
+                task.status = "Completed"
             }
-        return entity
+        return task
     }
 
     const handleDragEnd = (e) => { //dnd
@@ -145,48 +147,40 @@ const Kanban = ({sitePage}) => {
 
         if (!over) return
 
-        const entityId = active.id
+        const taskId = active.id
         const newStatus = over.id // one of: To-Do, In-Progress, Paused and Completed
 
-        const updatedEntity_ = entityArr.find((entity) => entity.id ===  entityId)
-        setSourceColumn(updatedEntity_.status)
+        const updatedTask_ = taskArr.find((task) => task.id ===  taskId)
+        setSourceColumn(updatedTask_.status)
         setDestColumn(newStatus)
-        setUpdatedEntityIdAndStatus({id:updatedEntity_.id, status:newStatus})
+        setUpdatedTaskIdAndStatus({id:updatedTask_.id, status:newStatus})
     }
     
     useEffect(() => {
-        if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
-            let updatedEntity_ = entityArr.find((entity) => entity.id ===  updatedEntityIdAndStatus.id)
-            // console.log("updatedEntity_:", updatedEntity_)
-            updatedEntity_.status = updatedEntityIdAndStatus.status
-            updatedEntity_ = handleDateFieldsAndStatus(updatedEntity_)
-            updatedEntity_ = formatDateFields(updatedEntity_)
-            setUpdatedEntity(updatedEntity_)
+        if (!!updatedTaskIdAndStatus.id && sourceColumn !== destColumn) {
+            let updatedTask_ = taskArr.find((task) => task.id ===  updatedTaskIdAndStatus.id)
+            // console.log("updatedTask_:", updatedTask_)
+            updatedTask_.status = updatedTaskIdAndStatus.status
+            updatedTask_ = handleDateFieldsAndStatus(updatedTask_)
+            updatedTask_ = formatDateFields(updatedTask_)
+            setUpdatedTask(updatedTask_)
         }
-    }, [updatedEntityIdAndStatus])
+    }, [updatedTaskIdAndStatus])
 
     useEffect(() => {
-        if (!!updatedEntityIdAndStatus.id && sourceColumn !== destColumn) {
-            setUpdatedEntityIdAndStatus({})
-            const newEntity = entityArr.map(entity => entity.id === updatedEntityIdAndStatus.id? updatedEntity : entity)
-            entityArr = newEntity // put here to speed up DnD action (but can be removed)
-            dndUpdateTaskMutation.mutate( {action:"update", entityName, currentEntity: updatedEntity, handleNotification, handleLogout} )
+        if (!!updatedTaskIdAndStatus.id && sourceColumn !== destColumn) {
+            setUpdatedTaskIdAndStatus({})
+            const newTask = taskArr.map(task => task.id === updatedTaskIdAndStatus.id? updatedTask : task)
+            taskArr = newTask // put here to speed up DnD action (but can be removed)
+            dndUpdateTaskMutation.mutate( {action:"update", entityName, currentEntity: updatedTask, handleNotification, handleLogout} )
         }
-    }, [updatedEntity])
-
-    const getInfoCardWidth = () => {
-        return entityName==="task"? "926.6px": "695px"
-    }
-
-    const chooseTaskDuration = (task) => {
-        return !!task.duration? task.duration : task.durationEst
-    }
+    }, [updatedTask])
 
     if ( isPending || breakObjectiveQuery.isPending ) return "Loading ..." //note: all hooks (e.g., useEffect) must be before any conditionals such as this
 
     return (
         <div className="kanban-page">
-            <HoverText width={getInfoCardWidth()}/>
+            <HoverText width="926.6px"/>
             <div className="kanban-page-header"> 
                 <Header/>
                 <div className="kanban-page-header-2">
@@ -213,7 +207,7 @@ const Kanban = ({sitePage}) => {
                             key={column.id}
                             columnId={column.id}
                             columnTitle={column.title}
-                            entityArr={entityArr}
+                            taskArr={taskArr}
                             entityName={entityName}
                             refetchKanbanContent={refetchKanbanContent}/>
                     )}
