@@ -57,6 +57,16 @@ const fetchAllUserContent = async (setProjects, setFormProject, setObjectives, s
     return resp.status
 }
 
+const handleNon401Requests = ({resp, resp_json, handleNotification, showSuccessNoti}) => {// handles the following requests: 200, 201, 400, 403, 404
+    if ([200, 201].includes(resp.status)) {
+        showSuccessNoti && handleNotification(resp_json.message, "success")
+    }
+    if ([400, 403, 404].includes(resp.status)) {
+        console.log(resp_json.message)
+        handleNotification(resp_json.message, "failure")
+    }
+}
+
 export async function fetchUserProjects(showNoti=false, handleNotification, handleLogout) { //fetches all user's projects
     try{
         const url = `${backendBaseUrl}/read-projects`
@@ -70,27 +80,13 @@ export async function fetchUserProjects(showNoti=false, handleNotification, hand
     } catch (err) {
         handleNotification(err.message + `. Failed to Get all ${entityName}s. Either DB connection error or error not prevented by api unit test.`, "failure")
     }
-    if ([200, 201].includes(resp.status)) {
-        showNoti && handleNotification(resp_json.message, "success")
-    }
-    if ([400, 403, 404].includes(resp.status)) {
-        console.log(resp_json.message)
-        handleNotification(resp_json.message, "failure")
-    }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: showNoti})
+
     const requestFn = async() => fetchUserProjects(showNoti, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
 }
 
-const handleNon401Requests = ({resp, resp_json, handleNotification, showSuccessNoti}) => {// handles the following requests: 200, 201, 400, 403, 404
-    if ([200, 201].includes(resp.status)) {
-        showSuccessNoti && handleNotification(resp_json.message, "success")
-    }
-    if ([400, 403, 404].includes(resp.status)) {
-        console.log(resp_json.message)
-        handleNotification(resp_json.message, "failure")
-    }
-}
 export async function fetchBreakObjective(handleNotification, handleLogout) { //fetches all user's projects
     try{
         const url = `${backendBaseUrl}/query-objectives?` + new URLSearchParams({"type":"break"})
@@ -104,10 +100,7 @@ export async function fetchBreakObjective(handleNotification, handleLogout) { //
     } catch (err) {
         handleNotification(err.message + ". Failed to the break objective. Either DB connection error or error not prevented by api unit test.", "failure")
     }
-    handleNon401Requests({
-        resp: resp, resp_json: resp_json, 
-        handleNotification: handleNotification, showSuccessNoti: false
-    })
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
     const requestFn = async() => fetchBreakObjective(handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
@@ -129,12 +122,7 @@ const fetchUserEntityPage = async (entityName, handleNotification, handleLogout,
     } catch (err) {
         handleNotification(err.message + `. Failed to READ ${entityName}. Either DB connection error or error not prevented by api unit test.`, "failure")
     }
-
-    if ([400, 403, 404].includes(resp.status)) {
-        console.log(resp_json.message)
-        handleNotification(resp_json.message, "failure")
-        return resp_json
-    }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
     const requestFn = async() => fetchUserEntityPage(entityName, handleNotification, handleLogout, page, perPage=23)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
@@ -155,6 +143,7 @@ const fetchHomepageTasks = async (selectedDate, handleNotification, handleLogout
     } catch (err) {
         handleNotification(err.message + `. Failed to fetch homepage tasks (fetchHomepageTasks()).  Either DB connection error or error not prevented by api unit test.`, "failure")
     }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
     const requestFn = async() => fetchHomepageTasks(selectedDate, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
@@ -173,11 +162,7 @@ const fetchTasksObjectiveAndProject = async (taskId, handleNotification, handleL
     } catch (err) {
         handleNotification(`Failed in to fetch Task's project and objective (fetchTasksObjectiveAndProject()). Either DB connection error or error not prevented by api unit test.`, "failure")
     }
-    if ([400, 403, 404].includes(resp.status)) {
-        console.log(resp_json.message)
-        handleNotification(resp_json.message, "failure")
-        return resp_json
-    }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
     const requestFn = async() => fetchTasksObjectiveAndProject(taskId, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
@@ -197,11 +182,7 @@ export async function fetchObjectivesProject(objectiveId, handleNotification, ha
     catch (err) {
         handleNotification(`Failed in to fetch Objective's project (fetchObjectivesProject()). Either DB connection error or error not prevented by api unit test.`, "failure")
     }   
-    if ([400, 403, 404].includes(resp.status)) {
-        console.log(resp_json.message)
-        handleNotification(resp_json.message, "failure")
-        return resp_json
-    }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: true})
     const requestFn = async() => fetchObjectivesProject(objectiveId, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
@@ -222,15 +203,10 @@ const fetchKanbanTasks = async (selectedDate, handleNotification, handleLogout) 
     } catch (err) {
         handleNotification(err.message + `. Failed to fetch kanban tasks (fetchKanbanTasks()).  Either DB connection error or error not prevented by api unit test.`, "failure")
     }
-    if ([400, 403, 404].includes(resp.status)) {
-        console.log(resp_json.message)
-        handleNotification(resp_json.message, "failure")
-        return resp_json
-    }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
     const requestFn = async() => fetchKanbanTasks(selectedDate, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
-
 }
 
 export async function fetchProjectsObjectives(projectId, handleNotification, handleLogout) {
@@ -249,11 +225,7 @@ export async function fetchProjectsObjectives(projectId, handleNotification, han
     } catch (err) {
         handleNotification(err.message + `. Failed to fetch kanban tasks (fetchProjectsObjectives()).  Either DB connection error or error not prevented by api unit test.`, "failure")
     }
-    if ([400, 403, 404].includes(resp.status)) {
-        console.log(resp_json.message)
-        handleNotification(resp_json.message, "failure")
-        return resp_json
-    }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
     const requestFn = async() => fetchProjectsObjectives(projectId, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
