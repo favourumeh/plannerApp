@@ -87,6 +87,26 @@ export async function fetchUserProjects(showNoti=false, handleNotification, hand
     return resp_json
 }
 
+export async function fetchObjectiveTasks({objectiveId, handleNotification, handleLogout}) {//fetches all tasks that belong to an objective
+    try{
+        const url = `${backendBaseUrl}/query-tasks?` + new URLSearchParams({"objectiveId":objectiveId})
+        const options = {
+            method:"GET",
+            headers: {"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + `. Failed to get the Objective's tasks. Either DB connection error or error not prevented by api unit test.`, "failure")
+    }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
+
+    const requestFn = async() => fetchObjectiveTasks(objectiveId, handleNotification, handleLogout)
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+}
+
 export async function fetchBreakObjective(handleNotification, handleLogout) { //fetches all user's projects
     try{
         const url = `${backendBaseUrl}/query-objectives?` + new URLSearchParams({"type":"break"})
@@ -255,4 +275,22 @@ export async function mutateEntityRequest({action, entityName, currentEntity, ha
     return resp_json
 } 
 
+export async function fetchEntityProgress({entityId, entityName, handleNotification, handleLogout}) {//fetch the progress of a project or objective
+    try {
+        const url = `${backendBaseUrl}/get-${entityName}-progress/${entityId}`
+        const options = {
+            method:"GET",
+            headers:{"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + `. Failed to get the progress of the ${entityName}. Either connection error or error not prevented by api unit test.`, "failure")
+    }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
+    const requestFn = async() => fetchProjectProgress({entityId, entityName,handleNotification, handleLogout})
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+} 
 export {fetchAllUserContent, fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject, fetchKanbanTasks}
