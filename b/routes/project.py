@@ -131,6 +131,40 @@ def query_projects():
         resp_dict["message"] = f"Failure: Could not read user project! Reason: {e}"
         return jsonify(resp_dict), 404
 
+@project.route("/get-project-progress/<int:project_id>", methods=["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def get_project_progress(project_id: int) -> Tuple[Response, int]:
+    resp_dict = {"message":""}
+    user_id: int = session["userId"]
+    
+    project: Project = Project.query.filter_by(id=project_id).first()
+    if not project:
+        resp_dict["message"] = "Failure: The requested project is not in the database. Choose another one."
+        return jsonify(resp_dict), 404
+    
+    project: Project = Project.query.filter_by(id=project_id, user_id=user_id).first()
+    if not project:
+        resp_dict["message"] = "Failure: The requested project does not belong to the user. Choose another one."
+        return jsonify(resp_dict), 403
+
+    project_tasks_query: Query = Task.query.join(Objective).filter(Objective.project_id==project_id)
+    tasks: List[Task] = project_tasks_query.all()
+    total_task_count: int = len(tasks)
+    total_task_duration: int = sum([task.duration if task.duration else task.duration_est for task in tasks])
+
+    completed_tasks: List[Task] = project_tasks_query.filter(Task.status=="Completed").all()
+    completed_tasks_count: int = len(completed_tasks)
+    completed_tasks_duration: int = sum([completed_task.duration if completed_task.duration else 0 for completed_task in completed_tasks])
+    progress_percentage_count: float = (completed_tasks_count / total_task_count * 100) if total_task_count > 0 else 0.0
+    progress_percentage_duration: float = (completed_tasks_duration * 100 / total_task_duration ) if total_task_duration > 0 else 0.0
+
+    resp_dict["message"] = "Success: Projects's progress retrieved."
+    resp_dict["projectName"] = project.title
+    resp_dict["progressPercentageCount"] = progress_percentage_count
+    resp_dict["progressPercentageDuration"] = progress_percentage_duration
+    return jsonify(resp_dict), 200
+
 #update
 @project.route("/update-project/<int:project_id>", methods=["PATCH"])
 @login_required(serializer=serializer)

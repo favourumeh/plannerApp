@@ -171,6 +171,40 @@ def get_objectives_project(objective_id: int):
     resp_dict["project"] = project.to_dict()
     return jsonify(resp_dict), 200
 
+@objective.route("/get-objective-progress/<int:objective_id>", methods=["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def get_objective_progress(objective_id: int) -> Tuple[Response, int]:
+    resp_dict = {"message":""}
+    user_id: int = session["userId"]
+    
+    objective: Objective = Objective.query.filter_by(id=objective_id).first()
+    if not objective:
+        resp_dict["message"] = "Failure: The requested objective is not in the database. Choose another one."
+        return jsonify(resp_dict), 404
+    
+    project: Project = Project.query.filter_by(id=objective.project_id, user_id=user_id).first()
+    if not project:
+        resp_dict["message"] = "Failure: The requested objective does not belong to the user. Choose another one."
+        return jsonify(resp_dict), 403
+
+    tasks_query: Query = Task.query.filter_by(objective_id=objective.id)
+    tasks: List[Task] = tasks_query.all()
+    total_tasks_count: int = len(tasks)
+    total_task_duration: float = sum([task.duration if task.duration else task.duration_est for task in tasks])
+    
+    completed_tasks: List[Task] = tasks_query.filter_by(status="Completed").all()
+    completed_tasks_count: int = len(completed_tasks)
+    completed_tasks_duration: float = sum([completed_task.duration if completed_task.duration else 0 for completed_task in completed_tasks])
+    progress_percentage_count: float = (completed_tasks_count / total_tasks_count * 100) if total_tasks_count > 0 else 0.0
+    progress_percentage_duration: float = (completed_tasks_duration * 100 / total_task_duration ) if total_task_duration > 0 else 0.0
+
+    resp_dict["message"] = "Success: Objective's progress retrieved."
+    resp_dict["objectiveName"] = objective.title
+    resp_dict["progressPercentageCount"] = progress_percentage_count
+    resp_dict["progressPercentageDuration"] = progress_percentage_duration
+    return jsonify(resp_dict), 200
+
 #update
 @objective.route("/update-objective/<int:objective_id>", methods=["PATCH"])
 @login_required(serializer=serializer)
