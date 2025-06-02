@@ -191,11 +191,10 @@ def get_objective_progress(objective_id: int) -> Tuple[Response, int]:
     tasks_query: Query = Task.query.filter_by(objective_id=objective.id)
     tasks: List[Task] = tasks_query.all()
     total_tasks_count: int = len(tasks)
-    total_task_duration: float = sum([task.duration if task.duration else task.duration_est for task in tasks])
-    
+    total_task_duration: float = sum([task.duration if isinstance(task.duration, int) else task.duration_est for task in tasks])
     completed_tasks: List[Task] = tasks_query.filter_by(status="Completed").all()
     completed_tasks_count: int = len(completed_tasks)
-    completed_tasks_duration: float = sum([completed_task.duration if completed_task.duration else 0 for completed_task in completed_tasks])
+    completed_tasks_duration: float = sum([completed_task.duration if isinstance(completed_task.duration, int) else 0 for completed_task in completed_tasks])
     progress_percentage_count: float = (completed_tasks_count / total_tasks_count * 100) if total_tasks_count > 0 else 0.0
     progress_percentage_duration: float = (completed_tasks_duration * 100 / total_task_duration ) if total_task_duration > 0 else 0.0
 

@@ -15,7 +15,7 @@ function EntityPage ({sitePage}) {
     if (!["view-projects", "view-objectives", "view-tasks"].includes(sitePage)) return null
     const [page, setPage] = useState(1)
     const {handleNotification, handleLogout,isModalOpen} = useContext(globalContext)
-    useEffect(() => setPage(1), [sitePage])
+    // useEffect(() => setPage(1), [sitePage])
     const entityName = sitePage==="view-projects"? "project" : sitePage==="view-objectives"? "objective" : "task"
     const { isPending, data, refetch: refetchEntityPageContent } = useQuery({
         queryKey: [`${entityName}s`, page],

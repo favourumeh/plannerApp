@@ -165,7 +165,7 @@ export async function fetchObjectivesProject(objectiveId, handleNotification, ha
     catch (err) {
         handleNotification(`Failed in to fetch Objective's project (fetchObjectivesProject()). Either DB connection error or error not prevented by api unit test.`, "failure")
     }   
-    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: true})
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
     const requestFn = async() => fetchObjectivesProject(objectiveId, handleNotification, handleLogout)
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
