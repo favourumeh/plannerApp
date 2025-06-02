@@ -66,7 +66,6 @@ function TaskForm ({form}) {
         enabled: !!taskProject.id
     })
     const relevantObjectives = isPendingObjectives? [{}] : objectivesData.objectives
-    // const relevantObjectives = objectives.filter(objective=> objective.projectId == taskProject?.id)
     const objectiveTitles = relevantObjectives.map(objective=> objective?.title)
     const taskObjective = objectiveTitles.includes(objectiveQuery)?
         relevantObjectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ) : {}

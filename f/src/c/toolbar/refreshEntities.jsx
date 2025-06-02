@@ -3,12 +3,11 @@ import { useContext } from "react"
 
 function RefreshEntities({refetch}) {
     //refetch is an output of useQuery
-    const { handleRefresh} = useContext(globalContext)
     return (
         <button 
             type="button" 
             className="refresh-btn" 
-            onClick={!!refetch ? () => refetch() :  () => handleRefresh(false)}
+            onClick={!!refetch ? () => refetch() :  undefined}
         >   
             <i className="fa fa-refresh" aria-hidden="true"></i> 
         </button>

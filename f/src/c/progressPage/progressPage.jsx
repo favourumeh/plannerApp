@@ -26,7 +26,7 @@ export default function ProgressPage ({sitePage}) {
         }
     }, [isModalOpen, isProjectsPending])
 
-    const refetchProject = () => {
+    const refetchProgressPageProjects = () => {
         refetchProjects()
         handleNotification("Projects refetched successfully", "success")
     }
@@ -51,7 +51,7 @@ export default function ProgressPage ({sitePage}) {
                         <Toolbar> 
                             <AddEntity/>
                             <ViewPage/>
-                            <RefreshEntities refetch={refetchProject}/>
+                            <RefreshEntities refetch={refetchProgressPageProjects}/>
                             <FilterPage/>
                         </Toolbar>
                     </div>

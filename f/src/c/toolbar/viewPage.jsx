@@ -3,28 +3,20 @@ import globalContext from "../../context"
 import { useContext } from "react"
 
 function ViewPage() {
-    const { sitePage, setSitePage,tasks, projects, objectives, setEntityName, setEntity} = useContext(globalContext);    
+    const { sitePage, setSitePage} = useContext(globalContext);    
     const onClickViewProjects = () => {
         setSitePage("view-projects")
-        setEntityName("project")
-        setEntity(projects)
     }
     const onClickViewObjectives = () => {
         setSitePage("view-objectives")
-        setEntityName("objective")
-        setEntity(objectives)
     }
 
     const onClickViewTasks = () => {
         setSitePage("view-tasks")
-        setEntityName("task")
-        setEntity(tasks)
     }
 
     const onClickViewKanban = () => {
         setSitePage("view-kanban")
-        setEntityName("task")
-        setEntity(tasks)
     }
     const onClickViewProgress = () => {
         setSitePage("view-progress")

@@ -26,7 +26,7 @@ function ObjectiveForm ({form}) {
     const projects = getProjectsQuery.isSuccess ? getProjectsQuery.data.projects : [{"title":""}]
     useEffect(() => { // sets initial content of the project field of an update-object form to the project/objective titles of objective being updated
         if (!getProjectsQuery.isPending && form==="update-objective") {
-            const project = projects.find((project) => project.id === currentObjective.projectId )
+            const project = projects.find( (project) => project.id === currentObjective.projectId )
             setProjectQuery(project.title)
         } 
     }, [getProjectsQuery.isPending]);

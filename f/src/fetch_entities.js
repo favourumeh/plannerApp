@@ -20,43 +20,6 @@ export async function retryRequestOnUpdatedAT(resp, resp_json, requestFn, handle
     return resp_json
 }
 
-const fetchAllUserContent = async (setProjects, setFormProject, setObjectives, setFormObjective, setTasks, handleNotification, handleLogout) => {
-    try {
-        const url = `${backendBaseUrl}/read-all`
-        const options = {
-            method:"GET",
-            headers: {"Content-Type":"application/json"},
-            credentials:"include"
-        }
-        var resp = await fetch(url, options)
-        var resp_json = await resp.json()
-    } catch (error) {
-        console.error("Error fetching all user content:", error)
-        handleNotification(`Error fetching all user content. R: Database connection down or API error. Please wait a few mins.`, "failure")
-        return 500
-    }
-    if (resp.status == 200){
-        console.log(resp_json.message)
-        const projects = resp_json.projects
-        const objectives = resp_json.objectives
-        const tasks = resp_json.tasks
-        setProjects(projects)
-        setFormProject(projects.filter((project)=> project["type"]=="default project")[0])
-        setObjectives(objectives)
-        setFormObjective(objectives.filter((objective) => objective["type"]=="default project objective")[0])
-        setTasks(tasks)
-    } else if ([400, 403, 404].includes(resp.status)) {
-        console.log(resp_json.message)
-        handleNotification(resp_json.message, "failure")
-    } else {
-        const requestFn = async() => fetchAllUserContent(setProjects, setFormProject, setObjectives, setFormObjective, setTasks, handleNotification)
-        resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
-        console.log("resp_json (in fechtAll)", resp_json)
-        return !resp_json.project?  !!resp_json.message? 401 : Number.isInteger(resp_json)? resp_json : 500 : 200
-    } 
-    return resp.status
-}
-
 const handleNon401Requests = ({resp, resp_json, handleNotification, showSuccessNoti}) => {// handles the following requests: 200, 201, 400, 403, 404
     if ([200, 201].includes(resp.status)) {
         showSuccessNoti && handleNotification(resp_json.message, "success")
@@ -293,4 +256,4 @@ export async function fetchEntityProgress({entityId, entityName, handleNotificat
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
 } 
-export {fetchAllUserContent, fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject, fetchKanbanTasks}
+export {fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject, fetchKanbanTasks}
