@@ -27,6 +27,8 @@ function App() {
     const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",false))
     const [isLoggedIn, setIsLoggedIn] = useState(() => persistState("isLoggedIn",false))
     const [sitePage, setSitePage] = useState(() => persistState("sitePage","")) // view-guest-page, view-webpage, view-projects, view-objectives, view-tasks
+    // const [sitePage, setSitePage] = useState("view-progress") // view-guest-page, view-webpage, view-projects, view-objectives, view-tasks
+
     const [form, setForm]  = useState(() => persistState("form", "")) //sign-up, login, create/edit-task, create/edit-objective, create/edit-project
     const [currentUser, setCurrentUser] = useState(() => persistState("currentUser",{}))
     const [notificationMessage, setNotificationMessage] = useState("")
@@ -248,7 +250,7 @@ function App() {
     }
 
     const findTaskObjective = (objectives, task) => objectives.find((objective)=> objective.id===task.objectiveId )
-    const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective.projectId)
+    const findObjectiveProject = (projects, objective) => projects.find((project)=> project.id===objective?.projectId)
 
     const getProject = (entity, entityName, projects, objectives) => {
         //get the project of an objective or task. If entity is a project return entity.
@@ -319,6 +321,7 @@ function App() {
     const queryClient = new QueryClient({
         queryCache: new QueryCache({onError: handleLogout}),
     })
+
 
     return (
         <QueryClientProvider client={queryClient}>

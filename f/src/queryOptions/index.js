@@ -3,3 +3,4 @@ export { default as readTasksObjectiveAndProjectQueryOption }  from "./readTasks
 export { default as readObjectivesProjectQueryOption }  from "./readObjectivesProjectQueryOption"
 export { default as homepageTasksQueryOptions }  from "./readHomepageTasksQueryOption"
 export { default as readProjectsQueryOption} from "./readProjectsQueryOption"
+export { default as readObjectiveTasksQueryOption } from "./readObjectiveTasksQueryOption"

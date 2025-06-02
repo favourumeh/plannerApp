@@ -17,7 +17,7 @@
 }
 
 .task-card-container{
-    width: 400px;
+    /* width: 400px; */
     /* border: 1px solid; */
     align-self: flex-end;
 }
@@ -32,19 +32,19 @@
 }
 
 /*add entity button*/
-.add-entity button{
+.mutate-entity button{
     visibility: hidden;
     background-color: rgba(0,0,0,0);
     border: none;
     padding:2px;
-    margin-right: 5px;
+    margin: 0px 5px 0px 5px;
 }
 
-.add-entity button:hover{
+.mutate-entity button:hover{
     color: rgb(0, 230, 0);
 }
 
-.progress-card-row:hover .add-entity button{
+.progress-card-row:hover .mutate-entity button{
     visibility: visible;
 }
 

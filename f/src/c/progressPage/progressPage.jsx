@@ -1,7 +1,8 @@
 import "./progressPage.css"
 import globalContext from "../../context"
-import { useState, useContext } from "react"
-import ProgressCard from "./progressCard"
+import { useState, useContext, useEffect } from "react"
+import { useQuery } from "@tanstack/react-query"
+import ProjectProgressCard from "./projectProgessCard"
 import Toolbar from "../toolbar/toolbar"
 import AddEntity from "../toolbar/addEntity"
 import ViewPage from "../toolbar/viewPage"
@@ -9,15 +10,28 @@ import RefreshEntities from "../toolbar/refreshEntities"
 import FilterPage from "../toolbar/filterPage"
 import Header from "../header/header"
 import Dropdown from "../dropdown"
+import { readProjectsQueryOption } from "../../queryOptions"
 
 export default function ProgressPage ({sitePage}) {
     if (sitePage!=="view-progress") return
-    const {tasks, objectives, projects} = useContext(globalContext)
+    const {handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
     const [metric, setMetric] = useState("duration") //duration or task-count
 
-    const getProjectObjectives = (projectId) => objectives.filter(objective => objective.projectId === projectId)
-    const getObjectiveTasks = (objectiveId) => tasks.filter(task => task.objectiveId == objectiveId)
+    const {data: projectQuery, isPending: isProjectsPending, refetch: refetchProjects} = useQuery(readProjectsQueryOption(false, handleNotification, handleLogout))
+    const projects = projectQuery?.projects
 
+    useEffect(() => {
+        if (!isModalOpen && !isProjectsPending) {
+            refetchProjects()
+        }
+    }, [isModalOpen, isProjectsPending])
+
+    const refetchProject = () => {
+        refetchProjects()
+        handleNotification("Projects refetched successfully", "success")
+    }
+
+    if (isProjectsPending) return "Loading projects..."
     return (
             <div className="progress-page">
                 <div className="progress-page-header"> 
@@ -37,24 +51,15 @@ export default function ProgressPage ({sitePage}) {
                         <Toolbar> 
                             <AddEntity/>
                             <ViewPage/>
-                            <RefreshEntities/>
+                            <RefreshEntities refetch={refetchProject}/>
                             <FilterPage/>
                         </Toolbar>
                     </div>
                 </div>
                 <div className="progress-page-body">
-                    {projects?.map((project) =>
-                        <ProgressCard key={project.id} entity={project} entityName="project" metric={metric}>
-                            {getProjectObjectives(project.id)?.map( (objective) => 
-                                <ProgressCard key={objective.id} entity={objective} entityName="objective" metric={metric}>
-                                    {getObjectiveTasks(objective.id)?.map( (task) => 
-                                        <ProgressCard key={task.id} entity={task} entityName="task" metric={metric}/> )
-                                    }
-                                </ProgressCard> 
-                            )}
-                        </ProgressCard>
-                    )
-                    }
+                    {projects?.map((project) => 
+                        <ProjectProgressCard key={project.id} entity={project} entityName="project" metric={metric} refetchProjects={refetchProjects}/> 
+                    )}
                 </div>
             </div>
         )

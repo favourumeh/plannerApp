@@ -26,3 +26,8 @@
     color: rgb(0, 230, 0);
 
 }
+
+/* prevent page from jumping when clicking the progress card dropdown */
+.progress-page-body{ 
+    min-height: 900px;
+}
