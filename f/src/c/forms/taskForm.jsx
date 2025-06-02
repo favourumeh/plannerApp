@@ -63,13 +63,13 @@ function TaskForm ({form}) {
 
     const {data: objectivesData , isPending: isPendingObjectives } = useQuery({ // requests the objectives of the project in the form's project field
         ...readProjectsObjectivesQueryOption(taskProject.id, handleNotification, handleLogout),
-        enabled: !isPendingTasksParents || !currentTask.id, // Cond: 1) for Update-project run if the task's project has been retrieved OR 2)For Create-project run if there is no currentId field in currentTask object
+        enabled: !!taskProject.id
     })
-    const objectives = isPendingObjectives? [{}] : objectivesData.objectives
-    const relevantObjectives = objectives.filter(objective=> objective.projectId == taskProject?.id)
+    const relevantObjectives = isPendingObjectives? [{}] : objectivesData.objectives
+    // const relevantObjectives = objectives.filter(objective=> objective.projectId == taskProject?.id)
     const objectiveTitles = relevantObjectives.map(objective=> objective?.title)
     const taskObjective = objectiveTitles.includes(objectiveQuery)?
-        objectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ) : {}
+        relevantObjectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ) : {}
 
     useEffect( () => { //clear objective if the project field is not valid (given that the projects have been )
         if (!getProjectsQuery.isPending && !projectTitles.includes(projectQuery)) {
@@ -78,13 +78,14 @@ function TaskForm ({form}) {
 
     useEffect(() => {
         if (!isPendingObjectives) {
+            // console.log("Objective query", objectiveQuery, "objectiveTitles", objectiveTitles) 
             if  (objectiveTitles.includes(objectiveQuery)) {
-                setCurrentTask({...currentTask, "objectiveId":taskObjective.id}) // set the objectiveId field of the currentTask when a valid objective is clicked or typed in the form's objective field
+                setCurrentTask({...currentTask, "objectiveId":taskObjective?.id}) // set the objectiveId field of the currentTask when a valid objective is clicked or typed in the form's objective field
             } else {
-                setCurrentTask({...currentTask, "objectiveId":""})
+                setCurrentTask({...currentTask, "objectiveId":""}) // set the objectiveId field of the currentTask to empty string when an invalid objective is typed in the form's objective field
             }
         }
-    }, [objectiveQuery, isPendingObjectives])
+    }, [objectiveQuery, relevantObjectives])
 
     useEffect(() => {// generate duration of a task when start and finish dates are present and updated
         if (!!currentTask.start && !!currentTask.finish){
