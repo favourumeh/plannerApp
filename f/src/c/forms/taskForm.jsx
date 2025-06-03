@@ -119,11 +119,17 @@ function TaskForm ({form}) {
         const {name, value} = e.target
         setCurrentTask(prev => ({...prev, [name]:value}))
     }
+
+    useEffect(() => {
+        if ( currentTask.status !== "Completed") {
+            setCurrentTask(prev => ({...prev, "finish":"", duration:null}))
+        }
+    }, [currentTask.status])
     
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
         const { labelName, inputName, inputType, currentTask, mandatoryField} = params
-        const displayDurationAcc = inputName!=="durationEst"?  undefined : !!currentTask.duration ? `(Acc=${currentTask.duration})`: undefined
+        const displayDurationAcc = inputName !== "durationEst" ? undefined : Number.isInteger(currentTask.duration) ? `(Acc=${currentTask.duration})` : undefined
         return (
             <div  className="form-group">
                 <div className="field-title"> {labelName} {displayDurationAcc} {mandatoryField? mandatoryIndicator(currentTask[inputName], "*"):undefined}</div>
@@ -231,9 +237,11 @@ function TaskForm ({form}) {
                                 !taskProject.title 
                                 || !taskObjective 
                                 || !currentTask.description 
-                                || !(currentTask.durationEst >=  10
-                                || createOrEditTaskMutation.isPending
-                                ) ? true:false}>
+                                || !(currentTask.durationEst >=  10 || createOrEditTaskMutation.isPending)
+                                || (Number.isInteger(currentTask.duration) &&  currentTask.duration <= 0 )
+                                || (!!currentTask.finish && currentTask.status!=="Completed" )
+                                || (!currentTask.finish && !currentTask.start && currentTask.status==="Completed" )
+                                ? true:false}>
                             { createOrEditTaskMutation.isPending? "sending..." : form==="create-task"? "Create":"Update"}
                         </button>
                     </div>

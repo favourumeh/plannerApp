@@ -71,11 +71,20 @@ def create_task() -> Tuple[Response, int]:
     if not duration_est:
         resp_dict["message"] = "Failure: Task is missing a duration_est (mins)."
         return jsonify(resp_dict), 400
+    
+    if isinstance(duration, int):
+        if duration <= 0:
+            resp_dict["message"] = "Failure: Task duration cannot be zero or negative."
+            return jsonify(resp_dict), 400
 
     scheduled_start = convert_date_str_to_datetime(scheduled_start, '%Y-%m-%d')
     start = convert_date_str_to_datetime(start, '%Y-%m-%dT%H:%M')
     finish = convert_date_str_to_datetime(finish, '%Y-%m-%dT%H:%M')
-
+    
+    if status !="Completed" and finish is not None:
+        resp_dict["message"] = "Failure: Task cannot have a finish date and be incomplete."
+        return jsonify(resp_dict), 400
+    
     if not was_paused:
         task_number = generate_entity_number(entity_number=task_number, parent_entity_id=objective_id, parent_entity_name="objective", entity_name="task", entity=Task)
     else:
@@ -258,6 +267,15 @@ def update_task(task_id: int) -> Tuple[Response, int]:
 
     if len(task.description) > int(task_description_limit):
         resp_dict["message"] = f"Failure: The task description is over the {task_description_limit} char limit."
+        return jsonify(resp_dict), 400
+
+    if isinstance(task.duration, int):
+        if task.duration <= 0:
+            resp_dict["message"] = "Failure: Task duration cannot be zero or negative."
+            return jsonify(resp_dict), 400
+        
+    if task.status != "Completed" and task.finish is not None:
+        resp_dict["message"] = "Failure: Task cannot have a finish date and be incomplete."
         return jsonify(resp_dict), 400
     
     #Check if task being updated already exist in the objective
