@@ -109,7 +109,7 @@ const Kanban = ({sitePage}) => {
         }
     }, [taskArr])
 
-    const handleDateFieldsAndStatus = (task) => {//automatically adjusts the task fields when a task is dragged from one status column to another 
+    const handleDateFieldsAndStatus = ({task}) => {//automatically adjusts the task fields when a task is dragged from one status column to another 
             let now = new Date( new Date().getTime() - new Date().getTimezoneOffset()*60*1000 )
             if (task.status==="To-Do") {
                 task.start = null
@@ -130,8 +130,8 @@ const Kanban = ({sitePage}) => {
                 //create paused task
                 task.wasPaused = true
                 const getParentTaskId = () => !!task.parentTaskId?  task.parentTaskId : task.id
-                let task = {...task, "parentTaskId":getParentTaskId(), "start":null, "finish":null, "duration":null}
-                dndUpdateTaskMutation.mutate({action:"create", entityName, currentEntity: formatDateFields(task), handleNotification, handleLogout})
+                let completedTask = {...task, "parentTaskId":getParentTaskId(), "start":null, "finish":null, "duration":null}
+                dndUpdateTaskMutation.mutate({action:"create", entityName, currentEntity: formatDateFields(completedTask), handleNotification, handleLogout})
                 //create completed task
                 task.start = !!task.start? task.start: now
                 task.finish = !!task.finish? task.finish : now
@@ -161,7 +161,7 @@ const Kanban = ({sitePage}) => {
             let updatedTask_ = taskArr.find((task) => task.id ===  updatedTaskIdAndStatus.id)
             // console.log("updatedTask_:", updatedTask_)
             updatedTask_.status = updatedTaskIdAndStatus.status
-            updatedTask_ = handleDateFieldsAndStatus(updatedTask_)
+            updatedTask_ = handleDateFieldsAndStatus({task:updatedTask_})
             updatedTask_ = formatDateFields(updatedTask_)
             setUpdatedTask(updatedTask_)
         }

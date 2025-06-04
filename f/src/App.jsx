@@ -112,7 +112,7 @@ function App() {
             if (Object.keys(entity).includes(dateField) && !!entity[dateField]) {
                 const formattedDateTime = new Date(entity[dateField]).toISOString().replace(/:\d{2}\.\d{3}Z$/, '')
                 const formattedDate = new Date(entity[dateField]).toISOString().split("T")[0]
-                var entity = {...entity, [dateField]: dateTimeFields.includes(dateField)? formattedDateTime:formattedDate} //#1
+                var entity = {...entity, [dateField]: dateTimeFields.includes(dateField)? formattedDateTime:formattedDate}
             }
         }
         return entity

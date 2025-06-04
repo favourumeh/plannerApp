@@ -94,7 +94,7 @@ function TaskForm ({form}) {
         }
     }, [currentTask.start, currentTask.finish])
 
-    useEffect(()=> {setCurrentTask( prev => (formatDateFields(prev))) }, [] )
+    useEffect(()=> {setCurrentTask( (formatDateFields(currentTask)) ) }, [] )
 
     const mandatoryIndicator = (fieldStateVar, indicator) => {
         return (typeof fieldStateVar==="undefined" || fieldStateVar==="")? <span className="required-asterisk">{indicator}</span>: undefined
