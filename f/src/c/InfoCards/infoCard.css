@@ -33,3 +33,7 @@ div.entity-row:hover .hover-info-card-overlay{
 div.progress-card-overlay:hover .hover-info-card-overlay{
     visibility: visible;
 }
+
+div.planner-task-card-overlay:hover .hover-info-card-overlay{
+    visibility: visible;
+}

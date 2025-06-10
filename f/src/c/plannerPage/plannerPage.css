@@ -1,0 +1,85 @@
+div.planner-page-header-2 {
+    margin-top:5px;
+    margin-bottom: 5px;
+    background-color: rgba(48, 48, 100, 0.137);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* div.planner-page-header-2:hover {
+    border-radius: 5px;
+    background-color: rgba(48, 48, 100, 0.137);
+    outline: 4px auto -webkit-focus-ring-color;
+} */
+
+div.planner-page-header-2 span {
+    border: 1px solid;
+    margin-right: 4px;
+    border-radius: 5px;
+}
+/* div.planner-page-header-2 span:hover {
+    border-radius: 5px;
+    background-color: rgba(48, 48, 100, 0.137);
+    outline: 4px auto -webkit-focus-ring-color;
+    color:  rgba(0, 230, 0);
+    cursor: pointer;
+} */
+
+div.planner-page-header-2 input{
+    max-width: 68px;
+    border: none;
+    background-color: rgba(48, 48, 100, 0.137);
+}
+div.planner-page-header-2 input:hover{
+    color: rgba(0, 230, 0);
+    cursor: pointer;
+}
+
+div.planner-page-header-2 .react-datepicker__tab-loop{
+    position: absolute;
+    z-index: 1;
+    translate: -100% -0px;
+}
+div.planner-page-header-2 input:focus{
+    outline: none;
+}
+
+div.planner-page-header-2 .fa-arrows-h{
+    margin: 0 2px 0 5px;
+}
+
+div.planner-body{
+    display: flex;
+    /* border: 1px solid; */
+    height: 500px;
+    width: 1200px;
+}
+
+div.planner-side-bar{
+    border: 1px solid;
+    border-radius: 10px;
+    width: 320px;
+    min-height: 500px;
+    position: fixed;
+    margin: 0 5px 0 0;
+    /* translate: -325px 0px; */
+}
+
+div.planner-content{
+    /* border: 1px solid; */
+    width: calc(100% - 325px);
+    height: 100%;
+    translate: 325px;
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 28px;
+    align-content: flex-start;
+}
+
+
+/* div #date0{
+    min-height: 150px;
+} */

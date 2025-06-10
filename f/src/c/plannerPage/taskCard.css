@@ -1,0 +1,50 @@
+div.planner-task-card-content{
+    border: 1px solid white;
+    margin: 0 0px 5px 0px;
+    border-radius: 4px;
+    text-align: left;
+    padding: 0 0px 0 2px;
+
+
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+
+}
+
+
+div.planner-task-card-overlay{
+    display: flex;
+    justify-content: space-around;
+
+}
+
+div.planner-task-card-content{
+    min-width: 237px;
+}
+
+div.planner-task-card-content:hover{
+    cursor: grab;
+}
+
+div.planner-task-card-overlay button{
+    background: none;
+    padding: 1px;
+    font: 1rem;
+    /* border: rgb(0,0,0,0); */
+    visibility: hidden;
+    border: 1px solid white;
+    translate: 0px -5px;
+}
+
+div.planner-task-card-overlay:hover button{
+    border: rgb(0,0,0,0);
+    visibility: visible;
+}
+
+div.kanban-card-overlay button:focus, button:focus-visible{
+    outline: none;
+}

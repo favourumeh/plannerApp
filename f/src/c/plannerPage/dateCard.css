@@ -1,0 +1,17 @@
+div.planner-date-container{
+    flex-grow: 0;
+    display: flex;
+    flex-direction: column;
+    width: 31%;
+    /* max-height: 300px; */
+    border: 1px solid;
+    border-radius: 10px;
+
+}
+
+div.planner-date-container-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 5px 0 5px;
+    margin: 0 0 5px 12px;
+}

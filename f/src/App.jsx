@@ -17,11 +17,8 @@ import ObjectiveForm from './c/forms/objectiveForm.jsx'
 import Kanban from './c/kanban/kanban.jsx'
 import ProgressPage from './c/progressPage/progressPage.jsx'
 import { defaultTask, defaultObjective, defaultProject } from './staticVariables.js'
-
-const persistState = (sessionName, default_) => {
-    var state = JSON.parse(sessionStorage.getItem(sessionName))
-    return state!=null? state:default_ 
-}
+import { persistState } from './utils/stateUtils.js'
+import { PlannerPage } from './c/plannerPage/plannerPage.jsx'
 
 function App() {
     const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",false))
@@ -187,6 +184,7 @@ function App() {
                 <EntityPage sitePage={sitePage} setSitePage={setSitePage}/>
                 <Kanban sitePage={sitePage}/>
                 <ProgressPage sitePage={sitePage}/>
+                <PlannerPage sitePage={sitePage}/>
             </globalContext.Provider>
             <ReactQueryDevtools/>
         </QueryClientProvider>
