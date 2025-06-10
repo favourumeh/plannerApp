@@ -5,6 +5,7 @@ import { mutateEntityRequest } from "../../fetch_entities"
 import { useContext } from "react"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
+import { useDraggable } from "@dnd-kit/core"
 
 export function TaskCard({task, projects, objectives, refetchScheduledTasks}) {
     const {setForm, setCurrentTask, handleNotification, handleLogout, setIsModalOpen} = useContext(globalContext)
@@ -33,8 +34,17 @@ export function TaskCard({task, projects, objectives, refetchScheduledTasks}) {
         })
     }
 
+    // DnD - Make enitity cards draggable
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({id: task.id}) //dnd
+    const style = transform ? {transform: `translate(${transform.x}px, ${transform.y}px)`} : undefined; //dnd keeps track of x-y coordinate of task card
     return (
-            <div className="planner-task-card-overlay">
+            <div 
+                style ={style}
+                ref={setNodeRef} 
+                {...listeners}
+                {...attributes} 
+                className="planner-task-card-overlay"
+            >
                 
                 <button onPointerDown={onClickEditBtn} > 
                     <i className="fa fa-pencil" aria-hidden="true"></i>

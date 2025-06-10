@@ -12,8 +12,9 @@ import "react-datepicker/dist/react-datepicker.css"
 import globalContext from "../../context"
 import { TaskCard } from "./taskCard"
 import { DateCard } from "./dateCard"
-import { fetchScheduledPlannerTasks, fetchUnscheduledPlannerTasks } from "../../fetch_entities"
-import { keepPreviousData, useQuery } from "@tanstack/react-query"
+import { fetchScheduledPlannerTasks, fetchUnscheduledPlannerTasks, mutateEntityRequest } from "../../fetch_entities"
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query"
+import { DndContext } from "@dnd-kit/core"
 
 
 const datetimeToString = (datetime) => {
@@ -42,6 +43,7 @@ export function PlannerPage ({sitePage}) {
     const scheduledTasksProjects = isPendingScheduled?  [] :  scheduledTasksQuery.taskProjects
     const scheduledTasksObjectives = isPendingScheduled?  [] :  scheduledTasksQuery.taskObjectives
 
+    const tasks = scheduledTasks
     const projects = scheduledTasksProjects
     const objectives = scheduledTasksObjectives
 
@@ -69,10 +71,34 @@ export function PlannerPage ({sitePage}) {
     const periodDates = (new Date(periodEnd) < new Date(periodStart))? [] : Array.from({ length: noPeriodDays+1 }, (_, i) => {
         const date = new Date(periodStart)
         date.setDate(date.getDate() + i)
-        return getDayFromDate(date) + " " +  datetimeToString(date)
+        return {id: getDayFromDate(date) + " " +  datetimeToString(date)}
     })
 
     // console.log("periodDates", periodDates)
+
+    const dndUpdateTaskMutation = useMutation({ // update(mutate) the task when it is dnd
+        mutationFn: mutateEntityRequest, 
+        onSuccess: refetchScheduledTasks,
+    })
+
+    const handleDragEnd = (e) => { //dnd
+        const {active, over} = e
+
+        if (!over) return
+
+        const draggedTask = tasks.find(task=> task.id === active.id)
+        const oldScheduledStart  = datetimeToString(new Date(draggedTask.scheduledStart))
+        const newScheduledStart = over.id.split(" ")[1]
+        if (oldScheduledStart === newScheduledStart) return 
+
+        dndUpdateTaskMutation.mutate({
+            action: "update",
+            entityName: "task",
+            currentEntity: {...draggedTask, scheduledStart: newScheduledStart },
+            handleNotification,
+            handleLogout
+        })
+    }
 
 
     return (
@@ -111,30 +137,29 @@ export function PlannerPage ({sitePage}) {
                 </Toolbar>
 
             </div>
+            <DndContext onDragEnd={handleDragEnd}>
+                <div className="planner-body"> 
+                    <div className="planner-side-bar"> 
+                        <div> Unscheduled Tasks </div> 
+                        <div></div>
+                    </div>
 
-            <div className="planner-body"> 
-                <div className="planner-side-bar"> 
-                    <div> Unscheduled Tasks </div> 
-                    <div></div>
+                    <div className="planner-content"> 
+                        { periodDates?.map((date, index) => 
+                            <DateCard
+                                key={index}
+                                date={date.id} 
+                                tasks={tasks}
+                                projects={projects}
+                                objectives={objectives}
+                                refetchScheduledTasks = {refetchScheduledTasks}
+                            />
+                        ) }
+
+                    </div>
                 </div>
-
-                <div className="planner-content"> 
-                    { periodDates?.map((date, index) => 
-                        <DateCard
-                            key={index}
-                            date={date} 
-                            tasks={scheduledTasks}
-                            projects={projects}
-                            objectives={objectives}
-                            refetchScheduledTasks = {refetchScheduledTasks}
-                        />
-                    ) }
-
-                </div>
-            </div>
+            </DndContext>
 
         </div>
     )
-
-    return null
 }

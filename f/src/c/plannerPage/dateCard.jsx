@@ -2,6 +2,7 @@
 import {TaskCard} from "./taskCard"
 import "./dateCard.css"
 import { useEffect, useState } from "react"
+import { useDroppable } from "@dnd-kit/core"
 
 const datetimeToString = (datetime) => {
     return !datetime? null : datetime.toISOString().split("T")[0] 
@@ -13,9 +14,10 @@ export function DateCard({date, tasks, projects, objectives, refetchScheduledTas
     const handleExpandedDayCard = ()  => {
         setIsExpanded(!isExpanded)
     }
-
+    const {setNodeRef} = useDroppable({ id: date }) //dnd
+    
     return (
-        <div id={"date"} className="planner-date-container">
+        <div ref={setNodeRef} id={date} className="planner-date-container">
             <div className="planner-date-container-header">
                 <div> {date} #{daysTasks.length}</div>
                 <div onClick={handleExpandedDayCard}>
