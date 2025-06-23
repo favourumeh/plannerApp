@@ -23,3 +23,7 @@ div.toolbar button:focus,
 button:focus-visible {
   outline: none;
 }
+
+div.toolbar div.dropbtn-content{
+    z-index: 2;
+}
