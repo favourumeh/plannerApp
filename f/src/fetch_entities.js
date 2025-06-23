@@ -257,7 +257,7 @@ export async function fetchEntityProgress({entityId, entityName, handleNotificat
     return resp_json
 } 
 
-export async function fetchScheduledPlannerTasks({periodStart, periodEnd, handleNotification, handleLogout}) {
+export async function fetchPlannerTasks({periodStart, periodEnd, handleNotification, handleLogout}) {
     try {
         const baseUrl =  `${backendBaseUrl}/query-tasks?`
         const query = new URLSearchParams({sitePage:"planner", periodStart:periodStart, periodEnd:periodEnd })
@@ -274,36 +274,8 @@ export async function fetchScheduledPlannerTasks({periodStart, periodEnd, handle
         handleNotification(err.message + `. Failed to get planner's the scheduled tasks. Likely database connection error.`, "failure")
     }
     handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
-    const requestFn = async() => fetchScheduledPlannerTasks({periodStart, periodEnd, handleNotification, handleLogout})
-    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
-    return resp_json
-}
-
-export async function fetchUnscheduledPlannerTasks() {
-    try {
-        const url = `${backendBaseUrl}/query-tasks?` + new URLSearchParams({sitePage:"planner"})
-        const options = {
-            method:"GET",
-            headers:{"Content-Type":"application/json"},
-            credentials:"include"
-        }
-        var resp = await fetch(url, options)
-        var resp_json = await resp.json()
-    } catch (err) {
-        handleNotification(err.message + `. Failed to get planner's the unscheduled tasks. Likely database connection error.`, "failure")
-    }
-    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
-    const requestFn = async() => fetchUnscheduledPlannerTasks()
+    const requestFn = async() => fetchPlannerTasks({periodStart, periodEnd, handleNotification, handleLogout})
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
 }
 export {fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject, fetchKanbanTasks}
-
-
-
-// query-tasks?sitePage=planner&periodStart=2025-06-09&periodEnd=2025-06-16
-// query-tasks?sitePage=planner&periodStart=2025-06-09&periodEnd=2025-06-16
-
-
-// query-tasks?sitePage=planner&periodStart=2025-06-09&periodEnd=2025-06-16
-// query-tasks?sitePage=planner&periodStart=2025-04-01&periodEnd=2025-04-30

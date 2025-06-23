@@ -1,0 +1,52 @@
+import DatePicker from "react-datepicker"
+import "./settingsBox.css"
+
+
+const datetimeToString = (datetime) => {
+    return !datetime? null : datetime.toISOString().split("T")[0] 
+}
+
+export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAll, setIsExpandAll, isJustUnscheduledTask, setIsJustUnscheduledTask}) {
+
+    return (
+        <div className="planner-settings-box"> 
+            <div className="planner-setting-header"> Settings </div>
+
+            <div className="planner-settings-period planner-settings-item"> 
+                <span> Period:</span>
+                <DatePicker
+                    selected={new Date(periodStart)}
+                    onSelect={(date) => setPeriodStart(datetimeToString(date))} 
+                    onChange={(date) => setPeriodStart(datetimeToString(date)) }
+                    dateFormat="yyyy-MM-dd"
+                />
+                <div>
+                    <i className="fa fa-arrows-h" aria-hidden="true"></i>
+                </div>
+                <DatePicker
+                    selected={new Date(periodEnd)}
+                    onSelect={(date) => setPeriodEnd(datetimeToString(date))} 
+                    onChange={(date) => setPeriodEnd(datetimeToString(date))}
+                    dateFormat="yyyy-MM-dd"
+                />
+            </div>
+            <div className="date-card-expander planner-settings-item">
+                <span> Expand/Constrict All: </span>&nbsp; &nbsp;
+                {isExpandAll?
+                    <i className="fa fa-compress" aria-hidden="true" onClick={() => setIsExpandAll(!isExpandAll)}></i>
+                    : <i className="fa fa-expand" aria-hidden="true" onClick={() => setIsExpandAll(!isExpandAll)}></i>
+                }
+            </div>
+
+            <div className="toggle-just-tasks planner-settings-item"> 
+                <span>Show Just Tasks: </span>
+                {isJustUnscheduledTask? 
+                    <i class="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(false)}></i>
+                    : <i class="fa fa-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(true)}></i>
+                }
+            </div>
+
+        </div>
+    )
+
+}

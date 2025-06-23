@@ -1,0 +1,71 @@
+div.planner-settings-box{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border: 1px solid white;
+    border-radius: 10px;
+    width: 380px;
+    margin: 0 0px 10px 0;
+    background-color: rgba(48, 48, 100, 1);
+    /* background-color: rgb(30, 23, 36); */
+
+}
+div.planner-settings-box .planner-settings-item{
+    /* border: 1px solid; */
+    margin: 0 0 5px 10px;
+}
+
+div.planner-settings-box span{
+    font-weight: 600;
+}
+
+div.planner-settings-period{
+    display: flex;
+}
+
+div.planner-settings-box input{
+    max-width: 68px;
+    border: none;
+    background-color: rgba(48, 48, 100, 0.137);
+}
+div.planner-settings-box input:hover{
+    color: rgba(0, 230, 0);
+    cursor: pointer;
+}
+
+div.planner-settings-box .react-datepicker__tab-loop{
+    position: absolute;
+    z-index: 1;
+    translate: -100% -0px;
+}
+div.planner-settings-box input:focus{
+    outline: none;
+}
+
+div.planner-settings-box .fa-arrows-h{
+    margin: 0 2px 0 5px;
+}
+
+
+div.planner-settings-box button:hover {
+    color: rgb(0, 230, 0);
+    background-color: rgba(0,0,0,0);
+    border: none;
+    
+}
+
+div.planner-settings-box button {
+    background-color: rgba(0,0,0,0);
+    border: none;
+    outline: none;
+}
+div.planner-setting-header{
+    align-self: center;
+}
+
+div.date-card-expander i {
+    cursor: pointer;
+}
+div.date-card-expander i:hover {
+    color:rgb(0, 230, 0);
+}
