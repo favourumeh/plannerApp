@@ -8,7 +8,6 @@
     width: 260px;
     border-radius: 10px;
     padding: 10px;
-
 }
 
 .hover-info-card-overlay .info-card-item {
@@ -35,5 +34,13 @@ div.progress-card-overlay:hover .hover-info-card-overlay{
 }
 
 div.planner-task-card-overlay:hover .hover-info-card-overlay{
+    visibility: visible;
+}
+
+div.planner-objective-card-title:hover .hover-info-card-overlay{
+    visibility: visible;
+}
+
+div.planner-project-card-title:hover .hover-info-card-overlay{
     visibility: visible;
 }
