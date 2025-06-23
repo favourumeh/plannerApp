@@ -164,27 +164,30 @@ def query_tasks():
         )
         resp_dict["_selectedDate"] = selected_date.strftime("%Y-%m-%d")
     if (site_page=="planner"):
-        if (period_start != None) and (period_end != None): #filter scheduled task by period
-            period_start: datetime = convert_date_str_to_datetime(period_start, "%Y-%m-%d")
-            period_end: datetime = convert_date_str_to_datetime(period_end, "%Y-%m-%d")
+        period_start: datetime = convert_date_str_to_datetime(period_start, "%Y-%m-%d")
+        period_end: datetime = convert_date_str_to_datetime(period_end, "%Y-%m-%d")
 
-            if (period_end<period_start):
-                resp_dict["message"] = "Failure: End date cannot be before start date. Please change this."
-                resp_dict["tasks"], resp_dict["taskObjectives"], resp_dict["taskProjects"] = [], [], []
-                return jsonify(resp_dict), 400
+        if (period_end<period_start):
+            resp_dict["message"] = "Failure: End date cannot be before start date. Please change this."
+            resp_dict["tasks"], resp_dict["taskObjectives"], resp_dict["taskProjects"] = [], [], []
+            return jsonify(resp_dict), 400
 
-            query: Query = query.filter(
+        query: Query = query.filter( # query unsheduled/scheduled/started tasks within period
+            db.or_(
                 db.and_(
                     db.func.date(Task.scheduled_start) >= period_start,
                     db.func.date(Task.scheduled_start) <= period_end,
-                )
+                ),
+                db.and_(
+                    db.func.date(Task.start) >= period_start, #included because task should be shown in the planner page when the task is started if it starts after/before its scheduled date
+                    db.func.date(Task.start) <= period_end,
+                ),
+                Task.scheduled_start == None, # unscheduled tasks
             )
-            resp_dict["periodStart"] = period_start.strftime("%Y-%m-%d")
-            resp_dict["periodEnd"] = period_end.strftime("%Y-%m-%d")
-
-        if (period_start == None) and (period_end == None): #filter unscheduled tasks
-            query: Query = query.filter(Task.scheduled_start == None)
-
+        )
+        resp_dict["periodStart"] = period_start.strftime("%Y-%m-%d")
+        resp_dict["periodEnd"] = period_end.strftime("%Y-%m-%d")
+            
     if page and per_page:
         pagination: Pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         resp_dict["_pages"] = pagination.pages
@@ -198,11 +201,12 @@ def query_tasks():
         resp_dict["tasks"] = [task.to_dict() for task in tasks]
         resp_dict["_itemCount"] = len(tasks)
 
-        if (not page) and (resp_dict["_itemCount"]>0):
+        if (not page) and (resp_dict["_itemCount"]>0): # returns the objectives and projects of the queried tasks when not paginated
             objective_ids: list[int] = [task.objective_id for task in query.all()]
-            objectives: list[Objective] = Objective.query.filter(Objective.id.in_(objective_ids)).all()
+            objectives: list[Objective] = Objective.query.filter(Objective.id.in_(objective_ids)).distinct().all()
+
             project_ids: List[int] = [objective.project_id for objective in objectives]
-            projects: list[Project] = Project.query.filter(Project.id.in_(project_ids)).all()
+            projects: list[Project] = Project.query.filter(Project.id.in_(project_ids)).distinct().all()
             resp_dict["taskObjectives"] = [objective.to_dict() for objective in objectives]
             resp_dict["taskProjects"] = [project.to_dict() for project in projects]
 
