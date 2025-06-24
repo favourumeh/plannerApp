@@ -29,6 +29,7 @@ export function PlannerPage ({sitePage}) {
     const [ periodStart, setPeriodStart ] = useState( () => persistState( "periodStart", datetimeToString(new Date()), "localStorage" ) )
     const [ periodEnd, setPeriodEnd ] = useState( () => persistState( "periodEnd", datetimeToString(new Date(new Date().setDate( new Date().getDate() + 1 ))), "localStorage" ) ) // end date is a week after start date
     const [isExpandAllDateCards, setIsExpandAllDateCards] = useState(true)
+    const [isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities] = useState(true)
     const [isJustUnscheduledTask, setIsJustUnscheduledTask] = useState(true)
     const {handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
 
@@ -151,12 +152,15 @@ export function PlannerPage ({sitePage}) {
                             setIsExpandAllDateCards={setIsExpandAllDateCards}
                             isJustUnscheduledTask={isJustUnscheduledTask} 
                             setIsJustUnscheduledTask = {setIsJustUnscheduledTask}
+                            isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
+                            setIsExpandAllUnscheduledEntities={setIsExpandAllUnscheduledEntities}
                         />
                         <UnscheduledSidebar 
                             unscheduledTasks={unscheduledTasks} 
                             projects={projects} 
                             objectives={objectives} 
                             isJustUnscheduledTask={isJustUnscheduledTask}
+                            isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
                             refetchPlannerTasks={refetchPlannerTasks}
                         />
                     </div>

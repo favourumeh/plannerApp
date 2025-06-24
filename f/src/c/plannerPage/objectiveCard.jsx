@@ -2,13 +2,14 @@ import "./parentCard.css"
 import { TaskCard } from "./taskCard"
 import ObjectiveInfoCard from "../InfoCards/objectiveInfoCard"
 import globalContext from "../../context"
-import { useContext } from "react"
+import { useContext, useEffect, useState } from "react"
 import { defaultTask } from "../../staticVariables"
 import { useMutation } from "@tanstack/react-query"
 import { mutateEntityRequest } from "../../fetch_entities"
 
-export function ObjectiveCard({entityName, objective, projects, objectives, unscheduledTasks, refetchPlannerTasks, translate}) {
+export function ObjectiveCard({entityName, objective, projects, objectives, unscheduledTasks, isExpandAllUnscheduledEntities, refetchPlannerTasks, translate}) {
     const {setCurrentObjective,setCurrentTask, setForm, setFormProject, setFormObjective, setIsModalOpen, handleNotification, handleLogout} = useContext(globalContext)
+    const [isExpanded, setIsExpanded] = useState(false) // state to track if the objective card is expanded to show objectives
     const unscheduledTasksOfObjective = unscheduledTasks?.filter((task) => task.objectiveId === objective.id )
     const project = projects?.find( project => project.id === objective.projectId )
 
@@ -48,36 +49,58 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
         setIsModalOpen(true)
     }
 
+    const handleEntityExpansion = (e) => {
+        e.stopPropagation()
+        setIsExpanded(!isExpanded)
+    }
+
+    useEffect(()=> { // expand/constrict all unsheduled entities
+        setIsExpanded(isExpandAllUnscheduledEntities)
+    }, [isExpandAllUnscheduledEntities])
+
     return (
         <div className="parent-card-container planner-objective-container">
             
             <div className="planner-parent-title-row  planner-objective-title-row">
 
                  <div className={`mutate-entity add-${entityName}-entity`}>
-                    <i className="fa fa-plus" aria-hidden="true"  onClick={handleClickAddBtn} ></i> 
+                    <i className="fa fa-plus side-btn" aria-hidden="true"  onClick={handleClickAddBtn} ></i> 
                 </div>
 
                 <div 
                     className = "planner-parent-card-title planner-objective-card-title"
                     onClick={onClickObjectiveCard}
-                > {`${objective.objectiveNumber} ${objective.title}`} 
-                    <ObjectiveInfoCard objective ={objective} objectiveProject={project} translate={translate}/>
+                > 
+                    <div>
+                        {`${objective.objectiveNumber} ${objective.title}`} 
+                        <ObjectiveInfoCard objective ={objective} objectiveProject={project} translate={translate}/>
+                    </div>
+                    
+                    <div>
+                        {isExpanded? 
+                            <i className="fa fa-caret-up dropdown-btn" aria-hidden="true" onClick={handleEntityExpansion}></i>
+                            : <i className="fa fa-caret-down dropdown-btn" aria-hidden="true" onClick={handleEntityExpansion}></i>
+                        }
+                    </div>
+
                 </div> 
 
                 <div className={`mutate-entity delete-${entityName}-entity`}>
-                    <i className="fa fa-times" aria-hidden="true" onClick={handleClickDeleteBtn} ></i>
+                    <i className="fa fa-times side-btn" aria-hidden="true" onClick={handleClickDeleteBtn} ></i>
                 </div>
             </div>
 
-            { unscheduledTasksOfObjective?.map( (task) =>
-                <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    projects={projects} 
-                    objectives={objectives}
-                    refetchPlannerTasks={refetchPlannerTasks}
-                    translate="-90% -100%"/>
-            ) }
+            {isExpanded?
+                unscheduledTasksOfObjective?.map( (task) =>
+                    <TaskCard 
+                        key={task.id} 
+                        task={task} 
+                        projects={projects} 
+                        objectives={objectives}
+                        refetchPlannerTasks={refetchPlannerTasks}
+                        translate="-90% -100%"/>
+                ) : undefined
+            }
         </div>
     )
 }

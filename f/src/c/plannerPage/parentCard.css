@@ -20,15 +20,24 @@ div.planner-parent-card-title{
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
+
+    display: flex;
+    justify-content: space-between;
+
 }
 
-
-div.planner-parent-title-row i {
+div.planner-parent-title-row i.side-btn {
     visibility: hidden;
     background-color: rgba(0,0,0,0);
     cursor: pointer;
     border: none;
     padding:2px;
+}
+
+div.planner-parent-title-row  i.dropdown-btn {
+    margin: 0px 5px 0px 0px;
+    /* color: red; */
+    font-size: larger;
 }
 
 

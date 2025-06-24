@@ -4,7 +4,7 @@ import { TaskCard } from "./taskCard"
 import { ProjectCard } from "./projectCard"
 import { useDroppable } from "@dnd-kit/core"
 
-export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJustUnscheduledTask, refetchPlannerTasks}) {
+export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJustUnscheduledTask, isExpandAllUnscheduledEntities, refetchPlannerTasks}) {
     // console.log("unScheduled tasks", unscheduledTasks)
     const totalTaskMins = unscheduledTasks.reduce((acc, task)=> acc + (task.duration || task.durationEst), 0)
 
@@ -37,6 +37,7 @@ export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJu
                         projects={projects} 
                         objectives={objectives} 
                         unscheduledTasks={unscheduledTasks}
+                        isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
                         refetchPlannerTasks={refetchPlannerTasks}
                         translate="-80% -120%"/>
 

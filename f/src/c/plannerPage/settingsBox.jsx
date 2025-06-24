@@ -6,7 +6,7 @@ const datetimeToString = (datetime) => {
     return !datetime? null : datetime.toISOString().split("T")[0] 
 }
 
-export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAllDateCards, setIsExpandAllDateCards, isJustUnscheduledTask, setIsJustUnscheduledTask}) {
+export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAllDateCards, setIsExpandAllDateCards, isJustUnscheduledTask, setIsJustUnscheduledTask, isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities}) {
     return (
         <div className="planner-settings-box"> 
             <div className="planner-setting-header"> Settings </div>
@@ -34,6 +34,13 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
                 {isExpandAllDateCards?
                     <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExpandAllDateCards(false)}></i>
                     : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExpandAllDateCards(true)}></i>
+                }
+            </div>
+            <div className="unscheduled-entities-expander planner-settings-item">
+                <span> Expand All Unscheduled Entities: </span>&nbsp; &nbsp;
+                {isExpandAllUnscheduledEntities?
+                    <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExpandAllUnscheduledEntities(false)}></i>
+                    : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExpandAllUnscheduledEntities(true)}></i>
                 }
             </div>
 
