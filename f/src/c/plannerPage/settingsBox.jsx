@@ -41,8 +41,8 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
             <div className="toggle-just-tasks planner-settings-item"> 
                 <span>Show Just Tasks: </span>
                 {isJustUnscheduledTask? 
-                    <i class="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(false)}></i>
-                    : <i class="fa fa-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(true)}></i>
+                    <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(false)}></i>
+                    : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(true)}></i>
                 }
             </div>
 

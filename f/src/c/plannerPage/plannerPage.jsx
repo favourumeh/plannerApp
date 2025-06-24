@@ -33,7 +33,7 @@ export function PlannerPage ({sitePage}) {
     const {handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
 
     //get the tasks for the planner page for the specified period
-    const {data: scheduledTasksQuery, isPending:isPendingScheduled, refetch: refetchScheduledTasks} = useQuery({
+    const {data: scheduledTasksQuery, isPending:isPendingScheduled, refetch: refetchPlannerTasks} = useQuery({
         queryKey: ["planner-tasks-planner-period", {"start":periodStart, "finish":periodEnd}],
         queryFn: () => fetchPlannerTasks({periodStart, periodEnd, handleNotification, handleLogout}),
         placeholderData: keepPreviousData, 
@@ -71,10 +71,6 @@ export function PlannerPage ({sitePage}) {
             return {id: getDayFromDate(date) + " " +  datetimeToString(date)}
         })
 
-    //refresh the tasks in the planner page
-    const refetchPlannerTasks = () =>{
-        refetchScheduledTasks()
-    }
     const dndUpdateTaskMutation = useMutation({ // update(mutate) the task when it is dnd
         mutationFn: mutateEntityRequest, 
         onSuccess: refetchPlannerTasks,
@@ -160,7 +156,8 @@ export function PlannerPage ({sitePage}) {
                             unscheduledTasks={unscheduledTasks} 
                             projects={projects} 
                             objectives={objectives} 
-                            isJustUnscheduledTask={isJustUnscheduledTask} 
+                            isJustUnscheduledTask={isJustUnscheduledTask}
+                            refetchPlannerTasks={refetchPlannerTasks}
                         />
                     </div>
 
@@ -174,7 +171,7 @@ export function PlannerPage ({sitePage}) {
                                 projects={projects}
                                 objectives={objectives}
                                 isExpandAll={isExpandAll}
-                                refetchScheduledTasks={refetchScheduledTasks}
+                                refetchPlannerTasks={refetchPlannerTasks}
                             />
                         ) }
                     </div>

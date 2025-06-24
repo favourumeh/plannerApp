@@ -7,14 +7,14 @@ import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
 import { useDraggable } from "@dnd-kit/core"
 
-export function TaskCard({task, projects, objectives, refetchScheduledTasks, translate}) {
+export function TaskCard({task, projects, objectives, refetchPlannerTasks, translate}) {
     const {setForm, setCurrentTask, handleNotification, handleLogout, setIsModalOpen} = useContext(globalContext)
     const objective = objectives?.find(objective=> task.objectiveId===objective.id)
     const project = projects.find((project) => objective?.projectId===project.id)
 
     const deleteEntityMutation = useMutation({
         mutationFn: mutateEntityRequest,
-        onSuccess: refetchScheduledTasks,
+        onSuccess: refetchPlannerTasks,
     })
     const onClickEditBtn = (e) => {
         e.stopPropagation()
@@ -24,14 +24,18 @@ export function TaskCard({task, projects, objectives, refetchScheduledTasks, tra
     }
 
     const onClickDeleteBtn = (e) => {
-        e.stopPropagation()
-        deleteEntityMutation.mutate({
-            action: "delete",
-            entityName: "task",
-            currentEntity: task, 
-            handleNotification: handleNotification, 
-            handleLogout: handleLogout,
-        })
+        if (e.ctrlKey) {
+            e.stopPropagation()
+            deleteEntityMutation.mutate({
+                action: "delete",
+                entityName: "task",
+                currentEntity: task, 
+                handleNotification: handleNotification, 
+                handleLogout: handleLogout,
+            })
+        } else {
+            handleNotification(`Hold down ctrl key to delete task`, "error")
+        }
     }
 
     // DnD - Make enitity cards draggable

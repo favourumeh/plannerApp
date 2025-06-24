@@ -7,7 +7,7 @@ import { useDroppable } from "@dnd-kit/core"
 const datetimeToString = (datetime) => {
     return !datetime? null : datetime.toISOString().split("T")[0] 
 }
-export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAll, refetchScheduledTasks}) {
+export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAll, refetchPlannerTasks}) {
     const [isExpanded, setIsExpanded] = useState(isExpandAll)
 
     const taskFilter = (task) => {
@@ -64,7 +64,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
 
             {isExpanded? 
                 daysTasks?.map((task, index) =>
-                    <TaskCard key={index} task={task} projects={projects} objectives={objectives} refetchScheduledTasks={refetchScheduledTasks} translate={"50% 25px"}/>
+                    <TaskCard key={index} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate={"50% 25px"}/>
                 )
                 : undefined    
             }
