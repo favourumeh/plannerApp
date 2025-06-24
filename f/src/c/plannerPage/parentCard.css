@@ -40,7 +40,6 @@ div.planner-parent-title-row  i.dropdown-btn {
     font-size: larger;
 }
 
-
 div.planner-project-container {
     /* border: 1px solid; */
     display: flex;
@@ -53,6 +52,14 @@ div.planner-objective-container {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+}
+
+div.planner-objective-container .planner-task-card-content{
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
 }
 
 div.planner-project-container .planner-project-title-row {

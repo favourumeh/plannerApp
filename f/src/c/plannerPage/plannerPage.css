@@ -18,6 +18,7 @@ div.planner-body{
     border: 1px solid;
     border-radius: 10px;
     min-height: 700px;
+    min-width: 1500px;
     /* background-color: rgb(30, 23, 36); */
     padding: 4px;
 }

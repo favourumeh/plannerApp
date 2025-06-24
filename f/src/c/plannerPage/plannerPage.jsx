@@ -1,5 +1,5 @@
 import "./plannerPage.css"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import { persistState } from "../../utils/stateUtils"
 import Toolbar from "../toolbar/toolbar"
 import AddEntity from "../toolbar/addEntity"
@@ -15,6 +15,7 @@ import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query"
 import { DndContext } from "@dnd-kit/core"
 import { UnscheduledSidebar } from "./unscheduledSidebar"
 import { SettingsBox } from "./settingsBox"
+import localPlannerPageContext from "./localPlannerPageContext"
 
 const datetimeToString = (datetime) => {
     return !datetime? null : datetime.toISOString().split("T")[0] 
@@ -26,12 +27,15 @@ const getDayFromDate = (date) => {
 
 export function PlannerPage ({sitePage}) {
     if (sitePage !=="view-planner") return null
+    const minPlannerBodyHeight = 700 // minimum height of the planner body
     const [ periodStart, setPeriodStart ] = useState( () => persistState( "periodStart", datetimeToString(new Date()), "localStorage" ) )
     const [ periodEnd, setPeriodEnd ] = useState( () => persistState( "periodEnd", datetimeToString(new Date(new Date().setDate( new Date().getDate() + 1 ))), "localStorage" ) ) // end date is a week after start date
     const [ isExpandAllDateCards, setIsExpandAllDateCards ] = useState( () => persistState( "isExpandAllDateCards", true, "localStorage" ) )
     const [ isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities ] = useState( () => persistState("isExpandAllUnscheduledEntities", true, "localStorage") )
     const [ isJustUnscheduledTask, setIsJustUnscheduledTask ] = useState(() => persistState("isJustUnscheduledTask", false, "localStorage") )
-    const plannerBodyLength = useState()
+    const [ plannerBodyHeight, setPlannerBodyHeight ] = useState(minPlannerBodyHeight)
+    const sideBar = useRef(null)
+    const scheduledSection = useRef(null)
     const {handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
 
     //get the tasks for the planner page for the specified period
@@ -132,70 +136,89 @@ export function PlannerPage ({sitePage}) {
         }
     }, [isModalOpen])
 
+    useEffect(() => { // dynamically set the height of the planner body based on the max height between the sidebar and the planner content (unscheduled section)
+        if (!sideBar.current) return
+
+        const observer = new ResizeObserver((entries) => {
+            const sideBarHeight = entries[0].contentRect.height
+            const scheduledSectionHeight = scheduledSection.current?.getBoundingClientRect().height
+            // console.log("sideBarHeight:", sideBarHeight)
+            setPlannerBodyHeight(Math.max(sideBarHeight+10, minPlannerBodyHeight, scheduledSectionHeight)) 
+        })
+
+        observer.observe(sideBar.current)
+        return () => observer.disconnect() // Cleanup
+    }, [])
+
+    const localPLannerPageContextValues = { // To-do move props to context
+    }
+
     return (
-        <div className="planner-page">
-            <div className="planner-page-header"> 
-                <Header/>
-                <div className="planner-page-header-2">
-                    <div 
-                        className="planner-header-"
-                        style={{"color": new Date(periodEnd) < new Date(periodStart)? "red": "white" }}
-                    >
-                        Planner
+        <localPlannerPageContext.Provider value={localPLannerPageContextValues}>
+            <div className="planner-page">
+                <div className="planner-page-header"> 
+                    <Header/>
+                    <div className="planner-page-header-2">
+                        <div 
+                            className="planner-header-"
+                            style={{"color": new Date(periodEnd) < new Date(periodStart)? "red": "white" }}
+                        >
+                            Planner
+                        </div>
+                    
                     </div>
-                 
+
+                    <Toolbar> 
+                        <AddEntity/>
+                        <ViewPage/>
+                        <RefreshEntities refetch={refetchPlannerTasks}/>
+                        <FilterPage/>
+                    </Toolbar>
+
                 </div>
-
-                <Toolbar> 
-                    <AddEntity/>
-                    <ViewPage/>
-                    <RefreshEntities refetch={refetchPlannerTasks}/>
-                    <FilterPage/>
-                </Toolbar>
-
-            </div>
-            <DndContext onDragEnd={handleDragEnd}>
-                <div className="planner-body"> 
-                    <div className="planner-side-bar" >
-                        <SettingsBox 
-                            periodStart={periodStart}  
-                            setPeriodStart={setPeriodStart}  
-                            periodEnd={periodEnd} 
-                            setPeriodEnd={setPeriodEnd}  
-                            isExpandAllDateCards={isExpandAllDateCards} 
-                            setIsExpandAllDateCards={setIsExpandAllDateCards}
-                            isJustUnscheduledTask={isJustUnscheduledTask} 
-                            setIsJustUnscheduledTask = {setIsJustUnscheduledTask}
-                            isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
-                            setIsExpandAllUnscheduledEntities={setIsExpandAllUnscheduledEntities}
-                        />
-                        <UnscheduledSidebar 
-                            unscheduledTasks={unscheduledTasks} 
-                            projects={projects} 
-                            objectives={objectives} 
-                            isJustUnscheduledTask={isJustUnscheduledTask}
-                            isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
-                            refetchPlannerTasks={refetchPlannerTasks}
-                        />
-                    </div>
-
-                    <div className="planner-content"> 
-                        { periodDates?.map((date, index) => 
-                            <DateCard
-                                key={index}
-                                date={date.id}
-                                isPendingScheduled={isPendingScheduled}
-                                tasks={tasks}
-                                projects={projects}
-                                objectives={objectives}
-                                isExpandAllDateCards={isExpandAllDateCards}
+                <DndContext onDragEnd={handleDragEnd}>
+                    <div className="planner-body" style={{minHeight: `${plannerBodyHeight}px`}}> 
+                        <div ref={sideBar} className="planner-side-bar" >
+                            <SettingsBox 
+                                periodStart={periodStart}  
+                                setPeriodStart={setPeriodStart}  
+                                periodEnd={periodEnd} 
+                                setPeriodEnd={setPeriodEnd}  
+                                isExpandAllDateCards={isExpandAllDateCards} 
+                                setIsExpandAllDateCards={setIsExpandAllDateCards}
+                                isJustUnscheduledTask={isJustUnscheduledTask} 
+                                setIsJustUnscheduledTask = {setIsJustUnscheduledTask}
+                                isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
+                                setIsExpandAllUnscheduledEntities={setIsExpandAllUnscheduledEntities}
+                            />
+                            <UnscheduledSidebar 
+                                unscheduledTasks={unscheduledTasks} 
+                                projects={projects} 
+                                objectives={objectives} 
+                                isJustUnscheduledTask={isJustUnscheduledTask}
+                                isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
                                 refetchPlannerTasks={refetchPlannerTasks}
                             />
-                        ) }
-                    </div>
-                </div>
-            </DndContext>
+                        </div>
 
-        </div>
+                        <div ref={scheduledSection} className="planner-content"> 
+                            { periodDates?.map((date, index) => 
+                                <DateCard
+                                    key={index}
+                                    date={date.id}
+                                    isPendingScheduled={isPendingScheduled}
+                                    tasks={tasks}
+                                    projects={projects}
+                                    objectives={objectives}
+                                    isExpandAllDateCards={isExpandAllDateCards}
+                                    refetchPlannerTasks={refetchPlannerTasks}
+                                />
+                            ) }
+                        </div>
+                    </div>
+                </DndContext>
+            </div>
+        </localPlannerPageContext.Provider>
+
     )
 }
