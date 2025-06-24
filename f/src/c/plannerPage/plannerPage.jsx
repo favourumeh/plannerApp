@@ -28,9 +28,10 @@ export function PlannerPage ({sitePage}) {
     if (sitePage !=="view-planner") return null
     const [ periodStart, setPeriodStart ] = useState( () => persistState( "periodStart", datetimeToString(new Date()), "localStorage" ) )
     const [ periodEnd, setPeriodEnd ] = useState( () => persistState( "periodEnd", datetimeToString(new Date(new Date().setDate( new Date().getDate() + 1 ))), "localStorage" ) ) // end date is a week after start date
-    const [isExpandAllDateCards, setIsExpandAllDateCards] = useState(true)
-    const [isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities] = useState(true)
-    const [isJustUnscheduledTask, setIsJustUnscheduledTask] = useState(true)
+    const [ isExpandAllDateCards, setIsExpandAllDateCards ] = useState( () => persistState( "isExpandAllDateCards", true, "localStorage" ) )
+    const [ isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities ] = useState( () => persistState("isExpandAllUnscheduledEntities", true, "localStorage") )
+    const [ isJustUnscheduledTask, setIsJustUnscheduledTask ] = useState(() => persistState("isJustUnscheduledTask", false, "localStorage") )
+    const plannerBodyLength = useState()
     const {handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
 
     //get the tasks for the planner page for the specified period
@@ -53,6 +54,19 @@ export function PlannerPage ({sitePage}) {
     useEffect(() => {
         localStorage.setItem("periodEnd", JSON.stringify( datetimeToString( new Date(periodEnd) )))
     }, [periodEnd] )
+    
+    useEffect(() => {
+        localStorage.setItem("isExpandAllDateCards", isExpandAllDateCards )
+    }, [isExpandAllDateCards] )
+
+    useEffect(() => {
+        localStorage.setItem("isExpandAllUnscheduledEntities", isExpandAllUnscheduledEntities )
+    }, [isExpandAllUnscheduledEntities] )
+
+    useEffect(() => {
+        localStorage.setItem("isJustUnscheduledTask", isJustUnscheduledTask )
+    }, [isJustUnscheduledTask] )
+    
 
     // calculate the number of days between periodStart and periodEnd
     function getDaysBetweenDates(date1, date2) {
