@@ -32,7 +32,6 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
         } else {
             handleNotification(`Hold down ctrl key to delete ${entityName}`, "error")
         }
-
     }
 
     const onClickObjectiveCard = () => {
@@ -49,7 +48,7 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
         setIsModalOpen(true)
     }
 
-    const handleEntityExpansion = (e) => {
+    const handleEntityExpansion = (e) => { // expands or constricts a specific objective card
         e.stopPropagation()
         setIsExpanded(!isExpanded)
     }
@@ -57,6 +56,16 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
     useEffect(()=> { // expand/constrict all unsheduled entities
         setIsExpanded(isExpandAllUnscheduledEntities)
     }, [isExpandAllUnscheduledEntities])
+
+
+    useEffect(() => { 
+        if (!isExpanded && unscheduledTasksOfObjective.length > 0) { // expand objective card to show tasks if objective card is constricted when the number of unscheduledTasksOfObjective changes.
+            setIsExpanded(true)
+        }
+        if (unscheduledTasksOfObjective.length === 0) { // constrict objective card when there are no unscheduled tasks
+            setIsExpanded(false)
+        }
+    }, [unscheduledTasksOfObjective.length])
 
     return (
         <div className="parent-card-container planner-objective-container">
@@ -69,9 +78,9 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
 
                 <div 
                     className = "planner-parent-card-title planner-objective-card-title"
-                    onClick={onClickObjectiveCard}
+                    onDoubleClick={onClickObjectiveCard}
                 > 
-                    <div>
+                    <div className="planner-parent-card-title-content">
                         {`${objective.objectiveNumber} ${objective.title}`} 
                         <ObjectiveInfoCard objective ={objective} objectiveProject={project} translate={translate}/>
                     </div>

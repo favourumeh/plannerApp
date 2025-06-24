@@ -8,22 +8,23 @@ div.planner-parent-title-row{
 
 div.planner-parent-card-title{
     /* border:1px solid; */
+    display: flex;
+    justify-content: space-between;
     border: 1px solid;
     border-radius: 4px;
 
     padding: 0 0 0 2px;
     cursor: pointer;
     width: 100%;
+}
 
+div.planner-parent-card-title-content{
+    width: 100%;
     overflow: hidden;
     text-overflow: ellipsis; 
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
-
-    display: flex;
-    justify-content: space-between;
-
 }
 
 div.planner-parent-title-row i.side-btn {
@@ -36,7 +37,6 @@ div.planner-parent-title-row i.side-btn {
 
 div.planner-parent-title-row  i.dropdown-btn {
     margin: 0px 5px 0px 0px;
-    /* color: red; */
     font-size: larger;
 }
 
