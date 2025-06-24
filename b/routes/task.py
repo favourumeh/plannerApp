@@ -8,7 +8,7 @@ from models import User, Project, Objective, Task
 from plannerPackage import login_required, token_required, generate_all_user_content, generate_user_content, generate_entity_number, convert_date_str_to_datetime 
 from config import db, app, serializer
 from typing import Tuple, List
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone
 
 #create blueprint
@@ -203,10 +203,20 @@ def query_tasks():
 
         if (not page) and (resp_dict["_itemCount"]>0): # returns the objectives and projects of the queried tasks when not paginated
             objective_ids: list[int] = [task.objective_id for task in query.all()]
-            objectives: list[Objective] = Objective.query.filter(Objective.id.in_(objective_ids)).distinct().all()
+            objectives: list[Objective] = Objective.query.filter(
+                db.or_(
+                    Objective.id.in_(objective_ids),
+                    db.func.date(Objective.date_added) >= (datetime.now(tz=timezone('Europe/London')) - timedelta(days=1)).date(),  # objectives created on or after the previous day. Ensures objectives are visible in the planner page once created. 
+                )
+            ).all()
 
             project_ids: List[int] = [objective.project_id for objective in objectives]
-            projects: list[Project] = Project.query.filter(Project.id.in_(project_ids)).distinct().all()
+            projects: list[Project] = Project.query.filter(
+                db.or_(
+                    Project.id.in_(project_ids),
+                    db.func.date(Project.date_added) >= (datetime.now(tz=timezone('Europe/London')) - timedelta(days=1)).date(),  # projects created on or after the previous day. Ensures ...
+                )
+            ).all()
             resp_dict["taskObjectives"] = [objective.to_dict() for objective in objectives]
             resp_dict["taskProjects"] = [project.to_dict() for project in projects]
 
