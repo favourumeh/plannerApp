@@ -7,8 +7,8 @@ import { useDroppable } from "@dnd-kit/core"
 const datetimeToString = (datetime) => {
     return !datetime? null : datetime.toISOString().split("T")[0] 
 }
-export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAll, refetchPlannerTasks}) {
-    const [isExpanded, setIsExpanded] = useState(isExpandAll)
+export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAllDateCards, refetchPlannerTasks}) {
+    const [isExpanded, setIsExpanded] = useState(isExpandAllDateCards)
 
     const taskFilter = (task) => {
         if (!!task.start){
@@ -35,8 +35,8 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
     }, [daysTasks.length])
 
     useEffect(()=> { // expand/constrict all date cards
-        setIsExpanded(isExpandAll)
-    }, [isExpandAll])
+        setIsExpanded(isExpandAllDateCards)
+    }, [isExpandAllDateCards])
 
     const styleDateCardTitle = {color: daysTasks.length === 0? "red" : "white"}
     const styleDateCard = {border:  + ( datetimeToString(new Date()) == datetimeToString(new Date(date.split(" ")[1])) )? "2px solid rgb(0,230,0)" : "1px solid" }

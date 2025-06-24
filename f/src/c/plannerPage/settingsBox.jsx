@@ -6,8 +6,7 @@ const datetimeToString = (datetime) => {
     return !datetime? null : datetime.toISOString().split("T")[0] 
 }
 
-export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAll, setIsExpandAll, isJustUnscheduledTask, setIsJustUnscheduledTask}) {
-
+export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAllDateCards, setIsExpandAllDateCards, isJustUnscheduledTask, setIsJustUnscheduledTask}) {
     return (
         <div className="planner-settings-box"> 
             <div className="planner-setting-header"> Settings </div>
@@ -31,10 +30,10 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
                 />
             </div>
             <div className="date-card-expander planner-settings-item">
-                <span> Expand/Constrict All: </span>&nbsp; &nbsp;
-                {isExpandAll?
-                    <i className="fa fa-compress" aria-hidden="true" onClick={() => setIsExpandAll(!isExpandAll)}></i>
-                    : <i className="fa fa-expand" aria-hidden="true" onClick={() => setIsExpandAll(!isExpandAll)}></i>
+                <span> Expand All Date Cards: </span>&nbsp; &nbsp;
+                {isExpandAllDateCards?
+                    <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExpandAllDateCards(false)}></i>
+                    : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExpandAllDateCards(true)}></i>
                 }
             </div>
 
