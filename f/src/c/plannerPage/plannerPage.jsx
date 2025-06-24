@@ -80,19 +80,19 @@ export function PlannerPage ({sitePage}) {
     const handleDragEnd = (e) => { //dnd
         const {active, over} = e
         if (!over) return
-        if (over.id === "Unscheduled-Tasks-List") {}
 
         const draggedTask = tasks.find(task=> task.id === active.id)
+
+        if (!!draggedTask.scheduledStart && over.id!=="Unscheduled-Tasks-List") { // dragging tasks within scheduled section
+            const oldStartOrScheduledStart  = datetimeToString(new Date(draggedTask.start || draggedTask.scheduledStart))
+            var newScheduledStart = over.id.split(" ")[1]
+            if (oldStartOrScheduledStart === newScheduledStart) return  // if the task is not dragged to a new date do nothing
+        }
+
         if (draggedTask.status!=="To-Do") {// if the dragged task is not "To-Do" dont allow it to be dropped in a different date
             handleNotification(`The status task being dragged is '${draggedTask.status}' thus it cannot be scheduled retrospectively`, "failure")
             return
         } 
-
-        if (!!draggedTask.scheduledStart && over.id!=="Unscheduled-Tasks-List") { // dragging tasks within scheduled section
-            const oldScheduledStart  = datetimeToString(new Date(draggedTask.scheduledStart))
-            var newScheduledStart = over.id.split(" ")[1]
-            if (oldScheduledStart === newScheduledStart) return  // if the task is not dragged to a new date do nothing
-        }
 
         if (!draggedTask.scheduledStart) { //dragging task from unscheduled section to scheduled section
             if (over.id === "Unscheduled-Tasks-List") return  // if the tasks remains in the unscheduled section do nothing
