@@ -34,7 +34,7 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
         }
     }
 
-    const onClickObjectiveCard = () => {
+    const onDoubleClickObjectiveCard = () => {
         setCurrentObjective(objective)
         setForm(`update-objective`)
         setIsModalOpen(true)
@@ -78,7 +78,7 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
 
                 <div 
                     className = "planner-parent-card-title planner-objective-card-title"
-                    onDoubleClick={onClickObjectiveCard}
+                    onDoubleClick={onDoubleClickObjectiveCard}
                 > 
                     <div className="planner-parent-card-title-content">
                         {`${objective.objectiveNumber} ${objective.title}`} 

@@ -43,7 +43,7 @@ export function ProjectCard({entityName, project, projects, objectives, unschedu
         setIsModalOpen(true)
     }
 
-    const onClickProjectCard = () => {
+    const onDoubleClickProjectCard = () => {
         setCurrentProject(project)
         setForm(`update-project`)
         setIsModalOpen(true)
@@ -78,7 +78,7 @@ export function ProjectCard({entityName, project, projects, objectives, unschedu
 
                     <div 
                         className = "planner-parent-card-title planner-project-card-title"
-                        onDoubleClick = {onClickProjectCard}
+                        onDoubleClick = {onDoubleClickProjectCard}
                     > 
                         <div className="planner-parent-card-title-content">
                             {`${project.projectNumber} ${project.title}`} 

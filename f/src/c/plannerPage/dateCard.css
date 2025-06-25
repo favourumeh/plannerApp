@@ -9,16 +9,34 @@ div.planner-date-container{
 
 }
 
+div.planner-date-container-header-row{
+    display: flex;
+    justify-content: space-around;
+    /* border: 1px solid; */
+}
+
+div.planner-date-container-header-row div.side-btn{
+    margin: 0 5px 0 5px;
+}
+
+div.planner-date-container-header-row div.add-task-entity{
+    visibility: hidden;;
+    margin: 0 2px 0 5px;
+}
+
+div.planner-date-container-header-row:hover div.add-task-entity{
+    visibility: visible;
+}
+
 div.planner-date-container-header {
-    border-radius: 10px;
     display: flex;
     justify-content: space-between;
-    padding: 0 5px 0 5px;
-    margin: 0 0 5px 12px;
+    margin: 0 0 5px 0px;
+    width: 100%;
 }
 
 div.date-card-title{
-    /* border: 1px solid; */
+    border: 1px solid;
     width: 100%;
     text-align: left;
     font-weight: bold;
