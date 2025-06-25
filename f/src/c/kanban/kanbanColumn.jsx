@@ -17,7 +17,8 @@ export default function KanbanColumn ({columnId, columnTitle, taskArr, entityNam
     return (
         <>
             <div ref = {setNodeRef} id={columnId} className="kanban-column"> {`${columnTitle} [${columnTaskArr.length}]`} 
-                {columnTaskArr.map( 
+                {columnTaskArr.sort((a, b) => // sort the tasks in a kanaban column by start date
+                    new Date(a.start) - new Date(b.start)).map( 
                     (columnTask) => 
                         <div key={columnTask.id}
                             className="kanban-item-overlay"
