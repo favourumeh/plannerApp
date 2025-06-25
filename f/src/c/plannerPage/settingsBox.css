@@ -69,3 +69,14 @@ div.date-card-expander i {
 div.date-card-expander i:hover {
     color:rgb(0, 230, 0);
 }
+
+div.max-daily-working-hours input{
+    border: 1px solid;
+    max-width: 30px
+}
+
+div.max-daily-working-hours input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button { /*removes the arrow spinner on "input" tags of type number*/
+  -webkit-appearance: none;
+  margin: 0;
+}

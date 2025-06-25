@@ -34,6 +34,8 @@ export function PlannerPage ({sitePage}) {
     const [ isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities ] = useState( () => persistState("isExpandAllUnscheduledEntities", true, "localStorage") )
     const [ isJustUnscheduledTask, setIsJustUnscheduledTask ] = useState(() => persistState("isJustUnscheduledTask", false, "localStorage") )
     const [ plannerBodyHeight, setPlannerBodyHeight ] = useState(minPlannerBodyHeight)
+    const [ maxDailyWorkingHours, setMaxDailyWorkingHours ] = useState( () => persistState( "maxDailyWorkingHours", 7, "localStorage" ) )
+
     const sideBar = useRef(null)
     const scheduledSection = useRef(null)
     const {handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
@@ -71,7 +73,11 @@ export function PlannerPage ({sitePage}) {
         localStorage.setItem("isJustUnscheduledTask", isJustUnscheduledTask )
     }, [isJustUnscheduledTask] )
     
+    useEffect(() => {
+        localStorage.setItem("maxDailyWorkingHours", maxDailyWorkingHours )
+    }, [maxDailyWorkingHours] )
 
+    
     // calculate the number of days between periodStart and periodEnd
     function getDaysBetweenDates(date1, date2) {
         if (date2.getTime() < date1.getTime()){return 0}
@@ -151,6 +157,7 @@ export function PlannerPage ({sitePage}) {
     }, [])
 
     const localPLannerPageContextValues = { // To-do move props to context
+        maxDailyWorkingHours, setMaxDailyWorkingHours
     }
 
     return (

@@ -1,16 +1,17 @@
 
 import {TaskCard} from "./taskCard"
 import "./dateCard.css"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { useDroppable } from "@dnd-kit/core"
 import { genereateWorkloadFill } from "../../utils/plannerUtilis"
+import localPlannerPageContext from "./localPlannerPageContext"
 
 const datetimeToString = (datetime) => {
     return !datetime? null : datetime.toISOString().split("T")[0] 
 }
 export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAllDateCards, refetchPlannerTasks}) {
     const [isExpanded, setIsExpanded] = useState(isExpandAllDateCards)
-    const [ maxWorkingHours, setMaxWorkingHours ] = useState(7)
+    const {maxDailyWorkingHours} = useContext(localPlannerPageContext)
 
     const taskFilter = (task) => {
         if (!!task.start){
@@ -56,7 +57,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
     const maxWorkloadBarWidth = 309.8
     const isTodayOrFuture = new Date(date.split(" ")[1]) >= new Date( datetimeToString(new Date()))
     const workloadBarStyle = {
-        width: `${ Math.min(1, (totalTaskMins/60)/maxWorkingHours )*maxWorkloadBarWidth}px`,
+        width: `${ Math.min(1, (totalTaskMins/60)/maxDailyWorkingHours )*maxWorkloadBarWidth}px`,
         backgroundColor: genereateWorkloadFill(totalTaskMins/60)
 
     }

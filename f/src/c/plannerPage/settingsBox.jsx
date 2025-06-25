@@ -1,5 +1,7 @@
 import DatePicker from "react-datepicker"
 import "./settingsBox.css"
+import { useContext } from "react"
+import localPlannerPageContext from "./localPlannerPageContext"
 
 
 const datetimeToString = (datetime) => {
@@ -7,6 +9,7 @@ const datetimeToString = (datetime) => {
 }
 
 export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAllDateCards, setIsExpandAllDateCards, isJustUnscheduledTask, setIsJustUnscheduledTask, isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities}) {
+    const {maxDailyWorkingHours, setMaxDailyWorkingHours} = useContext(localPlannerPageContext)
     return (
         <div className="planner-settings-box"> 
             <div className="planner-setting-header"> Settings </div>
@@ -50,6 +53,22 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
                     <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(false)}></i>
                     : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(true)}></i>
                 }
+            </div>
+
+            <div className="max-daily-working-hours planner-settings-item"> 
+                <span>Max Daily Working Hours: </span>
+                <input 
+                    type = "number"
+                    id = "username"
+                    className="login-input"
+                    name = "username"
+                    value = {maxDailyWorkingHours}
+                    min="1"
+                    max="24"
+                    step= "1"
+                    onChange = {e => setMaxDailyWorkingHours(Math.round(e.target.value))}
+                    required/>
+        
             </div>
 
         </div>
