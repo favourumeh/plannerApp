@@ -3,12 +3,14 @@ import {TaskCard} from "./taskCard"
 import "./dateCard.css"
 import { useEffect, useState } from "react"
 import { useDroppable } from "@dnd-kit/core"
+import { genereateWorkloadFill } from "../../utils/plannerUtilis"
 
 const datetimeToString = (datetime) => {
     return !datetime? null : datetime.toISOString().split("T")[0] 
 }
 export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAllDateCards, refetchPlannerTasks}) {
     const [isExpanded, setIsExpanded] = useState(isExpandAllDateCards)
+    const [ maxWorkingHours, setMaxWorkingHours ] = useState(7)
 
     const taskFilter = (task) => {
         if (!!task.start){
@@ -40,6 +42,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
 
     const styleDateCardTitle = {color: daysTasks.length === 0? "red" : "white"}
     const styleDateCard = {border:  + ( datetimeToString(new Date()) == datetimeToString(new Date(date.split(" ")[1])) )? "2px solid rgb(0,230,0)" : "1px solid" }
+
     const displayedTaskDuration = () => {
         if (totalTaskMins < 60) {
             return `${totalTaskMins}mins`
@@ -50,11 +53,20 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
         }
     }
 
+    const maxWorkloadBarWidth = 309.8
+    const isTodayOrFuture = new Date(date.split(" ")[1]) >= new Date( datetimeToString(new Date()))
+    const workloadBarStyle = {
+        width: `${ Math.min(1, (totalTaskMins/60)/maxWorkingHours )*maxWorkloadBarWidth}px`,
+        backgroundColor: genereateWorkloadFill(totalTaskMins/60)
+
+    }
     return (
         <div ref={setNodeRef} id={date} className="planner-date-container" style={styleDateCard}>
             <div className="planner-date-container-header" >
-                <div className="date-card-title" style={styleDateCardTitle}> {date} #{isPendingScheduled? "..." : daysTasks.length } ({displayedTaskDuration()})</div>
-                <div onClick={handleExpandedDayCard}>
+                {isTodayOrFuture?  <div className="workload-bar" style={workloadBarStyle}></div>: undefined}
+                <div className="date-card-title" style={styleDateCardTitle}> {date} #{isPendingScheduled? "..." : daysTasks.length } ({displayedTaskDuration()})
+                </div>
+                <div onClick={handleExpandedDayCard} className="date-card-expand-btns">
                     {isExpanded? 
                         <i className="fa fa-caret-up" aria-hidden="true"></i>
                         : <i className="fa fa-caret-down" aria-hidden="true"></i>

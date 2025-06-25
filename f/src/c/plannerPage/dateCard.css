@@ -10,8 +10,31 @@ div.planner-date-container{
 }
 
 div.planner-date-container-header {
+    border-radius: 10px;
     display: flex;
     justify-content: space-between;
     padding: 0 5px 0 5px;
     margin: 0 0 5px 12px;
+}
+
+div.date-card-title{
+    /* border: 1px solid; */
+    width: 100%;
+    text-align: left;
+    font-weight: bold;
+    /* z-index: 1; */
+}
+
+div.date-card-expand-btns i{
+    cursor: pointer;
+}
+
+div.workload-bar{
+    /* border: 1px solid; */
+    /* border-radius: 10px; */
+    height: 24px;
+    width: 345px;
+    position: absolute;
+    translate: 0%  0%;
+    z-index: -1;
 }
