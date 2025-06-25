@@ -70,8 +70,8 @@ export function ProjectCard({entityName, project, projects, objectives, unschedu
     return (
         <div className="parent-card-container planner-project-container">
             <div className="planner-parent-row planner-project-row">
-                <div className="planner-parent-title-row planner-project-title-row">
 
+                <div className="planner-parent-title-row planner-project-title-row">
                     <div className={`mutate-entity add-${entityName}-entity`}>
                         <i className="fa fa-plus side-btn" aria-hidden="true" onClick={handleClickAddBtn} ></i> 
                     </div>
@@ -82,7 +82,6 @@ export function ProjectCard({entityName, project, projects, objectives, unschedu
                     > 
                         <div className="planner-parent-card-title-content">
                             {`${project.projectNumber} ${project.title}`} 
-                            <ProjectInfoCard project={project} translate={translate}/>
                         </div>
                         <div>
                             {isExpanded? 
@@ -95,8 +94,9 @@ export function ProjectCard({entityName, project, projects, objectives, unschedu
                     <div className={`mutate-entity delete-${entityName}-entity`}>
                         <i className="fa fa-times side-btn" aria-hidden="true"  onClick={handleClickDeleteBtn} ></i>
                     </div>
-
+                    <ProjectInfoCard project={project} translate={translate}/>
                 </div> 
+
                     {isExpanded? 
                         projectsObjectives?.map( (objective) =>
                         <ObjectiveCard 
@@ -108,7 +108,8 @@ export function ProjectCard({entityName, project, projects, objectives, unschedu
                             unscheduledTasks={unscheduledTasks}
                             isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
                             refetchPlannerTasks={refetchPlannerTasks}
-                            translate="-80% -120%"/>
+                            translate="-80% -100%"/>
+                            // translate="-240px -240px"/>
                         ) : undefined
 
                     }

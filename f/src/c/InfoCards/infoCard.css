@@ -37,10 +37,10 @@ div.planner-task-card-overlay:hover .hover-info-card-overlay{
     visibility: visible;
 }
 
-div.planner-objective-card-title:hover .hover-info-card-overlay{
+div.planner-objective-title-row:hover .hover-info-card-overlay{
     visibility: visible;
 }
 
-div.planner-project-card-title:hover .hover-info-card-overlay{
+div.planner-project-title-row:hover .hover-info-card-overlay{
     visibility: visible;
 }

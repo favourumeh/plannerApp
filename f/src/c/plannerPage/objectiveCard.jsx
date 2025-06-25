@@ -82,7 +82,6 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
                 > 
                     <div className="planner-parent-card-title-content">
                         {`${objective.objectiveNumber} ${objective.title}`} 
-                        <ObjectiveInfoCard objective ={objective} objectiveProject={project} translate={translate}/>
                     </div>
                     
                     <div>
@@ -97,6 +96,7 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
                 <div className={`mutate-entity delete-${entityName}-entity`}>
                     <i className="fa fa-times side-btn" aria-hidden="true" onClick={handleClickDeleteBtn} ></i>
                 </div>
+                <ObjectiveInfoCard objective ={objective} objectiveProject={project} translate={translate}/>
             </div>
 
             {isExpanded?
