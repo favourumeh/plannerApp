@@ -68,7 +68,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
     const isTodayOrFuture = new Date(date.split(" ")[1]) >= new Date( datetimeToString(new Date()))
     const workloadBarStyle = {
         width: `${ Math.min(1, (totalTaskMins/60)/maxDailyWorkingHours )*maxWorkloadBarWidth}px`,
-        backgroundColor: genereateWorkloadFill(totalTaskMins/60)
+        backgroundColor: genereateWorkloadFill(totalTaskMins/60),
     }
 
     const handleClickAddBtn = (e) => {
