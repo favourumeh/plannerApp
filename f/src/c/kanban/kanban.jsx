@@ -71,6 +71,7 @@ const Kanban = ({sitePage}) => {
         if ( isTaskFinishedOnSelectedDay && isTaskStatusComplete ) {outputBool = true}
         if ( !isTaskStatusComplete && isTaskScheduledForSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
         if ( !isTaskStatusComplete && isTodayEqualToSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
+        if ( task.scheduledStart === null ) {outputBool = false}
         return outputBool
     }
 
