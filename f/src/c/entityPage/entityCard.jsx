@@ -22,13 +22,18 @@ function EntityCard ({entity, entityName, refetchEntityPageContent}) {
 
     const handleDeleteEntity = (e) =>  {
         e.preventDefault()
-        deleteTaskMutation.mutate({
-            action: "delete",
-            entityName: entityName,
-            currentEntity: entity,
-            handleNotification: handleNotification,
-            handleLogout: handleLogout
-        })
+
+        if ( e.ctrlKey) {
+            deleteTaskMutation.mutate({
+                action: "delete",
+                entityName: entityName,
+                currentEntity: entity,
+                handleNotification: handleNotification,
+                handleLogout: handleLogout
+            })
+        } else {
+            handleNotification(`Use 'CTRL + Click' to delete ${entityName} `, "failure")
+        }
     }
 
     const {data: taskParents, isPending: isPendingTaskParents} = useQuery( { // taskParents = the task's project and objective
