@@ -48,8 +48,8 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
         let colour = "white"
         if (task.status === "Completed") {colour = "rgba(0,230,0)"}
         if (task.status === "In-Progress") { colour = "yellow"}
-        if ( task.status !== "Completed" && isDateOlder( new Date(task.start) || new Date(task.scheduledStart), new Date() ) ) {colour = "red"}
-        if ( !task.start || !task.scheduledStart) { colour="white"}
+        if ( task.status !== "Completed" && isDateOlder( (new Date(task.start || task.scheduledStart)), new Date() ) ) {colour = "red"}
+        if ( !task.scheduledStart) { colour="white"}
         return colour
     }
 
