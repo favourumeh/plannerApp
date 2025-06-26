@@ -57,14 +57,19 @@ export default function ProjectProgressCard ({entity, entityName, metric, refetc
     //handle clicking delete-project button
     const handleDeleteEntity = (e) => {
         e.stopPropagation()
-        deleleProjectMutation.mutate({
-            action: "delete",
-            entityName: entityName,
-            currentEntity: entity,
-            handleNotification: handleNotification,
-            handleLogout: handleLogout
-        })
+        if (e.ctrlKey) {
+            deleleProjectMutation.mutate({
+                action: "delete",
+                entityName: entityName,
+                currentEntity: entity,
+                handleNotification: handleNotification,
+                handleLogout: handleLogout
+            })
+        } else {
+            handleNotification(`Use 'CTRL + Click' to delete ${entityName} '${entity.title}' `, "failure")
+        }
     }
+
     // handle refetch after objective deltion 
     const refetchAfterObjectiveDeletion = () => {
         refetchProjectObjectives()
@@ -144,7 +149,7 @@ export default function ProjectProgressCard ({entity, entityName, metric, refetc
 
                 </div>
                 <div className={`mutate-entity delete-${entityName}-entity`}>
-                    <button onDoubleClick={handleDeleteEntity}> <i className="fa fa-times" aria-hidden="true"></i> </button>
+                    <button onClick={handleDeleteEntity}> <i className="fa fa-times" aria-hidden="true"></i> </button>
                 </div>
             </div>
 

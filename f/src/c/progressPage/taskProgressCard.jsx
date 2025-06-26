@@ -20,14 +20,19 @@ export default function TaskProgressCard ({entity, entityName, project, objectiv
     //handle clicking delete-entity button
     const handleDeleteEntity = (e) => {
         e.stopPropagation()
-        deleleTaskMutation.mutate({
-            action: "delete",
-            entityName: entityName,
-            currentEntity: entity,
-            handleNotification: handleNotification,
-            handleLogout: handleLogout
-        })
+        if (e.ctrlKey) {
+            deleleTaskMutation.mutate({
+                action: "delete",
+                entityName: entityName,
+                currentEntity: entity,
+                handleNotification: handleNotification,
+                handleLogout: handleLogout
+            })
+        } else {
+            handleNotification(`Use 'CTRL + Click' to delete ${entityName} '${entity.description.length > 20? entity.description.slice(0, 20) + "..." : entity.description}' `, "failure")
+        }
     }
+
     const generateTaskStatusSymbol = () => {
             if (entity.status==="To-Do") {
                 return <i style={{color:colourDict["red"]}} className="fa fa-times" aria-hidden="true"></i>
@@ -72,7 +77,7 @@ export default function TaskProgressCard ({entity, entityName, project, objectiv
                     </div>
                 </div>
                 <div className={`mutate-entity add-${entityName}-entity`}>
-                    <button onDoubleClick={handleDeleteEntity}> <i className="fa fa-times" aria-hidden="true"></i> </button>
+                    <button onClick={handleDeleteEntity}> <i className="fa fa-times" aria-hidden="true"></i> </button>
                 </div>
             </div>
         </div>

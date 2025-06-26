@@ -50,13 +50,18 @@ export default function ObjectiveProgressCard ({entity, entityName, project, met
     //handle clicking delete-objective button
     const handleDeleteEntity = (e) => {
         e.stopPropagation()
-        deleleObjectiveMutation.mutate({
+        if (e.ctrlKey) {
+            deleleObjectiveMutation.mutate({
             action: "delete",
             entityName: entityName,
             currentEntity: entity,
             handleNotification: handleNotification,
             handleLogout: handleLogout
         })
+
+        } else {
+            handleNotification(`Use 'CTRL + Click' to delete ${entityName} '${entity.title}' `, "failure")
+        }
     }
 
     //handle refetch on task deletion
@@ -140,7 +145,7 @@ export default function ObjectiveProgressCard ({entity, entityName, project, met
 
                 </div>
                 <div className={`mutate-entity add-${entityName}-entity`}>
-                    <button onDoubleClick={handleDeleteEntity}> <i className="fa fa-times" aria-hidden="true"></i> </button>
+                    <button onClick={handleDeleteEntity}> <i className="fa fa-times" aria-hidden="true"></i> </button>
                 </div>
             </div>
 
