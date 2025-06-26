@@ -7,10 +7,8 @@ import { genereateWorkloadFill } from "../../utils/plannerUtilis"
 import localPlannerPageContext from "./localPlannerPageContext"
 import globalContext from "../../context"
 import { defaultObjective, defaultProject, defaultTask } from "../../staticVariables"
+import { datetimeToString } from "../../utils/dateUtilis"
 
-const datetimeToString = (datetime) => {
-    return !datetime? null : datetime.toISOString().split("T")[0] 
-}
 export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAllDateCards, refetchPlannerTasks}) {
     const [isExpanded, setIsExpanded] = useState(isExpandAllDateCards)
     const [maxWorkloadBarWidth, setMaxWorkloadBarWidth] = useState(309) 

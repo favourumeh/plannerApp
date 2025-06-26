@@ -21,6 +21,13 @@ div.planner-settings-box span{
 
 div.planner-settings-period{
     display: flex;
+    align-items: center;
+}
+
+div.planner-settings-period i.period-navigator {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
 }
 
 div.planner-settings-box input{

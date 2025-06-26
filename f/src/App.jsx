@@ -66,7 +66,6 @@ function App() {
         setIsLoggedIn(true)
         setIsModalOpen(false)
         setSitePage("view-homepage")
-        fetchAllContent()
     }
 
     const clearContent = () => {

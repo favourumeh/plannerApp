@@ -16,14 +16,7 @@ import { DndContext } from "@dnd-kit/core"
 import { UnscheduledSidebar } from "./unscheduledSidebar"
 import { SettingsBox } from "./settingsBox"
 import localPlannerPageContext from "./localPlannerPageContext"
-
-const datetimeToString = (datetime) => {
-    return !datetime? null : datetime.toISOString().split("T")[0] 
-}
-
-const getDayFromDate = (date) => {
-    return !date? null : new Date(date).toLocaleDateString("en-US", { weekday: 'short' })
-    }
+import { datetimeToString, getDayFromDate } from "../../utils/dateUtilis"
 
 export function PlannerPage ({sitePage}) {
     if (sitePage !=="view-planner") return null

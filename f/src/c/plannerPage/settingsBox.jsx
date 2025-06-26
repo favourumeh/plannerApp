@@ -2,20 +2,33 @@ import DatePicker from "react-datepicker"
 import "./settingsBox.css"
 import { useContext } from "react"
 import localPlannerPageContext from "./localPlannerPageContext"
-
-
-const datetimeToString = (datetime) => {
-    return !datetime? null : datetime.toISOString().split("T")[0] 
-}
+import { datetimeToString, getDaysBetweenDates } from "../../utils/dateUtilis"
 
 export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAllDateCards, setIsExpandAllDateCards, isJustUnscheduledTask, setIsJustUnscheduledTask, isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities}) {
     const {maxDailyWorkingHours, setMaxDailyWorkingHours} = useContext(localPlannerPageContext)
+    const periodDuration = getDaysBetweenDates(new Date(periodStart), new Date(periodEnd))
+
+    const handlePeriodNavigation = async (direction) => {// Flick through periods on the planner page by clicking the left and right arrows
+        switch (direction) {
+            case "previous-period":
+                await setPeriodStart( datetimeToString( new Date(new Date(periodStart).setDate(new Date(periodStart).getDate() - periodDuration +1 )) ) )
+                await setPeriodEnd( datetimeToString( new Date(new Date(periodEnd).setDate(new Date(periodEnd).getDate() - periodDuration + 1)) ) )
+                break
+            case "next-period":
+                await setPeriodEnd( datetimeToString( new Date(new Date(periodEnd).setDate(new Date(periodEnd).getDate() + periodDuration+1)) ) )
+                await setPeriodStart( datetimeToString( new Date(new Date(periodStart).setDate(new Date(periodStart).getDate() + periodDuration+1)) ) ) 
+                break
+        }
+    }
     return (
         <div className="planner-settings-box"> 
             <div className="planner-setting-header"> Settings </div>
 
             <div className="planner-settings-period planner-settings-item"> 
-                <span> Period:</span>
+                <span> Period:&nbsp; &nbsp;</span>
+                <i className="fa fa-arrow-left period-navigator" aria-hidden="true" onClick={() => handlePeriodNavigation("previous-period")}></i>
+                &nbsp; &nbsp; 
+
                 <DatePicker
                     selected={new Date(periodStart)}
                     onSelect={(date) => setPeriodStart(datetimeToString(date))} 
@@ -31,6 +44,9 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
                     onChange={(date) => setPeriodEnd(datetimeToString(date))}
                     dateFormat="yyyy-MM-dd"
                 />
+                &nbsp; &nbsp;
+                <i className="fa fa-arrow-right period-navigator" aria-hidden="true" onClick={() => handlePeriodNavigation("next-period")} ></i>
+
             </div>
             <div className="date-card-expander planner-settings-item">
                 <span> Expand All Date Cards: </span>&nbsp; &nbsp;
