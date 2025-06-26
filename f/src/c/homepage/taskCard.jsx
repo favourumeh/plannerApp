@@ -21,13 +21,17 @@ function TaskCard ({task, refetchHomePageTasks}) {
 
     const handleDeleteTask = (e) =>  {
         e.preventDefault()
-        deleteTaskMutation.mutate({
-            action: "delete",
-            entityName: "task",
-            currentEntity: task,
-            handleNotification: handleNotification,
-            handleLogout: handleLogout
-        })
+        if ( e.ctrlKey) {
+            deleteTaskMutation.mutate({
+                action: "delete",
+                entityName: "task",
+                currentEntity: task,
+                handleNotification: handleNotification,
+                handleLogout: handleLogout
+            })
+        } else {
+            handleNotification(`Use 'CTRL + Click' to delete task' `, "failure")
+        }
     }
     const getTasksProject = () =>  isPending ? "*" : data.project.projectNumber
     const getTasksObjective = () => isPending ? "*" : data.objective.objectiveNumber
