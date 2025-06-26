@@ -36,7 +36,7 @@ div.planner-date-container-header {
 }
 
 div.date-card-title{
-    border: 1px solid;
+    /* border: 1px solid; */
     width: 100%;
     text-align: left;
     font-weight: bold;
