@@ -31,13 +31,17 @@ export default function KanbanCard ({task, entityName, refetchKanbanContent}) {
     }
     const onClickDeleteBtn = (e) => {
         e.stopPropagation()
-        deleteEntityMutation.mutate({
-            action: "delete",
-            entityName: entityName,
-            currentEntity: task, 
-            handleNotification: handleNotification, 
-            handleLogout: handleLogout,
-        })
+        if ( e.ctrlKey ) {
+            deleteEntityMutation.mutate({
+                action: "delete",
+                entityName: entityName,
+                currentEntity: task, 
+                handleNotification: handleNotification, 
+                handleLogout: handleLogout,
+            })
+        } else {
+            handleNotification(`Use 'CTRL + Click' to delete ${entityName} '${task.description.length > 20? task.description.slice(0, 20) + "..." : task.description}' `, "failure")
+        }
     }
 
     // DnD - Make enitity cards draggable
