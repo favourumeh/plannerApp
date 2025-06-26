@@ -15,7 +15,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
     const [isExpanded, setIsExpanded] = useState(isExpandAllDateCards)
     const [maxWorkloadBarWidth, setMaxWorkloadBarWidth] = useState(309) 
     const {maxDailyWorkingHours} = useContext(localPlannerPageContext)
-    const {setCurrentTask, setForm, setFormProject, setFormObjective, setIsModalOpen} = useContext(globalContext)
+    const {setCurrentTask, setForm, setFormProject, setFormObjective, setIsModalOpen, setSitePage, setCurrentDate, handleNotification} = useContext(globalContext)
     const taskFilter = (task) => {
         if (!!task.start){
             return (datetimeToString(new Date(task.start)) === date.split(" ")[1])
@@ -80,6 +80,16 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
         setIsModalOpen(true)
     }
 
+    const openKanbanView = (e) => {// opens that kaban view for the date card
+        e.stopPropagation()
+        if (e.ctrlKey){
+            setSitePage("view-kanban")
+            setCurrentDate(new Date(date.split(" ")[1]))
+        } else {
+            handleNotification(`Use 'CTRL + Click' to open Kanban view for ${date}`, "failure")
+        }
+    }
+
     return (
         <div ref={setNodeRef} id={date} className="planner-date-container" style={styleDateCard}>
             
@@ -94,6 +104,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
                     <div 
                         className="date-card-title" 
                         style={styleDateCardTitle}
+                        onClick={openKanbanView}
                     > {date} #{isPendingScheduled? "..." : daysTasks.length } ({displayedTaskDuration()})
                     </div>
                 </div>
