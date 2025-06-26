@@ -6,6 +6,7 @@ import { useContext } from "react"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
 import { useDraggable } from "@dnd-kit/core"
+import { isDateOlder } from "../../utils/dateUtilis"
 
 export function TaskCard({task, projects, objectives, refetchPlannerTasks, translate}) {
     const {setForm, setCurrentTask, handleNotification, handleLogout, setIsModalOpen} = useContext(globalContext)
@@ -41,6 +42,19 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
     // DnD - Make enitity cards draggable
     const { attributes, listeners, setNodeRef, transform } = useDraggable({id: task.id}) //dnd
     const style = transform ? {transform: `translate(${transform.x}px, ${transform.y}px)`} : undefined; //dnd keeps track of x-y coordinate of task card
+
+    //generate the style of the task card
+    const generateTaskCardFontColour = () => {//generate colour of the taskCard text
+        let colour = "white"
+        if (task.status === "Completed") {colour = "rgba(0,230,0)"}
+        if (task.status === "In-Progress") { colour = "yellow"}
+        if ( task.status !== "Completed" && isDateOlder( new Date(task.start) || new Date(task.scheduledStart), new Date() ) ) {colour = "red"}
+        if ( !task.start || !task.scheduledStart) { colour="white"}
+        return colour
+    }
+
+    const stylePlannerTaskContent = {color:generateTaskCardFontColour()}
+
     return (
             <div 
                 style ={style}
@@ -54,7 +68,7 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
                 </button>
 
                 <div 
-                    style={{"color":task.status==="Completed"? "rgba(0,230,0)": "white"}}  
+                    style={stylePlannerTaskContent}  
                     className="planner-task-card-content"> {project?.projectNumber}.{objective?.objectiveNumber}.{task.taskNumber}: {task?.description}
                 </div>
                 <TaskInfoCard task={task} taskObjective={objective} taskProject={project} translate={translate}/>

@@ -13,3 +13,13 @@ export function getDaysBetweenDates(date1, date2) {// get the days between two d
 export function getDayFromDate(date){
     return !date? null : new Date(date).toLocaleDateString("en-US", { weekday: 'short' })
 }
+
+export function isDateOlder(date1, date2) { //checks if date1 is older than date12
+    const d1 = new Date(date1)
+    const d2 = new Date(date2)
+
+    d1.setHours(0, 0, 0, 0)
+    d2.setHours(0, 0, 0, 0)
+
+    return d1 < d2
+}
