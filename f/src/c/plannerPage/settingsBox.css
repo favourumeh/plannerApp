@@ -24,9 +24,7 @@ div.planner-settings-period{
     align-items: center;
 }
 
-div.planner-settings-period i.period-navigator {
-    display: flex;
-    align-items: center;
+div.planner-settings-period i {
     cursor: pointer;
 }
 
@@ -53,19 +51,6 @@ div.planner-settings-box .fa-arrows-h{
     margin: 0 2px 0 5px;
 }
 
-
-div.planner-settings-box button:hover {
-    color: rgb(0, 230, 0);
-    background-color: rgba(0,0,0,0);
-    border: none;
-    
-}
-
-div.planner-settings-box button {
-    background-color: rgba(0,0,0,0);
-    border: none;
-    outline: none;
-}
 div.planner-setting-header{
     align-self: center;
 }
@@ -73,10 +58,6 @@ div.planner-setting-header{
 div.date-card-expander i {
     cursor: pointer;
 }
-div.date-card-expander i:hover {
-    color:rgb(0, 230, 0);
-}
-
 div.max-daily-working-hours input{
     border: 1px solid;
     max-width: 30px

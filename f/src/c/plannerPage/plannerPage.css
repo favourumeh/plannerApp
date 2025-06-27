@@ -1,3 +1,7 @@
+div.planner-page i:hover {
+    color: rgb(0, 230, 0)
+}
+
 div.planner-page-header-2 {
     margin-top:5px;
     margin-bottom: 5px;

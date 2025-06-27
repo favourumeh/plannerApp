@@ -20,6 +20,25 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
                 break
         }
     }
+
+    const periodToCurrentMonth = async (e) => {
+        e.stopPropagation()
+        const today = new Date()
+        const firstDayOfCurrentMonth = new Date(today.setDate(1))
+        const newPeriodStart = datetimeToString(firstDayOfCurrentMonth)
+        const dateOvershoot = new Date(today.setDate(32)) // "32" goes to next month
+        const finalDayOfCurrentMonth = new Date(dateOvershoot.setDate(0)) // "0" goes to the end of the previous month
+        const newPeriodFinish = datetimeToString(finalDayOfCurrentMonth)
+
+        if (new Date(periodStart) <= firstDayOfCurrentMonth){ // prevents errors: periodEnd < periodStart
+            await setPeriodEnd(newPeriodFinish)
+            await setPeriodStart(newPeriodStart)
+        } else {
+            await setPeriodStart(newPeriodStart)
+            await setPeriodEnd(newPeriodFinish)
+        }
+    }
+
     return (
         <div className="planner-settings-box"> 
             <div className="planner-setting-header"> Settings </div>
@@ -36,7 +55,7 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
                     dateFormat="yyyy-MM-dd"
                 />
                 <div>
-                    <i className="fa fa-arrows-h" aria-hidden="true"></i>
+                    <i className="fa fa-arrows-h" aria-hidden="true" onClick={periodToCurrentMonth}></i>
                 </div>
                 <DatePicker
                     selected={new Date(periodEnd)}
