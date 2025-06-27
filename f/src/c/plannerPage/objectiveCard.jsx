@@ -107,7 +107,7 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
                         projects={projects} 
                         objectives={objectives}
                         refetchPlannerTasks={refetchPlannerTasks}
-                        translate="-90% -100%"/>
+                        translate="110% -100%"/>
                 ) : undefined
             }
         </div>

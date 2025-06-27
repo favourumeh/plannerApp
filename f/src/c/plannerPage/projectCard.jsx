@@ -108,7 +108,7 @@ export function ProjectCard({entityName, project, projects, objectives, unschedu
                             unscheduledTasks={unscheduledTasks}
                             isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
                             refetchPlannerTasks={refetchPlannerTasks}
-                            translate="-80% -100%"/>
+                            translate="125% -100%"/>
                             // translate="-240px -240px"/>
                         ) : undefined
 

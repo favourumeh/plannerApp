@@ -33,6 +33,7 @@ div.planner-side-bar{
     justify-content: flex-start;
     position: fixed;
     min-width: 400px;
+    z-index: 1;
 }
 
 div.planner-content{
@@ -46,4 +47,5 @@ div.planner-content{
     justify-content: flex-start;
     gap: 28px;
     align-content: flex-start;
+    z-index: 0;
 }
