@@ -55,7 +55,7 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
     }
     const pauseSignal = () => {
         return (
-        task.status === "Paused"? <i class="fa fa-pause" aria-hidden="true"></i>: ""
+        task.status === "Paused"? <i className="fa fa-pause" aria-hidden="true"></i>: ""
         )
     }
 

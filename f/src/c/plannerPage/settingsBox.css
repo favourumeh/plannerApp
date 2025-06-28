@@ -8,8 +8,8 @@ div.planner-settings-box{
     margin: 0 0px 10px 0;
     background-color: rgba(48, 48, 100, 1);
     /* background-color: rgb(30, 23, 36); */
-
 }
+
 div.planner-settings-box .planner-settings-item{
     /* border: 1px solid; */
     margin: 0 0 5px 10px;
@@ -53,6 +53,12 @@ div.planner-settings-box .fa-arrows-h{
 
 div.planner-setting-header{
     align-self: center;
+    cursor:pointer;
+    user-select: none; /*stops double clicking div from highlighting the inner text*/
+}
+
+div.planner-setting-header:hover{
+    color: rgba(0, 230, 0)
 }
 
 div.date-card-expander i {
