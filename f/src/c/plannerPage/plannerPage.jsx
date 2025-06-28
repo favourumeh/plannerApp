@@ -70,7 +70,6 @@ export function PlannerPage ({sitePage}) {
         localStorage.setItem("maxDailyWorkingHours", maxDailyWorkingHours )
     }, [maxDailyWorkingHours] )
 
-    
     // calculate the number of days between periodStart and periodEnd
     function getDaysBetweenDates(date1, date2) {
         if (date2.getTime() < date1.getTime()){return 0}
@@ -106,7 +105,7 @@ export function PlannerPage ({sitePage}) {
             if (oldStartOrScheduledStart === newScheduledStart) return  // if the task is not dragged to a new date do nothing
         }
 
-        if (draggedTask.status!=="To-Do") {// if the dragged task is not "To-Do" dont allow it to be dropped in a different date
+        if ( !["To-Do", "Paused"].includes(draggedTask.status) ) {// if the dragged task is not "To-Do" dont allow it to be dropped in a different date
             handleNotification(`The status task being dragged is '${draggedTask.status}' thus it cannot be scheduled retrospectively`, "failure")
             return
         } 

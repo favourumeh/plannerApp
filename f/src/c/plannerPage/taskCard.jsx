@@ -46,11 +46,17 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
     //generate the style of the task card
     const generateTaskCardFontColour = () => {//generate colour of the taskCard text
         let colour = "white"
-        if (task.status === "Completed") {colour = "rgba(0,230,0)"}
-        if (task.status === "In-Progress") { colour = "yellow"}
+        if ( task.status === "Completed" ) {colour = "rgba(0,230,0)"}
+        if ( task.status === "Paused") {colour = "orange"}
+        if ( task.status === "In-Progress" ) { colour = "yellow"}
         if ( task.status !== "Completed" && isDateOlder( (new Date(task.start || task.scheduledStart)), new Date() ) ) {colour = "red"}
         if ( !task.scheduledStart) { colour="white"}
         return colour
+    }
+    const pauseSignal = () => {
+        return (
+        task.status === "Paused"? <i class="fa fa-pause" aria-hidden="true"></i>: ""
+        )
     }
 
     const stylePlannerTaskContent = {color:generateTaskCardFontColour()}
@@ -69,7 +75,7 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
 
                 <div 
                     style={stylePlannerTaskContent}  
-                    className="planner-task-card-content"> {project?.projectNumber}.{objective?.objectiveNumber}.{task.taskNumber}: {task?.description}
+                    className="planner-task-card-content"> {pauseSignal()} {project?.projectNumber}.{objective?.objectiveNumber}.{task.taskNumber}: {task?.description}
                 </div>
                 <TaskInfoCard task={task} taskObjective={objective} taskProject={project} translate={translate}/>
 
