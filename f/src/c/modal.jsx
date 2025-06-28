@@ -1,10 +1,10 @@
 import "./modal.css"
-import { useEffect, useContext } from "react"
+import { useContext } from "react"
 import globalContext from "../context.js"
 import { defaultTask, defaultObjective, defaultProject } from '../staticVariables.js'
 
 function Modal ({children}) {
-    const {isModalOpen, setIsModalOpen, setForm, setCurrentTask, setCurrentObjective, setCurrentProject, setShowProjectQueryResult, setShowObjectiveQueryResult} = useContext(globalContext)
+    const {isModalOpen, setIsModalOpen, setForm, setCurrentTask, setCurrentObjective, setCurrentProject, setShowProjectQueryResult, setShowObjectiveQueryResult, handleNotification} = useContext(globalContext)
     if (!isModalOpen) {
         return null
     }
@@ -19,7 +19,7 @@ function Modal ({children}) {
         setShowObjectiveQueryResult(false)
     }
 
-    const handleClickModalOverlay= () => {
+    const handleDoubleClickModalOverlay= (e) => {
         setIsModalOpen(false)
         setForm("")
         setShowProjectQueryResult(false)
@@ -27,8 +27,8 @@ function Modal ({children}) {
     }
 
     return (
-        <div className="modal-overlay" onDoubleClick={handleClickModalOverlay} >
-            <div className="modal-content" onClick={(e)=>e.stopPropagation()}> 
+        <div className="modal-overlay" onDoubleClick={handleDoubleClickModalOverlay}>
+            <div className="modal-content" onClick={(e)=>e.stopPropagation()} onDoubleClick={ (e) => e.stopPropagation() }> 
                 <button className="modal-close-btn" onClick={()=>handleClickCloseBtn()}>&times;</button>
                 {children}
             </div>
