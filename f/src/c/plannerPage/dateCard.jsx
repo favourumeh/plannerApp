@@ -10,10 +10,10 @@ import { defaultObjective, defaultProject, defaultTask } from "../../staticVaria
 import { datetimeToString } from "../../utils/dateUtilis"
 
 export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAllDateCards, refetchPlannerTasks}) {
-    const [isExpanded, setIsExpanded] = useState(isExpandAllDateCards)
-    const [maxWorkloadBarWidth, setMaxWorkloadBarWidth] = useState(309) 
-    const {maxDailyWorkingHours} = useContext(localPlannerPageContext)
-    const {setCurrentTask, setForm, setFormProject, setFormObjective, setIsModalOpen, setSitePage, setCurrentDate, handleNotification} = useContext(globalContext)
+    const [ isExpanded, setIsExpanded ] = useState(isExpandAllDateCards)
+    const [ maxWorkloadBarWidth, setMaxWorkloadBarWidth ] = useState(309) 
+    const { maxDailyWorkingHours, isExcludeBreakHours } = useContext(localPlannerPageContext)
+    const { setCurrentTask, setForm, setFormProject, setFormObjective, setIsModalOpen, setSitePage, setCurrentDate, handleNotification } = useContext(globalContext)
     const taskFilter = (task) => {
         if (!!task.start){
             return (datetimeToString(new Date(task.start)) === date.split(" ")[1])
@@ -21,7 +21,16 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
         return (datetimeToString(new Date(task.scheduledStart)) === date.split(" ")[1])
     }
     const daysTasks = tasks?.filter(taskFilter)
-    const totalTaskMins = daysTasks.reduce((acc, task)=> acc + (task.duration || task.durationEst), 0)
+    const calcTotalTaskDuration  = (task) => {
+        if (!isExcludeBreakHours) {return (task.duration || task.durationEst)}
+
+        const taskObjective = objectives.find( (objective) => objective.id === task.objectiveId )
+        if (taskObjective?.type === "break"){
+            return 0
+        } else return (task.duration || task.durationEst)
+    }
+
+    const totalTaskMins = daysTasks.reduce((acc, task)=> acc + calcTotalTaskDuration(task), 0)
 
     const handleExpandedDayCard = ()  => {
         setIsExpanded(!isExpanded)

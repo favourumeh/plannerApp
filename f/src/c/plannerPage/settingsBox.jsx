@@ -5,7 +5,7 @@ import localPlannerPageContext from "./localPlannerPageContext"
 import { datetimeToString, getDaysBetweenDates } from "../../utils/dateUtilis"
 
 export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAllDateCards, setIsExpandAllDateCards, isJustUnscheduledTask, setIsJustUnscheduledTask, isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities}) {
-    const {maxDailyWorkingHours, setMaxDailyWorkingHours} = useContext(localPlannerPageContext)
+    const {maxDailyWorkingHours, setMaxDailyWorkingHours, isExcludeBreakHours, setIsExcludeBreakHours } = useContext(localPlannerPageContext)
     const periodDuration = getDaysBetweenDates(new Date(periodStart), new Date(periodEnd))
     const [isSettingBoxExpanded, setIsSettingsBoxExpanded] = useState(false)
 
@@ -105,8 +105,16 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
                         step= "1"
                         onChange = {e => setMaxDailyWorkingHours(Math.round(e.target.value))}
                         required/>
-            
                 </div>
+
+                <div className="toggle-excl-break-hrs planner-settings-item"> 
+                    <span>Exclude Break Hours: </span>
+                    {isExcludeBreakHours? 
+                        <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExcludeBreakHours(false)}></i>
+                        : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExcludeBreakHours(true)}></i>
+                    }
+                </div>
+
             </>
             : undefined }
         </div>
