@@ -39,7 +39,7 @@ export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJu
                         unscheduledTasks={unscheduledTasks}
                         isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
                         refetchPlannerTasks={refetchPlannerTasks}
-                        translate="135% -100%"/>
+                        translate="135% -50%"/>
 
                 )
 
