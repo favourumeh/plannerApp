@@ -26,7 +26,7 @@ export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJu
 
             {isJustUnscheduledTask? 
                 unscheduledTasks?.map((task)=> 
-                    <TaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate="-90% -100%"/>
+                    <TaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate="120% -50%"/>
                 )
                 :
                 projects?.map( (project) => 
