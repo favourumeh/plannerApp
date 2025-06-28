@@ -27,7 +27,7 @@ function Modal ({children}) {
     }
 
     return (
-        <div className="modal-overlay" onClick={handleClickModalOverlay} >
+        <div className="modal-overlay" onDoubleClick={handleClickModalOverlay} >
             <div className="modal-content" onClick={(e)=>e.stopPropagation()}> 
                 <button className="modal-close-btn" onClick={()=>handleClickCloseBtn()}>&times;</button>
                 {children}
