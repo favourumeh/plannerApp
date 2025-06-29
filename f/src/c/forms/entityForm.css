@@ -110,6 +110,7 @@ div.form-body .form-buttons {
     display: flex;
     justify-content: flex-end;
     margin-top: 5px;
+    /* border: 1px solid; */
 }
 
 div.form-body .form-buttons button{
@@ -127,4 +128,22 @@ div.form-body div.form-buttons .dropbtn-content {
     color: white;
     border: 1px solid;
     border-radius: 5px;
+}
+
+div.form-buttons div.form-input-warning{
+    visibility:hidden;
+    font-size: smaller;
+    border: none;
+    color: red;
+    overflow-y: scroll;
+    width: 350px;
+    height: 43px;
+    margin-right: 20px;
+    text-align: center;
+    scrollbar-width: thin;
+    scrollbar-color: #888 transparent;
+}
+
+div.form-buttons:hover  div.form-input-warning{
+    visibility:visible;
 }

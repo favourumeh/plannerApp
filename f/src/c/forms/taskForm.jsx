@@ -19,9 +19,9 @@ function TaskForm ({form}) {
         formProject, formObjective,
         formatDateFields,handleNotification, handleLogout, setIsModalOpen, setForm} = useContext(globalContext)
 
-    const [projectQuery, setProjectQuery] = useState(formProject.title)
-    const [objectiveQuery, setObjectiveQuery] = useState(formObjective.title)
-
+    const [ projectQuery, setProjectQuery ] = useState(formProject.title)
+    const [ objectiveQuery, setObjectiveQuery ] = useState(formObjective.title)
+    const [ formInputIssues, setFormInputIssues ] = useState("")
     const getProjectsQuery = useQuery(
         readProjectsQueryOption(false, handleNotification, handleLogout)
     )
@@ -65,7 +65,7 @@ function TaskForm ({form}) {
         ...readProjectsObjectivesQueryOption(taskProject.id, handleNotification, handleLogout),
         enabled: !!taskProject.id
     })
-    const relevantObjectives = isPendingObjectives? [{}] : objectivesData.objectives
+    const relevantObjectives = (isPendingObjectives || !taskProject.id)? [{}] : objectivesData.objectives //woo bug fix
     const objectiveTitles = relevantObjectives.map(objective=> objective?.title)
     const taskObjective = objectiveTitles.includes(objectiveQuery)?
         relevantObjectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ) : {}
@@ -125,7 +125,7 @@ function TaskForm ({form}) {
             setCurrentTask(prev => ({...prev, "finish":"", duration:null}))
         }
     }, [currentTask.status])
-    
+
     const formField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
         const { labelName, inputName, inputType, currentTask, mandatoryField} = params
@@ -175,6 +175,87 @@ function TaskForm ({form}) {
         excludeEntityFields? undefined : setProjectQuery("")
         setCurrentTask({...defaultTask, id:currentTask.id, objectiveId:currentTask.objectiveId})
     }
+
+    // Handle Form Input Validation
+    const handleDisableFormSubmitBtn = () =>{ //disables the submit button when the form's input is invalid OR if form is waiting on the response from POST/PATCH request. 
+        var disabled = false
+        if ( !taskProject.title || !taskObjective.title ) {
+            disabled = true
+        }
+        if ( !currentTask.description ) {
+            disabled = true
+        }
+        if ( !(currentTask.durationEst >=  10 ) ) {
+            disabled=true
+        }
+        if ( Number.isInteger(currentTask.duration) &&  currentTask.duration <= 0 ) {
+            disabled=true
+        }
+        if ( !!currentTask.finish && currentTask.status!=="Completed" ) {
+            disabled=true
+        }
+        if ( (!currentTask.finish || !currentTask.start) && currentTask.status==="Completed" ) {
+            disabled=true
+        }
+        if ( currentTask.description.length > 200 ) {disabled=true}
+        if ( createOrEditTaskMutation.isPending ) {disabled=true} // when waiting for the post/patch request to complete. the submit button must be disabled
+        return disabled
+    }
+
+    useEffect( ()=> { //specifies what form validation error messages to show/remove
+
+        const message1 = " Task is missing one of 'Project' or 'Objective' field."
+        if (!!taskProject && !!taskObjective) {
+            ( !currentTask.objectiveId ||  !taskProject.title || !taskObjective.title ) ?
+                setFormInputIssues(prev => prev.includes(message1) ? prev : prev +message1)
+                : setFormInputIssues(prev => prev.replace(message1, ""))
+        } else {
+            setFormInputIssues(prev => prev.includes(message1) ? prev : prev + message1)
+        }
+
+        const message2 = " Task is missing a description."
+        if ( !currentTask.description ) {
+            setFormInputIssues(prev => prev.includes(message2) ? prev : prev + message2)
+        } else {
+            setFormInputIssues(prev => prev.replace(message2, ""))
+        }
+
+        const message3 = " Task's duration estimate is below 10min."
+        if ( !(currentTask.durationEst >=  10 ) ) {
+            setFormInputIssues(prev => prev.includes(message3) ? prev : prev + message3)
+        } else {
+            setFormInputIssues(prev => prev.replace(message3, ""))
+        }
+
+        const message4 = " Task duration is a number below 0 or equal to 0."
+        if ( Number.isInteger(currentTask.duration) &&  currentTask.duration <= 0 ) {
+            setFormInputIssues(prev => prev.includes(message4) ? prev : prev + message4)
+        } else {
+            setFormInputIssues(prev => prev.replace(message4, ""))
+        }
+
+        const message5 = " Task's 'Finish' field is filled in and its status is not 'Completed'."
+        if ( !!currentTask.finish && currentTask.status!=="Completed" ) {
+            setFormInputIssues(prev => prev.includes(message5) ? prev : prev + message5)
+        } else {
+            setFormInputIssues(prev => prev.replace(message5, ""))
+        }
+
+        const message6 = " Task's status is 'Completed' without filling in both the 'Finish' or 'Start' field"
+        if ( (!currentTask.finish || !currentTask.start) && currentTask.status==="Completed" ) {
+            setFormInputIssues(prev => prev.includes(message6) ? prev : prev + message6)
+        } else {
+            setFormInputIssues(prev => prev.replace(message6, ""))
+        }
+
+        const message7 = " Task's description is over 200 characters."
+        if ( currentTask.description.length > 200 ) {
+            setFormInputIssues(prev => prev.includes(message7) ? prev : prev + message7)
+        } else {
+            setFormInputIssues(prev => prev.replace(message7, ""))
+        }
+    }, [currentTask, projectQuery, objectiveQuery] )
+
     return (
         <>
         <div className="form-overlay" onClick={closeSearchResult}>
@@ -193,7 +274,10 @@ function TaskForm ({form}) {
                 </div>
 
                 <div className="form-group">
-                    <div className="field-title"> Task Description{mandatoryIndicator(currentTask["description"], "*")} </div>
+                    <div className="field-title"> 
+                        Task Description{mandatoryIndicator(currentTask["description"], "*")} &nbsp;
+                        (<span style={{color: currentTask.description.length >200 ? "red": "white" }}>{currentTask.description.length || 0}</span>/200)
+                    </div>
                     <textarea 
                         type = "description"
                         id = "description"
@@ -223,6 +307,9 @@ function TaskForm ({form}) {
                     </div>
                 </div>
                 <div className="form-buttons">
+                    <div className="form-input-warning">
+                        {formInputIssues}
+                    </div>
                     <Dropdown buttonContent={`Clear`} buttonClassName="form-clear-btn" translate={"-75% -10%"}>
                         <div onClick={()=> handleClearAll(false)}> All fields</div>
                         <div onClick={()=> handleClearAll(true)}> Excl. entity fields</div>
@@ -231,18 +318,9 @@ function TaskForm ({form}) {
                     <div className="btn-div">
                         <button type="submit" 
                             className="submit-btn" 
-                            // onClick={(e)=>handleEntitySubmit(e, form.split("-")[0], form.split("-")[1], currentTask)}
-                            onClick={(e) => onSubmitForm(e)}
-                            disabled ={
-                                !taskProject.title 
-                                || !taskObjective 
-                                || !currentTask.description 
-                                || !(currentTask.durationEst >=  10 || createOrEditTaskMutation.isPending)
-                                || (Number.isInteger(currentTask.duration) &&  currentTask.duration <= 0 )
-                                || (!!currentTask.finish && currentTask.status!=="Completed" )
-                                || (!currentTask.finish && !currentTask.start && currentTask.status==="Completed" )
-                                ? true:false}>
-                            { createOrEditTaskMutation.isPending? "sending..." : form==="create-task"? "Create":"Update"}
+                            onClick={onSubmitForm}
+                            disabled ={handleDisableFormSubmitBtn()}>
+                            { createOrEditTaskMutation.isPending? "sending..." : form==="create-task"? "Create":"Update" }
                         </button>
                     </div>
                 </div>
