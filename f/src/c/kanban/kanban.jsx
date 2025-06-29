@@ -115,6 +115,7 @@ const Kanban = ({sitePage}) => {
             if (task.status==="To-Do") {
                 task.start = null
                 task.finish = null
+                task.duration = null
             }
             if (task.status==="In-Progress") {
                 task.start = !task.start? now : task.start
