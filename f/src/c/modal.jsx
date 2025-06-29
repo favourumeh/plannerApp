@@ -19,7 +19,7 @@ function Modal ({children}) {
         setShowObjectiveQueryResult(false)
     }
 
-    const handleDoubleClickModalOverlay= (e) => {
+    const handleDoubleClickModalOverlay= () => {
         setIsModalOpen(false)
         setForm("")
         setShowProjectQueryResult(false)

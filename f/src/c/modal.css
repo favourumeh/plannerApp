@@ -28,6 +28,10 @@ div.modal-content {
     border-color: red; */
 }
 
+div.modal-content div.field-title{
+    user-select: none;
+}
+
 button.modal-close-btn{
     position: absolute;
     background: none;
