@@ -3,11 +3,10 @@ import globalContext from "../context"
 import { useState, useRef, useEffect, useContext } from "react"
 
 function NotificationBar () {
-    const {notificationMessage, setNotificationMessage, isNotiBarVisible, setIsNotiBarVisible, isNotiMessageError} = useContext(globalContext)
+    const {notificationMessage, setNotificationMessage, isNotiBarVisible, setIsNotiBarVisible, isNotiMessageError, notificationId} = useContext(globalContext)
     const [isNotiBarExpanded, setIsNotiBarExpanded] = useState(false)
     const [isHoverNotificationBar, setIsHoverNotificationBar] = useState(false)
     const notiBarTimerRef = useRef()
-    
 
     useEffect(() => {
         if (!isHoverNotificationBar){
@@ -17,7 +16,7 @@ function NotificationBar () {
         }
         return () => clearTimeout(notiBarTimerRef.current)
     },
-    [isHoverNotificationBar, notificationMessage]
+    [isHoverNotificationBar, notificationId] // 1-
     )
 
     const handleMouseEnter = () => {
@@ -55,4 +54,9 @@ function NotificationBar () {
 }
 
 export default NotificationBar
+
+/*
+    1- notificationId is a unique identifier for each notification instance. This Forces the 5 second timeout of the notificatgion reset with every new notification instance. 
+        Previously the notifcation message was used instead of id which forced the 
+*/ 
 

@@ -29,6 +29,7 @@ function App() {
     const [notificationMessage, setNotificationMessage] = useState("")
     const [isNotiBarVisible, setIsNotiBarVisible] = useState(false)
     const [isNotiMessageError, setIsNotiMessageError] = useState(false) // determines the colour of the noti message bar (green or red)
+    const [ notificationId, setNotificationId ] = useState()
     const [formProject, setFormProject] = useState(() => persistState("formProject",{}))
     const [formObjective, setFormObjective] = useState(() => persistState("formObjective",{}))
     const [currentTask, setCurrentTask] = useState(() => persistState("currentTask", defaultTask))
@@ -57,6 +58,7 @@ function App() {
 
     const handleNotification = (message, category) => {
         setIsNotiBarVisible(true)
+        setNotificationId(crypto.randomUUID())
         setNotificationMessage(message)
         setIsNotiMessageError(category=="success"? false:true)
     } 
@@ -145,6 +147,7 @@ function App() {
         notificationMessage, setNotificationMessage,
         isNotiBarVisible, setIsNotiBarVisible,
         isNotiMessageError, setIsNotiMessageError,
+        notificationId,
         handleNotification,
         handleLogin, handleLogout,
         formProject, formObjective,
