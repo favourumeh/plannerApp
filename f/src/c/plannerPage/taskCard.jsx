@@ -62,12 +62,13 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
     const stylePlannerTaskContent = {color:generateTaskCardFontColour()}
 
     return (
+        <div className="planner-task-card-container">
             <div 
                 style ={style}
                 ref={setNodeRef} 
                 {...listeners}
                 {...attributes} 
-                className="planner-task-card-overlay"
+                className="planner-task-title-row"
             >
                 <button onPointerDown={onClickEditBtn} > 
                     <i className="fa fa-pencil" aria-hidden="true"></i>
@@ -77,12 +78,12 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
                     style={stylePlannerTaskContent}  
                     className="planner-task-card-content"> {pauseSignal()} {project?.projectNumber}.{objective?.objectiveNumber}.{task.taskNumber}: {task?.description}
                 </div>
-                <TaskInfoCard task={task} taskObjective={objective} taskProject={project} translate={translate}/>
 
                 <button onPointerDown ={onClickDeleteBtn}> 
                     <i className="fa fa-times" aria-hidden="true"></i>
                 </button>
             </div>
+            <TaskInfoCard task={task} taskObjective={objective} taskProject={project} translate={translate}/>
+        </div>
     )
-
 }

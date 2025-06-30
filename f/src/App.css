@@ -1,5 +1,5 @@
 #root {
-  max-width: 1500px; /*Ensures the content doesn’t stretch too wide on large screens, improving readability and aesthetics. if screen is narrower than max-width then element shrinks */
+  max-width: 1750px; /*Ensures the content doesn’t stretch too wide on large screens, improving readability and aesthetics. if screen is narrower than max-width then element shrinks*/
   margin: 0 auto; /* 0= no margin at the top or buttom. auto=browser will automatically calculate equal margins on the left and right, thus centering element horizontally*/
   padding: 2rem; /* spacing between border and inner elements (i.e.,children). 2rem means font is 2x the root fontsize (default is 16px so 32px)*/
   text-align: center; /*Aligns text content (and buttons, images, spans) inside the #root element to center*/

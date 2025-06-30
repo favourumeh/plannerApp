@@ -33,7 +33,7 @@ div.progress-card-overlay:hover .hover-info-card-overlay{
     visibility: visible;
 }
 
-div.planner-task-card-overlay:hover .hover-info-card-overlay{
+div.planner-task-card-container:hover .hover-info-card-overlay{
     visibility: visible;
 }
 

@@ -15,7 +15,7 @@ div.planner-task-card-content{
 }
 
 
-div.planner-task-card-overlay{
+div.planner-task-title-row{
     display: flex;
     justify-content: space-around;
 
@@ -30,7 +30,7 @@ div.planner-task-card-content:hover{
     cursor: grab;
 }
 
-div.planner-task-card-overlay button{
+div.planner-task-title-row button{
     background: none;
     padding: 1px;
     font: 1rem;
@@ -40,7 +40,7 @@ div.planner-task-card-overlay button{
     translate: 0px -5px;
 }
 
-div.planner-task-card-overlay:hover button{
+div.planner-task-title-row:hover button{
     border: rgb(0,0,0,0);
     visibility: visible;
 }

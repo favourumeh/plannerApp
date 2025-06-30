@@ -17,30 +17,36 @@ div.planner-page-header-2 span {
     border-radius: 5px;
 }
 
+.planner-body{ /*set a local variable that can be use within the the children of the element that has the tag planner-body  */
+    --sidebar-width: 395px;
+}
+
 div.planner-body{
     display: flex;
     border: 1px solid;
     border-radius: 10px;
     min-height: 700px;
     min-width: 1500px;
-    /* background-color: rgb(30, 23, 36); */
-    padding: 4px;
+    max-width: 1550px;
+    background-color: rgb(30, 23, 36);
+    padding: 10px 10px 10px 10px;
 }
 
 div.planner-side-bar{
+    /* border: 1px solid; */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     position: fixed;
-    min-width: 400px;
+    max-width: var(--sidebar-width);
     z-index: 1;
 }
 
 div.planner-content{
     /* border: 1px solid; */
-    width: calc(100% - 400px);
+    width: calc(100% - var(--sidebar-width));
     height: 100%;
-    translate: 400px;
+    translate: calc(var(--sidebar-width) + 20px);
 
     display: flex;
     flex-wrap: wrap;

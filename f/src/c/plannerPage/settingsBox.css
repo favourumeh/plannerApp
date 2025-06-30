@@ -4,7 +4,7 @@ div.planner-settings-box{
     align-items: flex-start;
     border: 1px solid white;
     border-radius: 10px;
-    width: 380px;
+    width: 100%;
     margin: 0 0px 10px 0;
     background-color: rgba(48, 48, 100, 1);
     /* background-color: rgb(30, 23, 36); */

@@ -127,7 +127,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
             {isExpanded? 
                 daysTasks?.sort((a, b) => // sort the tasks in the date card by the start time
                     new Date(a.start) - new Date(b.start)).map((task, index) =>
-                    <TaskCard key={index} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate={"50% 25px"}/>
+                    <TaskCard key={index} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate={"100% -0%"}/>
                 )
                 : undefined    
             }
