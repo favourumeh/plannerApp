@@ -6,9 +6,11 @@ import { useContext, useEffect, useState } from "react"
 import { defaultTask } from "../../staticVariables"
 import { useMutation } from "@tanstack/react-query"
 import { mutateEntityRequest } from "../../fetch_entities"
+import localPlannerPageContext from "./localPlannerPageContext"
 
 export function ObjectiveCard({entityName, objective, projects, objectives, unscheduledTasks, isExpandAllUnscheduledEntities, refetchPlannerTasks, translate}) {
     const {setCurrentObjective,setCurrentTask, setForm, setFormProject, setFormObjective, setIsModalOpen, handleNotification, handleLogout} = useContext(globalContext)
+    const { scrollPosition } = useContext(localPlannerPageContext)
     const [isExpanded, setIsExpanded] = useState(false) // state to track if the objective card is expanded to show objectives
     const unscheduledTasksOfObjective = unscheduledTasks?.filter((task) => task.objectiveId === objective.id )
     const project = projects?.find( project => project.id === objective.projectId )
@@ -107,7 +109,8 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
                         projects={projects} 
                         objectives={objectives}
                         refetchPlannerTasks={refetchPlannerTasks}
-                        translate="110% -50%"/>
+                        translate={`120% calc( -50% - ${scrollPosition}px)`}/>
+                        // translate="115% -50%"/>
                 ) : undefined
             }
         </div>

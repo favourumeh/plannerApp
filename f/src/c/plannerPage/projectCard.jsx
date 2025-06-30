@@ -6,9 +6,12 @@ import { defaultObjective } from "../../staticVariables"
 import globalContext from "../../context"
 import { useMutation } from "@tanstack/react-query"
 import { mutateEntityRequest } from "../../fetch_entities"
+import localPlannerPageContext from "./localPlannerPageContext"
 
 export function ProjectCard({entityName, project, projects, objectives, unscheduledTasks, isExpandAllUnscheduledEntities, refetchPlannerTasks, translate}) {
     const {setCurrentProject, setCurrentObjective, setFormProject, setForm, setIsModalOpen, handleNotification, handleLogout} = useContext(globalContext)
+    const { scrollPosition } = useContext(localPlannerPageContext)
+
     const [isExpanded, setIsExpanded] = useState(false) // state to track if the project card is expanded to show objectives
     const  projectsObjectives = objectives?.filter( (objective) => objective.projectId === project.id ) // the objectives of the project that have unscheduled tasks
     const objectvesOfProject = objectives?.filter( (objective) => objective.projectId === project.id )
@@ -108,8 +111,8 @@ export function ProjectCard({entityName, project, projects, objectives, unschedu
                             unscheduledTasks={unscheduledTasks}
                             isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
                             refetchPlannerTasks={refetchPlannerTasks}
-                            translate="125% -50%"/>
-                            // translate="-240px -240px"/>
+                            translate={`130% calc( -50% - ${scrollPosition}px)`}/>
+                            // translate="125% -50%"/>
                         ) : undefined
 
                     }

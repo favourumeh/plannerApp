@@ -4,11 +4,10 @@ import { TaskCard } from "./taskCard"
 import { ProjectCard } from "./projectCard"
 import { useDroppable } from "@dnd-kit/core"
 import localPlannerPageContext from "./localPlannerPageContext"
-import { useContext } from "react"
+import { useContext, useRef } from "react"
 
 export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJustUnscheduledTask, isExpandAllUnscheduledEntities, refetchPlannerTasks}) {
-    const { isExcludeBreakHours } = useContext(localPlannerPageContext)
-
+    const { isExcludeBreakHours, scrollPosition, setScrollPosition } = useContext(localPlannerPageContext)
     const calcTotalTaskDuration  = (task) => {
         if (!isExcludeBreakHours) {return (task.duration || task.durationEst)}
 
@@ -29,33 +28,50 @@ export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJu
             return `${Math.floor(totalTaskMins/60)}hrs ${minRemainder}mins`
         }
     }
+
+    const divScroller = useRef(0)
+
+    const handleScroll = (e) => { // records how far up/down in px the scroll bar has moved in the unscheduled section. This is used to keep the info card of an entity from drifting down relative to its entity as you scroll down. 
+        setScrollPosition(e.target.scrollTop)
+        // console.log("positon", e.target.scrollTop)
+    }
     
     return (
-        <div ref={setNodeRef} id="Unscheduled-Tasks-List" className="planner-unscheduled-container"> 
-            <div> Unscheduled Tasks #{unscheduledTasks.length} ({displayedTaskDuration()}) </div> 
+        <div
+            ref={divScroller} 
+            className="planner-unscheduled-container-scroller-wrapper"
+            onScroll={handleScroll}
+            >
+            <div 
+                ref={setNodeRef} 
+                id="Unscheduled-Tasks-List" 
+                className="planner-unscheduled-container-droppable"
+                > 
+                <div> Unscheduled Tasks #{unscheduledTasks.length} ({displayedTaskDuration()}) </div> 
 
-            {isJustUnscheduledTask? 
-                unscheduledTasks?.map((task)=> 
-                    <TaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate="120% -50%"/>
-                )
-                :
-                projects?.map( (project) => 
-                    <ProjectCard 
-                        key={project.id}
-                        entityName="project"
-                        project={project} 
-                        projects={projects} 
-                        objectives={objectives} 
-                        unscheduledTasks={unscheduledTasks}
-                        isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
-                        refetchPlannerTasks={refetchPlannerTasks}
-                        translate="135% -50%"/>
+                {isJustUnscheduledTask? 
+                    unscheduledTasks?.map((task)=> 
+                        <TaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate="145% -50%"/>
+                    )
+                    :
+                    projects?.map( (project) => 
+                        <ProjectCard 
+                            key={project.id}
+                            entityName="project"
+                            project={project} 
+                            projects={projects} 
+                            objectives={objectives} 
+                            unscheduledTasks={unscheduledTasks}
+                            isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
+                            refetchPlannerTasks={refetchPlannerTasks}
+                            translate={`140% calc( -50% - ${scrollPosition}px)`}/>
+                            // translate="135% -50%"/>
 
-                )
+                    )
 
-            }
-
-
+                }
+            </div>
         </div>
+
     )
 }

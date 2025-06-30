@@ -29,6 +29,7 @@ export function PlannerPage ({sitePage}) {
     const [ plannerBodyHeight, setPlannerBodyHeight ] = useState(minPlannerBodyHeight)
     const [ maxDailyWorkingHours, setMaxDailyWorkingHours ] = useState( () => persistState( "maxDailyWorkingHours", 7, "localStorage" ) )
     const [ isExcludeBreakHours, setIsExcludeBreakHours ] = useState( () => persistState( "isExcludeBreakHours", true, "localStorage" ) )
+    const [ scrollPosition, setScrollPosition ] = useState(0) // tracks the scroll of the sidebar's unscheduled section
 
     const sideBar = useRef(null)
     const scheduledSection = useRef(null)
@@ -155,7 +156,8 @@ export function PlannerPage ({sitePage}) {
 
     const localPLannerPageContextValues = { // To-do move props to context
         maxDailyWorkingHours, setMaxDailyWorkingHours,
-        isExcludeBreakHours, setIsExcludeBreakHours
+        isExcludeBreakHours, setIsExcludeBreakHours,
+        scrollPosition, setScrollPosition,
     }
 
     return (
