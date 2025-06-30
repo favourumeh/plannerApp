@@ -135,11 +135,12 @@ div.form-buttons div.form-input-warning{
     font-size: smaller;
     border: none;
     color: red;
-    overflow-y: scroll;
     width: 350px;
     height: 43px;
     margin-right: 20px;
     text-align: center;
+    /*enable vertical scrolling */
+    overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #888 transparent;
 }
