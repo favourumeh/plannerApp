@@ -5,8 +5,4 @@ div.planner-unscheduled-container-scroller-wrapper{
     height: 445px;
     margin: 0 0px 0 0px;
     background-color: rgba(48, 48, 100, 1);
-    overflow-y: auto;
-    overflow-x:hidden;
-    scrollbar-width: thin;
-    scrollbar-color: #888 transparent;
 }

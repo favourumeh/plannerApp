@@ -7,7 +7,7 @@ import localPlannerPageContext from "./localPlannerPageContext"
 import { useContext, useRef } from "react"
 
 export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJustUnscheduledTask, isExpandAllUnscheduledEntities, refetchPlannerTasks}) {
-    const { isExcludeBreakHours, scrollPosition, setScrollPosition } = useContext(localPlannerPageContext)
+    const { isExcludeBreakHours, scrollPosition, setScrollPosition, isDragging } = useContext(localPlannerPageContext)
     const calcTotalTaskDuration  = (task) => {
         if (!isExcludeBreakHours) {return (task.duration || task.durationEst)}
 
@@ -35,12 +35,19 @@ export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJu
         setScrollPosition(e.target.scrollTop)
         // console.log("positon", e.target.scrollTop)
     }
-    
+    const unScheduledSectionContainerStyle = { // dissables scrolling in the unscheduled section when a task is being dragged to/from the section
+        overflowX: "hidden",
+        overflowY: isDragging ? "hidden" : "auto",
+        scrollbarWidth: isDragging? undefined : "thin",
+        scrollbarColor: isDragging? undefined : "#888 transparent"
+    }
+
     return (
         <div
             ref={divScroller} 
             className="planner-unscheduled-container-scroller-wrapper"
             onScroll={handleScroll}
+            style={unScheduledSectionContainerStyle}
             >
             <div 
                 ref={setNodeRef} 

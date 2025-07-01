@@ -27,9 +27,9 @@ div.planner-body{
     border-radius: 10px;
     min-height: 700px;
     min-width: 1500px;
-    max-width: 1550px;
     background-color: rgb(30, 23, 36);
     padding: 10px 10px 10px 10px;
+    user-select: none;
 }
 
 div.planner-side-bar{

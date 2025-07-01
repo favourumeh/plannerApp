@@ -9,7 +9,7 @@ import { useDraggable } from "@dnd-kit/core"
 import { isDateOlder } from "../../utils/dateUtilis"
 
 export function TaskCard({task, projects, objectives, refetchPlannerTasks, translate}) {
-    const {setForm, setCurrentTask, handleNotification, handleLogout, setIsModalOpen} = useContext(globalContext)
+    const { setForm, setCurrentTask, handleNotification, handleLogout, setIsModalOpen } = useContext(globalContext)
     const objective = objectives?.find(objective=> task.objectiveId===objective.id)
     const project = projects.find((project) => objective?.projectId===project.id)
 
@@ -40,7 +40,7 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
     }
 
     // DnD - Make enitity cards draggable
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({id: task.id}) //dnd
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: task.id,}) //dnd
     const style = transform ? {transform: `translate(${transform.x}px, ${transform.y}px)`} : undefined; //dnd keeps track of x-y coordinate of task card
 
     //generate the style of the task card

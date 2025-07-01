@@ -30,6 +30,7 @@ export function PlannerPage ({sitePage}) {
     const [ maxDailyWorkingHours, setMaxDailyWorkingHours ] = useState( () => persistState( "maxDailyWorkingHours", 7, "localStorage" ) )
     const [ isExcludeBreakHours, setIsExcludeBreakHours ] = useState( () => persistState( "isExcludeBreakHours", true, "localStorage" ) )
     const [ scrollPosition, setScrollPosition ] = useState(0) // tracks the scroll of the sidebar's unscheduled section
+    const [ isDragging, setIsDragging ] = useState(false) // monitors whether user is dragging a task
 
     const sideBar = useRef(null)
     const scheduledSection = useRef(null)
@@ -101,6 +102,7 @@ export function PlannerPage ({sitePage}) {
 
     const handleDragEnd = (e) => { //dnd
         const {active, over} = e
+        setIsDragging(false)
         if (!over) return
 
         const draggedTask = tasks.find(task=> task.id === active.id)
@@ -158,6 +160,7 @@ export function PlannerPage ({sitePage}) {
         maxDailyWorkingHours, setMaxDailyWorkingHours,
         isExcludeBreakHours, setIsExcludeBreakHours,
         scrollPosition, setScrollPosition,
+        isDragging, setIsDragging
     }
 
     return (
@@ -183,7 +186,7 @@ export function PlannerPage ({sitePage}) {
                     </Toolbar>
 
                 </div>
-                <DndContext onDragEnd={handleDragEnd}>
+                <DndContext onDragStart={()=> {setIsDragging(true)}} onDragEnd={handleDragEnd}>
                     <div className="planner-body" style={{minHeight: `${plannerBodyHeight}px`}}> 
                         <div ref={sideBar} className="planner-side-bar" >
                             <SettingsBox 
