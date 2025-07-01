@@ -5,7 +5,6 @@ import { mutateEntityRequest } from "../../fetch_entities"
 import { useContext } from "react"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
-import { useDraggable } from "@dnd-kit/core"
 import { isDateOlder } from "../../utils/dateUtilis"
 
 export function TaskCard({task, projects, objectives, refetchPlannerTasks, translate}) {
@@ -39,10 +38,6 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
         }
     }
 
-    // DnD - Make enitity cards draggable
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: task.id,}) //dnd
-    const style = transform ? {transform: `translate(${transform.x}px, ${transform.y}px)`} : undefined; //dnd keeps track of x-y coordinate of task card
-
     //generate the style of the task card
     const generateTaskCardFontColour = () => {//generate colour of the taskCard text
         let colour = "white"
@@ -62,12 +57,7 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
     const stylePlannerTaskContent = {color:generateTaskCardFontColour()}
 
     return (
-        <div className="planner-task-card-container"
-            style ={style}
-            ref={setNodeRef} 
-            {...listeners}
-            {...attributes} 
-        >
+        <>
             <div className="planner-task-title-row">
                 <button onPointerDown={onClickEditBtn} > 
                     <i className="fa fa-pencil" aria-hidden="true"></i>
@@ -83,6 +73,6 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
                 </button>
             </div>
             <TaskInfoCard task={task} taskObjective={objective} taskProject={project} translate={translate}/>
-        </div>
+        </>
     )
 }

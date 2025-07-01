@@ -1,10 +1,10 @@
 
 import "./unscheduledSidebar.css"
-import { TaskCard } from "./taskCard"
 import { ProjectCard } from "./projectCard"
 import { useDroppable } from "@dnd-kit/core"
 import localPlannerPageContext from "./localPlannerPageContext"
 import { useContext, useRef } from "react"
+import { DraggableTaskCard } from "./DraggableTaskCard"
 
 export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJustUnscheduledTask, isExpandAllUnscheduledEntities, refetchPlannerTasks}) {
     const { isExcludeBreakHours, scrollPosition, setScrollPosition, isDragging } = useContext(localPlannerPageContext)
@@ -58,7 +58,7 @@ export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJu
 
                 {isJustUnscheduledTask? 
                     unscheduledTasks?.map((task)=> 
-                        <TaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate="145% -50%"/>
+                        <DraggableTaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate="145% -50%"/>
                     )
                     :
                     projects?.map( (project) => 

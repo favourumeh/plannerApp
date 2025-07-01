@@ -1,5 +1,4 @@
 
-import {TaskCard} from "./taskCard"
 import "./dateCard.css"
 import { useContext, useEffect, useRef, useState } from "react"
 import { useDroppable } from "@dnd-kit/core"
@@ -8,6 +7,7 @@ import localPlannerPageContext from "./localPlannerPageContext"
 import globalContext from "../../context"
 import { defaultObjective, defaultProject, defaultTask } from "../../staticVariables"
 import { datetimeToString } from "../../utils/dateUtilis"
+import { DraggableTaskCard } from "./DraggableTaskCard"
 
 export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAllDateCards, refetchPlannerTasks}) {
     const [ isExpanded, setIsExpanded ] = useState(isExpandAllDateCards)
@@ -127,7 +127,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
             {isExpanded? 
                 daysTasks?.sort((a, b) => // sort the tasks in the date card by the start time
                     new Date(a.start) - new Date(b.start)).map((task, index) =>
-                    <TaskCard key={index} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate={"100% -0%"}/>
+                    <DraggableTaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate="100% -0%"/>
                 )
                 : undefined    
             }

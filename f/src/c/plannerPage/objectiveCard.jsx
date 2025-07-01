@@ -1,5 +1,4 @@
 import "./parentCard.css"
-import { TaskCard } from "./taskCard"
 import ObjectiveInfoCard from "../InfoCards/objectiveInfoCard"
 import globalContext from "../../context"
 import { useContext, useEffect, useState } from "react"
@@ -7,6 +6,7 @@ import { defaultTask } from "../../staticVariables"
 import { useMutation } from "@tanstack/react-query"
 import { mutateEntityRequest } from "../../fetch_entities"
 import localPlannerPageContext from "./localPlannerPageContext"
+import { DraggableTaskCard } from "./DraggableTaskCard"
 
 export function ObjectiveCard({entityName, objective, projects, objectives, unscheduledTasks, isExpandAllUnscheduledEntities, refetchPlannerTasks, translate}) {
     const {setCurrentObjective,setCurrentTask, setForm, setFormProject, setFormObjective, setIsModalOpen, handleNotification, handleLogout} = useContext(globalContext)
@@ -103,14 +103,7 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
 
             {isExpanded?
                 unscheduledTasksOfObjective?.map( (task) =>
-                    <TaskCard 
-                        key={task.id} 
-                        task={task} 
-                        projects={projects} 
-                        objectives={objectives}
-                        refetchPlannerTasks={refetchPlannerTasks}
-                        translate={`120% calc( -50% - ${scrollPosition}px)`}/>
-                        // translate="115% -50%"/>
+                    <DraggableTaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate={`120% calc( -50% - ${scrollPosition}px)`}/>// translate="115% -50%"/>
                 ) : undefined
             }
         </div>
