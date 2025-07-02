@@ -1,7 +1,7 @@
 div.planner-unscheduled-container-scroller-wrapper{
     border: 1px solid white;
     border-radius: 10px;
-    max-width: 100%;
+    min-width: var(--sidebar-width); /*100%;*/ /*see --sidebar-width decalaration in plannerPage.css */
     height: 445px;
     margin: 0 0px 0 0px;
     background-color: rgba(48, 48, 100, 1);
