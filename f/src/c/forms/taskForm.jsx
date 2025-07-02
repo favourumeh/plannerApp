@@ -76,11 +76,14 @@ function TaskForm ({form}) {
         }}, [projectQuery])
 
     useEffect(() => {
-        if (!isPendingObjectives) {
+        if (!isPendingObjectives && !!objectiveQuery) {
             // console.log("Objective query", objectiveQuery, "objectiveTitles", objectiveTitles) 
+            // console.log("relevantObjectives", relevantObjectives)
+            // console.log("woo")
             if  (objectiveTitles.includes(objectiveQuery)) {
                 setCurrentTask({...currentTask, "objectiveId":taskObjective?.id}) // set the objectiveId field of the currentTask when a valid objective is clicked or typed in the form's objective field
             } else {
+                // console.log("woo")
                 setCurrentTask({...currentTask, "objectiveId":""}) // set the objectiveId field of the currentTask to empty string when an invalid objective is typed in the form's objective field
             }
         }
