@@ -37,9 +37,9 @@ export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJu
     }
     const unScheduledSectionContainerStyle = { // dissables scrolling in the unscheduled section when a task is being dragged to/from the section
         overflowX: "hidden",
-        overflowY: isDragging ? "hidden" : "auto",
-        scrollbarWidth: isDragging? undefined : "thin",
-        scrollbarColor: isDragging? undefined : "#888 transparent"
+        overflowY: "auto",
+        scrollbarWidth:  "thin",
+        scrollbarColor: "#888 transparent"
     }
 
     return (

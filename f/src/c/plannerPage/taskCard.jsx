@@ -11,7 +11,6 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
     const { setForm, setCurrentTask, handleNotification, handleLogout, setIsModalOpen } = useContext(globalContext)
     const objective = objectives?.find(objective=> task.objectiveId===objective.id)
     const project = projects.find((project) => objective?.projectId===project.id)
-
     const deleteEntityMutation = useMutation({
         mutationFn: mutateEntityRequest,
         onSuccess: refetchPlannerTasks,
