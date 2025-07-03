@@ -1,10 +1,12 @@
 import "./clock.css"
 import { useState, useEffect, useContext } from "react"
 import globalContext from "../../context"
+import DatePicker from "react-datepicker"
+import { datetimeToString } from "../../utils/dateUtilis"
 
 const Clock = () => {
-    const [todayDateTime, setTodayDateTime] = useState(new Date())
-    const {currentDate, setCurrentDate, sitePage} = useContext(globalContext)
+    const [ todayDateTime, setTodayDateTime ] = useState(new Date())
+    const { currentDate, setCurrentDate } = useContext(globalContext)
     // Update the time every second
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -27,14 +29,19 @@ const Clock = () => {
         return todayDateTime.toDateString() === new Date(currentDate).toDateString()? "white" : "red"
     } 
 
-    const timeSpanStyle = {"color":"rgb(0,230,0)", "cursor":"pointer"}
     return (
         <div 
             className="clock"
         > 
-            <span style={{color:todayIndicator()}}
+            <span style={{color:todayIndicator()}} className="date"
             >
-                {fromatDate(new Date(currentDate))}  
+            <DatePicker
+                selected={new Date(currentDate)}
+                onSelect={ (date) => setCurrentDate(datetimeToString(date)) } 
+                onChange={ (date) => setCurrentDate(datetimeToString(date)) }
+                dateFormat="yyyy-MM-dd"
+            />
+                {/* {fromatDate(new Date(currentDate))}   */}
             </span> |
             <span 
                 className="time"

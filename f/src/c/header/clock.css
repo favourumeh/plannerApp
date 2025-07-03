@@ -4,6 +4,36 @@
 
 }
 
-div.clock {
+div.clock span.time{
+    font-size: 14px;
+    margin-left: 2px;
     font-weight: 600;
+
+}
+
+div.clock input{
+    border: 1px solid;
+    max-width: 68px;
+    border: none;
+    background-color: rgba(48, 48, 100, 0.137);
+    height: 22px;
+    font-size:14px;
+    font-weight: 600;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    min-width: 73px;
+}
+
+div.clock input:hover{
+    color: rgba(0, 230, 0);
+    cursor: pointer;
+}
+
+div.clock .react-datepicker__tab-loop{
+    position: absolute;
+    z-index: 1;
+    translate: -100% -0px;
+}
+
+div.clock input:focus{
+    outline: none;
 }
