@@ -1,19 +1,13 @@
 import "./kanbanColumn.css"
-import { useState, useEffect, useContext } from "react"
+import { useContext } from "react"
 import KanbanCard from "./kanbanCard"
 import { useDroppable } from "@dnd-kit/core"
 import globalContext from "../../context"
 
 export default function KanbanColumn ({columnId, columnTitle, taskArr, entityName, refetchKanbanContent}) {
-    const [columnTaskArr, setColumnTaskArr] = useState([])
     const {onShowHoverText, onHideHoverText} = useContext(globalContext)
-
-    useEffect ( () => {
-        setColumnTaskArr(taskArr.filter((task) => task.status==columnId))
-    }, [taskArr])
-
+    const columnTaskArr = taskArr?.filter((task) => task.status==columnId)
     const {setNodeRef} = useDroppable({ id: columnId }) //dnd
-
     return (
         <>
             <div ref = {setNodeRef} id={columnId} className="kanban-column"> {`${columnTitle} [${columnTaskArr.length}]`} 

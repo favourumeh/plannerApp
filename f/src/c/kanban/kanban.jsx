@@ -13,26 +13,23 @@ import RefreshEntities from "../toolbar/refreshEntities"
 import HoverText from "./hoverText"
 import { fetchKanbanTasks, fetchBreakObjective, mutateEntityRequest } from "../../fetch_entities"
 
+const columns = [
+    {id:"To-Do", title:"To Do"}, 
+    {id:"In-Progress", title:"In Progress"}, 
+    {id:"Paused", title:"Paused"}, 
+    {id:"Completed", title:"Completed"}
+]
+
 const Kanban = ({sitePage}) => {
     if (sitePage!=="view-kanban") return 
     const {formatDateFields, currentDate, setCurrentDate, handleDayNavigation, 
             handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
     const entityName = "task"
-    const [updatedTask, setUpdatedTask] = useState([])
-    const [updatedTaskIdAndStatus, setUpdatedTaskIdAndStatus] = useState({})
-    const [sourceColumn, setSourceColumn] = useState("")
-    const [destColumn, setDestColumn] = useState("")
     const [remainingTaskTimeUnits, setRemainingTaskTimeUnits] = useState("hrs")
     const [remainingTaskTime, setRemainingTaskTime] = useState(0) //can be hours or minutes
     const [totalTaskTimeUnits, setTotalTaskTimeUnits] = useState("mins")
     const [totalTaskTime, setTotalTaskTime] = useState(0)
 
-    const columns = [
-        {id:"To-Do", title:"To Do"}, 
-        {id:"In-Progress", title:"In Progress"}, 
-        {id:"Paused", title:"Paused"}, 
-        {id:"Completed", title:"Completed"}
-    ]
     const selectedDate = new Date(currentDate).toISOString().split("T")[0]
     const {data, isPending, refetch: refetchKanbanContent} = useQuery({ //get all the kanban tasks for the selected date
         queryKey: ["kanban-tasks", {"entityName":entityName, "selectedDate":selectedDate}],
@@ -144,41 +141,23 @@ const Kanban = ({sitePage}) => {
         return task
     }
 
-    const handleDragEnd = (e) => { //dnd
+    const handleDragEnd = async (e) => { //dnd
         const {active, over} = e
 
         if (!over) return
 
-        const taskId = active.id
-        const newStatus = over.id // one of: To-Do, In-Progress, Paused and Completed
+        const draggedTaskId = active.id
+        const destColumn = over.id // one of: To-Do, In-Progress, Paused and Completed
+        var draggedTask = taskArr?.find( (task) => task.id === draggedTaskId )
+        
+        if ( draggedTask.status === destColumn ) return
 
-        const updatedTask_ = taskArr.find((task) => task.id ===  taskId)
-        setSourceColumn(updatedTask_.status)
-        setDestColumn(newStatus)
-        setUpdatedTaskIdAndStatus({id:updatedTask_.id, status:newStatus})
+        if ( draggedTask.status !== destColumn ) {
+            draggedTask.status = destColumn
+            draggedTask = await formatDateFields( handleDateFieldsAndStatus( {task:draggedTask} ) )
+            dndUpdateTaskMutation.mutate( {action:"update", entityName, currentEntity: draggedTask, handleNotification, handleLogout} )
+        }
     }
-    
-    useEffect(() => {
-        if (!!updatedTaskIdAndStatus.id && sourceColumn !== destColumn) {
-            let updatedTask_ = taskArr.find((task) => task.id ===  updatedTaskIdAndStatus.id)
-            // console.log("updatedTask_:", updatedTask_)
-            updatedTask_.status = updatedTaskIdAndStatus.status
-            updatedTask_ = handleDateFieldsAndStatus({task:updatedTask_})
-            updatedTask_ = formatDateFields(updatedTask_)
-            setUpdatedTask(updatedTask_)
-        }
-    }, [updatedTaskIdAndStatus])
-
-    useEffect(() => {
-        if (!!updatedTaskIdAndStatus.id && sourceColumn !== destColumn) {
-            setUpdatedTaskIdAndStatus({})
-            const newTask = taskArr.map(task => task.id === updatedTaskIdAndStatus.id? updatedTask : task)
-            taskArr = newTask // put here to speed up DnD action (but can be removed)
-            dndUpdateTaskMutation.mutate( {action:"update", entityName, currentEntity: updatedTask, handleNotification, handleLogout} )
-        }
-    }, [updatedTask])
-
-    if ( isPending || breakObjectiveQuery.isPending ) return "Loading ..." //note: all hooks (e.g., useEffect) must be before any conditionals such as this
 
     return (
         <div className="kanban-page">
@@ -204,7 +183,7 @@ const Kanban = ({sitePage}) => {
             </div>
             <DndContext onDragEnd={handleDragEnd}>
                 <div className="kanban-page-body">
-                    {columns?.map((column) => 
+                    {columns.map((column) => 
                         <KanbanColumn 
                             key={column.id}
                             columnId={column.id}
