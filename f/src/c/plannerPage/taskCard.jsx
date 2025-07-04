@@ -56,7 +56,7 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
     const stylePlannerTaskContent = {color:generateTaskCardFontColour()}
 
     return (
-        <>
+        <div className="planner-task-card-container">
             <div className="planner-task-title-row">
                 <button onPointerDown={onClickEditBtn} > 
                     <i className="fa fa-pencil" aria-hidden="true"></i>
@@ -72,6 +72,6 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
                 </button>
             </div>
             <TaskInfoCard task={task} taskObjective={objective} taskProject={project} translate={translate}/>
-        </>
+        </div>
     )
 }
