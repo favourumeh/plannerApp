@@ -8,10 +8,6 @@ button:focus-visible {
   outline: none;
 }
 
-div.entity-page-header{
-    /* border: 1px solid white; */
-}
-
 .entity-page-header-row2{
     display: flex;
     justify-content: space-between;
@@ -33,23 +29,12 @@ div.entity-page-header{
 }
 
 div.entity-page-body {
-    /* border: 1px solid white ; */
+    border: 1px solid white ;
     border-radius: 10px;
     background-color: rgb(30, 23, 36);
     display: flex;
-    justify-content: center;
-    align-content: flex-start;
-    height: 450px;
-}
-
-ol.entity-list{
-    list-style-type: none;
-    padding-left:0px;
-    width: 100%;
-
-}
-
-#entity-list div.task-card:hover{
-    color: grey;
-    cursor: pointer;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 430px;
+    padding: 20px;
 }

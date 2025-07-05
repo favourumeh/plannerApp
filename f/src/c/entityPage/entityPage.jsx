@@ -10,13 +10,14 @@ import FilterPage from "../toolbar/filterPage"
 import ViewPage from "../toolbar/viewPage"
 import RefreshEntities from "../toolbar/refreshEntities"
 import { fetchUserEntityPage } from "../../fetch_entities"
+import Dropdown from "../dropdown"
 
 function EntityPage ({sitePage}) {
-    if (!["view-projects", "view-objectives", "view-tasks"].includes(sitePage)) return null
+    if (sitePage != "view-entity") return null
     const [page, setPage] = useState(1)
     const {handleNotification, handleLogout,isModalOpen} = useContext(globalContext)
-    // useEffect(() => setPage(1), [sitePage])
-    const entityName = sitePage==="view-projects"? "project" : sitePage==="view-objectives"? "objective" : "task"
+    const [entityName, setEntityName] = useState("project")
+
     const { isPending, data, refetch: refetchEntityPageContent } = useQuery({
         queryKey: [`${entityName}s`, page],
         queryFn: () => fetchUserEntityPage(entityName, handleNotification, handleLogout, page),
@@ -32,7 +33,7 @@ function EntityPage ({sitePage}) {
 
     if (isPending) return "Loading..."
 
-    const  entityArr = sitePage==="view-projects"? data?.projects : sitePage==="view-objectives" ? data?.objectives : data?.tasks 
+    const  entityArr = entityName==="project"? data?.projects : entityName==="objective" ? data?.objectives : data?.tasks 
 
     const onClickNextPage = () => {
         if (page===data["_pages"]) return
@@ -43,6 +44,17 @@ function EntityPage ({sitePage}) {
         if (page===1) return
         setPage(page-1)
     }
+
+    const dropdownButton = () =>{
+        return (
+            <>
+                {entityName.toUpperCase()}S &nbsp;&nbsp;
+                <i class={`fa fa-caret-down side-btn`} aria-hidden="true"></i> &nbsp;
+                ({`${page}/${data["_pages"]}`})
+            </>
+        )
+    }
+
     return (
         <div className="entity-page">
             <div className="entity-page-header"> 
@@ -52,7 +64,15 @@ function EntityPage ({sitePage}) {
 
                 <div className="entity-page-header-row2">
                     <button type="button" className="next-pg-btn" onClick={onClickPrevPage}> <i className="fa fa-arrow-left" aria-hidden="true"></i> </button>
-                    <strong> {entityName.toUpperCase()}S ({`${page}/${data["_pages"]}`})</strong>
+                    <Dropdown 
+                        buttonContent={ dropdownButton() } 
+                        buttonClassName={"entity-dropdown"}
+                        translate={"0px 40px"}
+                        >
+                        <div onClick={ () => {setEntityName("project"); setPage(1);} }> Projects </div>
+                        <div onClick={ () => {setEntityName("objective"); setPage(1);} }> Objectives </div>
+                        <div onClick={ () => {setEntityName("task"); setPage(1);} }> Tasks </div>
+                    </Dropdown> 
                     <button type="button" className="prev-pg-btn" onClick={onClickNextPage}> <i className="fa fa-arrow-right" aria-hidden="true"></i> </button>
                 </div>
                 
@@ -67,13 +87,11 @@ function EntityPage ({sitePage}) {
             </div>
 
             <div className="entity-page-body"> 
-                <ol id="entity-list" className="entity-list">
                     {entityArr?.map((entity)=> 
-                        <li align="left" key={entity.id}>
+                        <div align="left" key={entity.id}>
                             <EntityCard entity={entity} entityName={entityName} refetchEntityPageContent = {refetchEntityPageContent}/>
-                        </li>
+                        </div>
                     )}
-                </ol>
             </div>
 
         </div>
