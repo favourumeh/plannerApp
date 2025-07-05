@@ -34,14 +34,16 @@ function EntityPage ({sitePage}) {
     if (isPending) return "Loading..."
 
     const  entityArr = entityName==="project"? data?.projects : entityName==="objective" ? data?.objectives : data?.tasks 
-
+    const  projects = entityName==="task"? data?.taskProjects : []
+    const  objectives = entityName==="task"? data?.taskObjectives: []
+    // console.log(data, data)
     const onClickNextPage = () => {
-        if (page===data["_pages"]) return
+        if (page>=data["_pages"]) return
         setPage(page+1)
     }
 
     const onClickPrevPage = () => {
-        if (page===1) return
+        if (page<=1) return
         setPage(page-1)
     }
 
@@ -49,8 +51,8 @@ function EntityPage ({sitePage}) {
         return (
             <>
                 {entityName.toUpperCase()}S &nbsp;&nbsp;
-                <i class={`fa fa-caret-down side-btn`} aria-hidden="true"></i> &nbsp;
-                ({`${page}/${data["_pages"]}`})
+                <i className={`fa fa-caret-down side-btn`} aria-hidden="true"></i> &nbsp;
+                ({`${page}/${ !!data._pages ? Math.max(data._pages, 1) : 1} `})
             </>
         )
     }
@@ -89,7 +91,7 @@ function EntityPage ({sitePage}) {
             <div className="entity-page-body"> 
                     {entityArr?.map((entity)=> 
                         <div align="left" key={entity.id}>
-                            <EntityCard entity={entity} entityName={entityName} refetchEntityPageContent = {refetchEntityPageContent}/>
+                            <EntityCard entity={entity} entityName={entityName} projects={projects} objectives={objectives} refetchEntityPageContent = {refetchEntityPageContent}/>
                         </div>
                     )}
             </div>
