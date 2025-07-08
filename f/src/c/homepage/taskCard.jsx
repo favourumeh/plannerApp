@@ -3,7 +3,7 @@ import {useContext, useEffect} from "react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
-import readTasksObjectiveAndProjectQueryOption from "../../queryOptions/readTasksObjectiveAndProjectQueryOption"
+import { readTasksObjectiveAndProjectQueryOption } from "../../queryOptions"
 import { mutateEntityRequest } from "../../fetch_entities"
 function TaskCard ({task, refetchHomePageTasks}) {
     const {setForm, isModalOpen, setIsModalOpen, setCurrentTask, userSettings, handleNotification, handleLogout } = useContext(globalContext)

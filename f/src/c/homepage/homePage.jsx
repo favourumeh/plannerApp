@@ -11,7 +11,7 @@ import FilterPage from "../toolbar/filterPage"
 import ViewPage from "../toolbar/viewPage"
 import RefreshEntities from "../toolbar/refreshEntities"
 import TimerLine from "./timerLine"
-import homepageTasksQueryOptions from "../../queryOptions/readHomepageTasksQueryOption"
+import { homepageTasksQueryOptions } from "../../queryOptions"
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todaysDate = new Date().toDateString()
@@ -26,16 +26,19 @@ function HomePage ({isLoggedIn, sitePage}) {
     const { isPending, data, refetch:refetchHomePageTasks } = useQuery( homepageTasksQueryOptions(selectedDate, handleNotification, handleLogout) )
 
     useEffect(() => {// refetchHomePageTasks after exiting an entity form
-        if (!isModalOpen && !isPending) {
+        if (!isModalOpen) {
             refetchHomePageTasks()
         }
     }, [isModalOpen])
 
-    if (isPending) return "Loading ..."
-    const homePageTasks = data.tasks
+    const homePageTasks = isPending? [] : data.tasks
 
     // change the colour of (the text of) the day if it is not today's date
     const todayIndicator = () => todaysDate === new Date(currentDate).toDateString()? "rgb(0, 230, 0)" : "red"
+
+    const indicatePageLoad = () => {
+        return isPending? <i className="fa fa-spinner" aria-hidden="true"></i> : undefined
+    }
     return (
         <div className="homepage">
             <div  className="homepage-header"> 
@@ -45,7 +48,7 @@ function HomePage ({isLoggedIn, sitePage}) {
 
                 <div className="homepage-header-row2">
                     <button type="button" className="yesterday-btn" onClick={() => handleDayNavigation("previous-day")}> <i className="fa fa-arrow-left" aria-hidden="true"></i> </button>
-                    <strong> <span className="homepage-day" style={{"color":todayIndicator()}}>{currentDay}'s</span> Tasks </strong>
+                    <strong> <span className="homepage-day" style={{"color":todayIndicator()}}>{currentDay}'s</span> Tasks {indicatePageLoad()} </strong>
                     <button type="button" className="tomorrow-btn" onClick={() => handleDayNavigation("next-day")} > <i className="fa fa-arrow-right" aria-hidden="true"> </i> </button>
                 </div>
 

@@ -5,8 +5,6 @@ export async function retryRequestOnUpdatedAT(resp, resp_json, requestFn, handle
         console.log(resp_json.message)
         const resp_ref = await fetch(`${backendBaseUrl}/refresh`, {"credentials":"include"})
         const resp_ref_json = await resp_ref.json()
-        // handleNotification(resp_json.message + ". Refreshing...try again", "failure")
-        // console.log("resp ref status", resp_ref.status)
         if (resp_ref.status !== 200) {
             console.log(resp_ref_json.message)
             handleNotification(resp_ref_json.message, "failure")
@@ -143,7 +141,7 @@ const fetchTasksObjectiveAndProject = async (taskId, handleNotification, handleL
         var resp = await fetch(url, options)
         var resp_json = await resp.json()
     } catch (err) {
-        handleNotification(`Failed in to fetch Task's project and objective (fetchTasksObjectiveAndProject()). Either DB connection error or error not prevented by api unit test.`, "failure")
+        handleNotification(`Failed to fetch Task's project and objective (fetchTasksObjectiveAndProject()). Either DB connection error or error not prevented by api unit test.`, "failure")
     }
     handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
     const requestFn = async() => fetchTasksObjectiveAndProject(taskId, handleNotification, handleLogout)
@@ -163,7 +161,7 @@ export async function fetchObjectivesProject(objectiveId, handleNotification, ha
         var resp_json = await resp.json()
     } 
     catch (err) {
-        handleNotification(`Failed in to fetch Objective's project (fetchObjectivesProject()). Either DB connection error or error not prevented by api unit test.`, "failure")
+        handleNotification(`Failed to fetch Objective's project (fetchObjectivesProject()). Either DB connection error or error not prevented by api unit test.`, "failure")
     }   
     handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
     const requestFn = async() => fetchObjectivesProject(objectiveId, handleNotification, handleLogout)

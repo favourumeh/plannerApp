@@ -31,14 +31,13 @@ function EntityPage ({sitePage}) {
         }
     }, [isModalOpen])
 
-    if (isPending) return "Loading..."
+    const entityPageData = isPending ? [] : data
+    const  entityArr = entityName==="project"? entityPageData?.projects : entityName==="objective" ? entityPageData?.objectives : entityPageData?.tasks 
+    const  projects = entityName==="task"? entityPageData?.taskProjects : []
+    const  objectives = entityName==="task"? entityPageData?.taskObjectives: []
 
-    const  entityArr = entityName==="project"? data?.projects : entityName==="objective" ? data?.objectives : data?.tasks 
-    const  projects = entityName==="task"? data?.taskProjects : []
-    const  objectives = entityName==="task"? data?.taskObjectives: []
-    // console.log(data, data)
     const onClickNextPage = () => {
-        if (page>=data["_pages"]) return
+        if (page>=entityPageData["_pages"]) return
         setPage(page+1)
     }
 
@@ -52,11 +51,14 @@ function EntityPage ({sitePage}) {
             <>
                 {entityName.toUpperCase()}S &nbsp;&nbsp;
                 <i className={`fa fa-caret-down side-btn`} aria-hidden="true"></i> &nbsp;
-                ({`${page}/${ !!data._pages ? Math.max(data._pages, 1) : 1} `})
+                ({`${page}/${ !!entityPageData._pages ? Math.max(entityPageData._pages, 1) : 1} `})
             </>
         )
     }
 
+    const indicatePageLoad = () => {
+        return isPending? <i className="fa fa-spinner" aria-hidden="true"></i> : undefined
+    }
     return (
         <div className="entity-page">
             <div className="entity-page-header"> 
@@ -75,6 +77,7 @@ function EntityPage ({sitePage}) {
                         <div onClick={ () => {setEntityName("objective"); setPage(1);} }> Objectives </div>
                         <div onClick={ () => {setEntityName("task"); setPage(1);} }> Tasks </div>
                     </Dropdown> 
+                    {indicatePageLoad()}
                     <button type="button" className="prev-pg-btn" onClick={onClickNextPage}> <i className="fa fa-arrow-right" aria-hidden="true"></i> </button>
                 </div>
                 

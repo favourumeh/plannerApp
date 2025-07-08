@@ -159,6 +159,10 @@ const Kanban = ({sitePage}) => {
         }
     }
 
+    const indicatePageLoad = () => {
+        return isPending? <i className="fa fa-spinner" aria-hidden="true"></i> : undefined
+    }
+
     return (
         <div className="kanban-page">
             <HoverText width="926.6px"/>
@@ -171,6 +175,7 @@ const Kanban = ({sitePage}) => {
                         > 
                             {`Kanban ${entityName}s | ${remainingTaskTime} ${remainingTaskTimeUnits} left (total ${totalTaskTime} ${totalTaskTimeUnits})`} 
                         </strong>
+                        &nbsp; {indicatePageLoad()}
                     </div>
                     <button type="button" className="tomorrow-btn" onClick={() => handleDayNavigation("next-day")} > <i className="fa fa-arrow-right" aria-hidden="true"> </i> </button>
                 </div>
