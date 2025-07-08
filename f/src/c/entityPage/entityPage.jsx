@@ -33,7 +33,7 @@ function EntityPage ({sitePage}) {
 
     const entityPageData = isPending ? [] : data
     const  entityArr = entityName==="project"? entityPageData?.projects : entityName==="objective" ? entityPageData?.objectives : entityPageData?.tasks 
-    const  projects = entityName==="task"? entityPageData?.taskProjects : []
+    const  projects = entityName==="task"? entityPageData?.taskProjects : entityName==="objective"? entityPageData?.objectivesProjects : [] 
     const  objectives = entityName==="task"? entityPageData?.taskObjectives: []
 
     const onClickNextPage = () => {

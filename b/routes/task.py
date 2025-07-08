@@ -201,7 +201,7 @@ def query_tasks():
         resp_dict["tasks"] = [task.to_dict() for task in tasks]
         resp_dict["_itemCount"] = len(tasks)
 
-        if (resp_dict["_itemCount"]>0): # returns the objectives and projects of the queried tasks when not paginated
+        if (resp_dict["_itemCount"]>0): # returns the objectives and projects of the queried tasks
             objective_ids: list[int] = [task.objective_id for task in query.all()]
             objectives: list[Objective] = Objective.query.filter(
                 db.or_(

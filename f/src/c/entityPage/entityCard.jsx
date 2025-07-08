@@ -1,7 +1,6 @@
 import "./entityCard.css"
 import { useContext} from "react"
-import { useQuery, useMutation } from "@tanstack/react-query"
-import { readObjectivesProjectQueryOption } from "../../queryOptions/"
+import { useMutation } from "@tanstack/react-query"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
 import ObjectiveInfoCard from "../InfoCards/objectiveInfoCard"
@@ -35,11 +34,6 @@ function EntityCard ({entity, entityName, projects, objectives, refetchEntityPag
         }
     }
 
-    const {data: objectiveParent, isPending: isPendingObjectiveParent} = useQuery( { //objectiveParent = the objective's project
-        ...readObjectivesProjectQueryOption(entity.id, handleNotification, handleLogout),
-        enabled: entityName==="objective",
-    })
-
     const handleEditEntity = (e) => {
         e.stopPropagation()
         setForm(`update-${entityName}`)
@@ -51,11 +45,16 @@ function EntityCard ({entity, entityName, projects, objectives, refetchEntityPag
         var taskObjective = objectives?.find( (objective) => objective.id == entity.objectiveId )
         var taskProject = projects?.find( (project) => project.id === taskObjective.projectId )
     }
+
+    if (entityName === "objective"){
+        var objectiveProject = projects?.find( (project) => project.id === entity.projectId )
+    }
+
     const generateCardContent = () => {
         if (entityName==="task") {
             return `Task ${taskProject.projectNumber}.${taskObjective.objectiveNumber}.${entity.taskNumber}`
         } else if (entityName==="objective") {
-            return `Objective ${isPendingObjectiveParent? "*" : objectiveParent.project.projectNumber}.${entity.objectiveNumber}`
+            return `Objective ${objectiveProject.projectNumber}.${entity.objectiveNumber}`
         } else {
             return `Project ${entity.projectNumber}`
         }
@@ -66,7 +65,7 @@ function EntityCard ({entity, entityName, projects, objectives, refetchEntityPag
             case ("project"):
                 return <ProjectInfoCard project={entity} translate="122% 0%" />
             case ("objective"):
-                return <ObjectiveInfoCard objective={entity} objectiveProject={isPendingObjectiveParent?  {"title":"*"}: objectiveParent.project } translate="122% 0%"/>
+                return <ObjectiveInfoCard objective={entity} objectiveProject={objectiveProject} translate="122% 0%"/>
             case ("task"):
                 return <TaskInfoCard task={entity} taskObjective={taskObjective} taskProject={taskProject} translate="122% 0%"/>
             default:

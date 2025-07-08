@@ -1,23 +1,18 @@
 import "./taskCard.css"
-import {useContext, useEffect} from "react"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import {useContext} from "react"
+import { useMutation } from "@tanstack/react-query"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
-import { readTasksObjectiveAndProjectQueryOption } from "../../queryOptions"
 import { mutateEntityRequest } from "../../fetch_entities"
-function TaskCard ({task, refetchHomePageTasks}) {
-    const {setForm, isModalOpen, setIsModalOpen, setCurrentTask, userSettings, handleNotification, handleLogout } = useContext(globalContext)
-    const {data, isPending, refetch: refetchTasksProjectAndObjective}  = useQuery(readTasksObjectiveAndProjectQueryOption(task.id, handleNotification, handleLogout))
+function TaskCard ({task, projects, objectives, refetchHomePageTasks}) {
+    const {setForm, setIsModalOpen, setCurrentTask, userSettings, handleNotification, handleLogout } = useContext(globalContext)
+    const taskObjective = objectives?.find( (objective) => objective.id===task.objectiveId )
+    const taskProject = projects?.find( (project) => project.id===taskObjective.projectId )
+
     const deleteTaskMutation = useMutation({ 
         mutationFn: mutateEntityRequest,
         onSuccess: refetchHomePageTasks,
     })
-
-    useEffect(() => { // refresh the project and objective numbers shown on the task card task is moved.
-        if (!isModalOpen && !isPending){
-            refetchTasksProjectAndObjective()
-        }
-    }, [isModalOpen, isPending])
 
     const handleDeleteTask = (e) =>  {
         e.preventDefault()
@@ -33,8 +28,6 @@ function TaskCard ({task, refetchHomePageTasks}) {
             handleNotification(`Use 'CTRL + Click' to delete task' `, "failure")
         }
     }
-    const getTasksProject = () =>  isPending ? "*" : data.project.projectNumber
-    const getTasksObjective = () => isPending ? "*" : data.objective.objectiveNumber
 
     const handleEditTask = (e) => {
         e.stopPropagation()
@@ -67,11 +60,11 @@ function TaskCard ({task, refetchHomePageTasks}) {
     //generate the text on the task card
     const generateTaskCardText = () => {
         if (taskDuration<10) return ""
-        return `Task ${getTasksProject()}.${getTasksObjective()}.${task.taskNumber} ${task.description}`
+        return `Task ${taskProject.projectNumber}.${taskObjective.objectiveNumber}.${task.taskNumber} ${task.description}`
     }
     return (
         <div  style={taskRowCardStyle} id={`row-id-${task.id}`} className="task-row">
-            <TaskInfoCard task={task} translate ={"122% 0%"} taskObjective={getTasksObjective()} taskProject={getTasksProject()}/>
+            <TaskInfoCard task={task} translate ={"122% 0%"} taskObjective={taskObjective} taskProject={taskProject}/>
             <button> 
                 <i id={`add-task-id-${task.id}`}  className="fa fa-plus" aria-hidden="true"/>
             </button>

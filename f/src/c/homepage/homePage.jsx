@@ -31,7 +31,10 @@ function HomePage ({isLoggedIn, sitePage}) {
         }
     }, [isModalOpen])
 
-    const homePageTasks = isPending? [] : data.tasks
+    const homePageTasksResponse = isPending? [] : data
+    const homePageTasks = homePageTasksResponse.tasks
+    const projects = homePageTasksResponse.taskProjects
+    const objectives = homePageTasksResponse.taskObjectives
 
     // change the colour of (the text of) the day if it is not today's date
     const todayIndicator = () => todaysDate === new Date(currentDate).toDateString()? "rgb(0, 230, 0)" : "red"
@@ -65,7 +68,7 @@ function HomePage ({isLoggedIn, sitePage}) {
                 <TimerLine/>
                 <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
                 <div style={{"position":"relative"}} className="task-card-overlay">
-                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task} refetchHomePageTasks={refetchHomePageTasks}/>)}
+                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchHomePageTasks={refetchHomePageTasks}/>)}
                 </div>
 
             </div>

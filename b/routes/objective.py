@@ -141,6 +141,10 @@ def query_objectives():
         resp_dict["message"] = "Success: user's objectives loaded"
         resp_dict["objectives"] = [objective.to_dict() for objective in objectives]
         resp_dict["_itemCount"] = len(objectives)
+        if len(objectives) > 0: # then return the projects of the objectives
+            project_ids: List[int] = [objective.project_id for objective in objectives]
+            projects: list[Project] = Project.query.filter( Project.id.in_(project_ids) ).all()
+            resp_dict["objectivesProjects"] = [project.to_dict() for project in projects]
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Failure: Could not read user objective! Reason: {e}"
