@@ -1,9 +1,9 @@
-import os
 import re
 from dotenv import load_dotenv
 import json
 from config import db, app, serializer
 from flask import Blueprint, request, jsonify, Response, session
+from flask_sqlalchemy.query import Query
 from models import User, Refresh_Token, Project, Objective, Task
 from werkzeug.security import generate_password_hash, check_password_hash
 from typing import Tuple, List
@@ -45,7 +45,7 @@ def signup() -> Tuple[Response, int]:
         resp_dict["message"] = "Failure: Username is too long. Must be <= 15 characters."
         return jsonify(resp_dict), 400
 
-    #account for blank email fields
+    #account for blank email fields (if they are null they cannot register as duplicates)
     email = None if email=="" else email
 
     if email:
@@ -222,22 +222,38 @@ def refresh() -> Tuple[Response, int]:
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def delete_user(user_id: int) -> Tuple[Response, int]:
+    """Allows User to delete their account and Admin to delete any account (except admin account)"""
     resp_dict = {"message": "boo", "userId": f"{session["userId"]}"}
+    session_user: User = User.query.filter_by(id=session["userId"]).first()
+    user_to_delete: User = User.query.filter_by(id=user_id).first()
 
-    if user_id != session["userId"]:
+    if not user_to_delete:
+        resp_dict["message"] = "Failure: User selected for deletion cannot be found in the database."
+        return jsonify(resp_dict), 404
+
+    if user_to_delete.is_admin:
+        resp_dict["message"] = "Failure: Cannot delete the admin account."
+        return jsonify(resp_dict), 403
+
+    if (user_id != session["userId"]) and (not session_user.is_admin): #only delete if the user selected for deletion matches the session user OR session user is the admin
         resp_dict["message"] = "Failure: Account chosen for deletion does not match the account logged in."
         return jsonify(resp_dict), 403
-    
-    user: User = User.query.filter_by(id=session["userId"]).first()
-    refresh_tokens, projects, objectives, tasks = generate_all_user_content(user_id)
-    content_to_delete: List[Refresh_Token|None, Task|None, Objective|None, Project|None] = refresh_tokens + tasks + objectives + projects # note: sequence of list matters for foreign key null contraints 
+
+    refresh_token: Query = Refresh_Token.query.filter(Refresh_Token.user_id == user_id) # each user only gets one RT
+    projects: Query = Project.query.filter(Project.user_id == user_id)
+    project_ids: List[int] = [project.id for project in projects.all()]
+    objectives: Query = Objective.query.filter(Objective.project_id.in_(project_ids))
+    objective_ids: List[int] = [objective.id for objective in objectives.all()]
+    tasks: Query = Task.query.filter(Task.objective_id.in_(objective_ids))
 
     try:
-        for instance in content_to_delete:
-            db.session.delete(instance)
-        db.session.delete(user)
+        refresh_token.delete()
+        tasks.delete()
+        objectives.delete()
+        projects.delete()
+        db.session.delete(user_to_delete)
         db.session.commit()
-        resp_dict["message"] = f"Deleted account ({user.username}) and associated rt, projects, objectives and tasks."
+        resp_dict["message"] = f"Deleted account ({user_to_delete.username}) and associated rt, projects, objectives and tasks."
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Could not delete the chosen user. Reason {e}"
@@ -284,7 +300,26 @@ def edit_user(user_id: int) -> Tuple[Response, int]:
     except Exception as e:
         resp_dict["message"] = f"Failure: User changes could not be committed to db. Reason: {e}"
         return jsonify(resp_dict), 404
-        
+
+@auth.route("/get-users", methods = ["GET"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def get_users() -> Tuple[Response, int]:
+    """Allows the admin to gets all users"""
+    resp_dict = {"message":"", "users": ""}
+    user_id: int = session["userId"]
+    user: User = User.query.filter_by(id=user_id).first()    
+    if not user.is_admin:
+        resp_dict["message"] = "Failure: User is not permitted to access this route"
+        return jsonify(resp_dict), 403
+    try:
+        users: List[User] = User.query.all()
+        remove_pwd_field = lambda userDict: {key: value for key, value in userDict.items() if key != "password"}
+        resp_dict["users"] = [remove_pwd_field(user.to_dict()) for user in users]
+        resp_dict["message"] = "Success: retrieved user data"
+        return jsonify(resp_dict), 200
+    except Exception as e: 
+        return f"Failure: Could not get the site's users. Reason {e}"
 
 @auth.route("/get-user/<int:user_id>", methods = ["GET"])
 @login_required(serializer=serializer)
@@ -293,8 +328,8 @@ def get_user(user_id: int) -> Tuple[Response, int]:
     """Allows the admin to gets all fields in of a User's account"""
     resp_dict = {"message":"", "user": ""}
 
-    admin_user: User = User.query.filter_by(id=session["userId"]).first()    
-    if not admin_user.is_admin:
+    session_user: User = User.query.filter_by(id=session["userId"]).first()    
+    if not session_user.is_admin:
         resp_dict["message"] = "Failure: User is not permitted to access this route"
         return jsonify(resp_dict), 403
     
@@ -314,8 +349,8 @@ def get_user_refresh_token(user_id: int) -> Tuple[Response, int]:
     """Allows the admin to gets all fields in of a User's refresh token entry/entries"""
     resp_dict = {"message":"", "user": ""}
 
-    admin_user: User = User.query.filter_by(id=session["userId"]).first()    
-    if not admin_user.is_admin:
+    session_user: User = User.query.filter_by(id=session["userId"]).first()    
+    if not session_user.is_admin:
         resp_dict["message"] = "Failure: User is not permitted to access this route"
         return jsonify(resp_dict), 403
 
