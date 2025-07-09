@@ -18,15 +18,14 @@ load_dotenv()
 #create authorisation decorator 
 def token_required(app: Flask, serializer: URLSafeTimedSerializer):
     """
-    Checks the user's CRUD requests to determine if: 1) There is a cookie containing the access token called 'session_AT';
-    2) The token is valid. 
+    Checks the integrity and validity of the user's AT cookie (session_AT). Used before any user's CRUD requests. 
     Args:
         app: Flask app instance
         serializer: used to deserialize and verify the signature of the access token cookie 'session_AT'.
     """
     def decorated(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def access_token_validation(*args, **kwargs):
             resp_dict = {"message": ""}
             #get access token from http-only cookie
             access_token_cookie: str|None = request.cookies.get("session_AT")
@@ -51,15 +50,15 @@ def token_required(app: Flask, serializer: URLSafeTimedSerializer):
                 resp_dict["message"] = f"Invalid Access Token! Reason: {e}"
                 return jsonify(resp_dict), 401
             return func(*args, **kwargs)
-        return wrapper
+        return access_token_validation
     return decorated
 
 #login (authentication) required decorator
 def login_required(serializer: URLSafeTimedSerializer):
-    """Checks a user's login status. Used for each CRUD request and logout request"""
+    """Checks a user's login status by checking the integrity and validity of the RT cookie ("bespoke_session"). Used for each CRUD request and logout request"""
     def decorated(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def refresh_token_validation(*args, **kwargs):
             resp_dict = {"message": ""}
             cookie = request.cookies.get("bespoke_session")
             
@@ -100,7 +99,7 @@ def login_required(serializer: URLSafeTimedSerializer):
                 return jsonify(resp_dict), 401
                 
             return func(*args, **kwargs)
-        return wrapper
+        return refresh_token_validation
     return decorated
 
 
