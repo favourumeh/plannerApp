@@ -2,22 +2,61 @@ import DatePicker from "react-datepicker"
 import "./settingsBox.css"
 import { useContext, useState } from "react"
 import localPlannerPageContext from "./localPlannerPageContext"
-import { datetimeToString, getDaysBetweenDates } from "../../utils/dateUtilis"
+import { datetimeLocalToString, getDaysBetweenDates } from "../../utils/dateUtilis"
+
+const isMonthBoundary = (date) => {
+    const d = new Date(date)
+    const firstDay = d.getDate() === 1
+    const lastDay = d.getDate() === new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate() 
+    return { isFirstDay: firstDay, isLastDay: lastDay }
+}
 
 export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAllDateCards, setIsExpandAllDateCards, isJustUnscheduledTask, setIsJustUnscheduledTask, isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities}) {
     const {maxDailyWorkingHours, setMaxDailyWorkingHours, isExcludeBreakHours, setIsExcludeBreakHours } = useContext(localPlannerPageContext)
-    const periodDuration = getDaysBetweenDates(new Date(periodStart), new Date(periodEnd))
     const [isSettingBoxExpanded, setIsSettingsBoxExpanded] = useState(false)
 
-    const handlePeriodNavigation = async (direction) => {// Flick through periods on the planner page by clicking the left and right arrows
-        switch (direction) {
+    const calculatePeriodDates = async ( {ps, pe, periodDuration, boundaryType, navDirection} ) => {
+        if ( isMonthBoundary( periodStart ).isFirstDay && isMonthBoundary( periodEnd ).isLastDay ) {
+            if ( navDirection === "previous-period") {
+                return ( boundaryType === "start"? 
+                    datetimeLocalToString( new Date(ps.getFullYear(), ps.getMonth()-1, 1) ) 
+                    : datetimeLocalToString( new Date(pe.getFullYear(), pe.getMonth(), 0) ) 
+                )
+            }else if (navDirection === "next-period"){
+                return ( boundaryType === "start"? 
+                    datetimeLocalToString( new Date(ps.getFullYear(), ps.getMonth()+1, 1) ) 
+                    : datetimeLocalToString( new Date(pe.getFullYear(), pe.getMonth()+2, 0) ) 
+                )
+            }
+        }
+
+        if ( navDirection === "previous-period") {
+            return ( boundaryType === "start"? 
+                datetimeLocalToString( new Date(new Date(periodStart).setDate(new Date(periodStart).getDate() - periodDuration )) ) 
+                : datetimeLocalToString( new Date(new Date(periodEnd).setDate(new Date(periodEnd).getDate() - periodDuration )) ) 
+            )
+        }else if (navDirection === "next-period"){
+            return ( boundaryType === "start"? 
+                datetimeLocalToString( new Date(new Date(periodStart).setDate(new Date(periodStart).getDate() + periodDuration)) ) 
+                : datetimeLocalToString( new Date(new Date(periodEnd).setDate(new Date(periodEnd).getDate() + periodDuration)) ) 
+            )
+        }
+    }
+
+    const handlePeriodNavigation = async (navDirection) => {// Flick through periods on the planner page by clicking the left and right arrows
+        const ps = new Date(periodStart)
+        const pe = new Date(periodEnd)
+        const periodDuration = getDaysBetweenDates(ps, pe) +1
+        const newPeriodStart = await calculatePeriodDates( {ps, pe, periodDuration, boundaryType:"start", navDirection} )
+        const newPeriodEnd = await calculatePeriodDates( {ps, pe, periodDuration, boundaryType:"end", navDirection} )
+        switch (navDirection) {
             case "previous-period":
-                await setPeriodStart( datetimeToString( new Date(new Date(periodStart).setDate(new Date(periodStart).getDate() - periodDuration +1 )) ) )
-                await setPeriodEnd( datetimeToString( new Date(new Date(periodEnd).setDate(new Date(periodEnd).getDate() - periodDuration + 1)) ) )
+                await setPeriodStart( newPeriodStart )
+                await setPeriodEnd( newPeriodEnd )
                 break
             case "next-period":
-                await setPeriodEnd( datetimeToString( new Date(new Date(periodEnd).setDate(new Date(periodEnd).getDate() + periodDuration+1)) ) )
-                await setPeriodStart( datetimeToString( new Date(new Date(periodStart).setDate(new Date(periodStart).getDate() + periodDuration+1)) ) ) 
+                await setPeriodEnd( newPeriodEnd )
+                await setPeriodStart( newPeriodStart  )
                 break
         }
     }
@@ -26,10 +65,10 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
         e.stopPropagation()
         const today = new Date()
         const firstDayOfCurrentMonth = new Date(today.setDate(1))
-        const newPeriodStart = datetimeToString(firstDayOfCurrentMonth)
+        const newPeriodStart = datetimeLocalToString(firstDayOfCurrentMonth)
         const dateOvershoot = new Date(today.setDate(32)) // "32" goes to next month
         const finalDayOfCurrentMonth = new Date(dateOvershoot.setDate(0)) // "0" goes to the end of the previous month
-        const newPeriodFinish = datetimeToString(finalDayOfCurrentMonth)
+        const newPeriodFinish = datetimeLocalToString(finalDayOfCurrentMonth)
 
         if (new Date(periodStart) <= firstDayOfCurrentMonth){ // prevents errors: periodEnd < periodStart
             await setPeriodEnd(newPeriodFinish)
@@ -52,8 +91,8 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
 
                     <DatePicker
                         selected={new Date(periodStart)}
-                        onSelect={(date) => setPeriodStart(datetimeToString(date))} 
-                        onChange={(date) => setPeriodStart(datetimeToString(date)) }
+                        onSelect={(date) => setPeriodStart(datetimeLocalToString(date))} 
+                        onChange={(date) => setPeriodStart(datetimeLocalToString(date)) }
                         dateFormat="yyyy-MM-dd"
                     />
                     <div>
@@ -61,8 +100,8 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
                     </div>
                     <DatePicker
                         selected={new Date(periodEnd)}
-                        onSelect={(date) => setPeriodEnd(datetimeToString(date))} 
-                        onChange={(date) => setPeriodEnd(datetimeToString(date))}
+                        onSelect={(date) => setPeriodEnd(datetimeLocalToString(date))} 
+                        onChange={(date) => setPeriodEnd(datetimeLocalToString(date))}
                         dateFormat="yyyy-MM-dd"
                     />
                     &nbsp; &nbsp;
