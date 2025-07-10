@@ -8,6 +8,7 @@ import { readObjectiveTasksQueryOption } from "../../queryOptions"
 import { fetchEntityProgress, mutateEntityRequest } from "../../fetch_entities"
 import { generateProgressBarColour } from "../../utils/progressUtils"
 import { defaultTask } from "../../staticVariables"
+import { formatTaskMins } from "../../utils/dateUtilis"
 
 export default function ObjectiveProgressCard ({entity, entityName, project, metric, refetchAfterObjectiveDeletion}) {
     const [isExpanded, setIsExpanded] = useState(false)
@@ -28,7 +29,14 @@ export default function ObjectiveProgressCard ({entity, entityName, project, met
     ...readObjectiveTasksQueryOption(entity.id, handleNotification, handleLogout),
        enabled: isExpanded,
     })
+    //handle metrics
     const progressPercentage = !isProgressPending? metric==="duration"? Math.round(progressQuery.progressPercentageDuration) : Math.round(progressQuery.progressPercentageCount) : "0"
+    const completedTaskMetric = !isProgressPending? metric==="duration"? formatTaskMins(progressQuery.completedTaskDuration) : progressQuery.completedTaskCount : "..."
+    const totalTaskMetric = !isProgressPending? metric==="duration"? formatTaskMins(progressQuery.totalTaskDuration) : progressQuery.totalTaskCount : "..."
+    
+    const rawMetricValues = (completedTaskMetric, totalTaskMetric) => {
+        return  `${completedTaskMetric}/${totalTaskMetric}${metric==="duration"? "" : " tasks"}`
+    }
 
     const tasks = isExpanded && !isTasksPending? tasksQuery.tasks : []
 
@@ -128,7 +136,7 @@ export default function ObjectiveProgressCard ({entity, entityName, project, met
                     className={`progress-card-overlay ${entityName}-card-overlay`}
                     onClick={onClickEditBtn}
                 >
-                    <ObjectiveInfoCard objective={entity} translate="-120% 0%" objectiveProject={project}/>
+                    <ObjectiveInfoCard objective={entity} translate="-120% 0%" objectiveProject={project} progress={rawMetricValues(completedTaskMetric, totalTaskMetric)}/>
                     <div className="progress-bar">
                         <div className="progress-bar-fill" 
                             style={{"width":`${progressBarDivWidth}px`, "backgroundColor":generateProgressBarColour(progressPercentage)}}

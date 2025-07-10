@@ -5,6 +5,7 @@ import { useDroppable } from "@dnd-kit/core"
 import localPlannerPageContext from "./localPlannerPageContext"
 import { useContext, useRef } from "react"
 import { DraggableTaskCard } from "./DraggableTaskCard"
+import { formatTotalMins } from "../../utils/dateUtilis"
 
 export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJustUnscheduledTask, isExpandAllUnscheduledEntities, refetchPlannerTasks}) {
     const { isExcludeBreakHours, scrollPosition, setScrollPosition, isDragging } = useContext(localPlannerPageContext)
@@ -19,16 +20,6 @@ export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJu
 
     const totalTaskMins = unscheduledTasks.reduce((acc, task)=> acc + calcTotalTaskDuration(task), 0)
     const {setNodeRef} = useDroppable({ id: "Unscheduled-Tasks-List" }) //dnd
-    const displayedTaskDuration = () => {
-        if (totalTaskMins < 60) {
-            return `${totalTaskMins}mins`
-        } else {
-            const totalTaskHours = totalTaskMins/60
-            const minRemainder = Math.abs(Math.round(60*(Math.floor(totalTaskHours) - totalTaskHours)))
-            return `${Math.floor(totalTaskMins/60)}hrs ${minRemainder}mins`
-        }
-    }
-
     const divScroller = useRef(0)
 
     const handleScroll = (e) => { // records how far up/down in px the scroll bar has moved in the unscheduled section. This is used to keep the info card of an entity from drifting down relative to its entity as you scroll down. 
@@ -54,7 +45,7 @@ export function UnscheduledSidebar({unscheduledTasks, projects, objectives, isJu
                 id="Unscheduled-Tasks-List" 
                 className="planner-unscheduled-container-droppable"
                 > 
-                <div> Unscheduled Tasks #{unscheduledTasks.length} ({displayedTaskDuration()}) </div> 
+                <div> Unscheduled Tasks #{unscheduledTasks.length} ({formatTotalMins(totalTaskMins)}) </div> 
 
                 {isJustUnscheduledTask? 
                     unscheduledTasks?.map((task)=> 

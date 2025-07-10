@@ -162,6 +162,10 @@ def get_project_progress(project_id: int) -> Tuple[Response, int]:
     resp_dict["projectName"] = project.title
     resp_dict["progressPercentageCount"] = progress_percentage_count
     resp_dict["progressPercentageDuration"] = progress_percentage_duration
+    resp_dict["totalTaskCount"] = total_task_count
+    resp_dict["completedTaskCount"] = completed_tasks_count
+    resp_dict["totalTaskDuration"] = total_task_duration
+    resp_dict["completedTaskDuration"] = completed_tasks_duration
     return jsonify(resp_dict), 200
 
 #update

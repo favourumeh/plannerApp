@@ -8,6 +8,7 @@ import { fetchEntityProgress, mutateEntityRequest } from "../../fetch_entities"
 import { readProjectsObjectivesQueryOption } from "../../queryOptions"
 import { generateProgressBarColour } from "../../utils/progressUtils"
 import { defaultObjective } from "../../staticVariables"
+import { formatTaskMins } from "../../utils/dateUtilis"
 
 export default function ProjectProgressCard ({entity, entityName, metric, refetchProjects}) {
     // console.log("params", entityName, metric)
@@ -30,6 +31,13 @@ export default function ProjectProgressCard ({entity, entityName, metric, refetc
        enabled: isExpanded,
     })
     const progressPercentage = !isProgressPending? metric==="duration"? Math.round(progressQuery.progressPercentageDuration) : Math.round(progressQuery.progressPercentageCount) : "..."
+    const completedTaskMetric = !isProgressPending? metric==="duration"? formatTaskMins(progressQuery.completedTaskDuration) : progressQuery.completedTaskCount : "..."
+    const totalTaskMetric = !isProgressPending? metric==="duration"? formatTaskMins(progressQuery.totalTaskDuration) : progressQuery.totalTaskCount : "..."
+
+    const rawMetricValues = (completedTaskMetric, totalTaskMetric) => {
+        return  `${completedTaskMetric}/${totalTaskMetric}${metric==="duration"? "" : " tasks"}`
+    }
+
     const objectives = isExpanded && !isObjectivesPending? objectivesQuery.objectives : [] 
 
     // refresh the progress percentage and the objectives when the project is updated 
@@ -132,14 +140,14 @@ export default function ProjectProgressCard ({entity, entityName, metric, refetc
                     className={`progress-card-overlay ${entityName}-card-overlay`}
                     onClick={onClickEditBtn}
                 >
-                    <ProjectInfoCard project={entity} translate="-110% 0%" />
+                    <ProjectInfoCard project={entity} translate="-110% 0%" progress={rawMetricValues(completedTaskMetric, totalTaskMetric)} />
                     <div className="progress-bar">
                         <div className="progress-bar-fill" 
                             style={{"width":`${progressBarDivWidth}px`, "backgroundColor":generateProgressBarColour(progressPercentage)}}
                         >
                         </div>
 
-                        <div className="progress-card-content">{entity.projectNumber + " " + entity.title}</div>
+                        <div className="progress-card-content">{`${entity.projectNumber} ${entity.title}`}</div>
                     </div>
 
                     <div ref={divProgressCardTools} className="progress-card-tools" onClick={handleCardExpansion}>

@@ -28,3 +28,17 @@ export function isDateOlder(date1, date2) { //checks if date1 is older than date
 
     return d1 < d2
 }
+
+export function formatTotalMins(totalTimeInMins){ // takes time in mins and converts it to hrs and mins > 60mins
+        if (totalTimeInMins < 60) return `${totalTimeInMins}mins`
+
+        const totalTaskHours = totalTimeInMins/60
+        const minRemainder = Math.abs(Math.round(60*(Math.floor(totalTaskHours) - totalTaskHours)))
+        return `${Math.floor(totalTimeInMins/60)}hrs ${minRemainder}mins`
+    }
+    
+export function formatTaskMins (totalTimeInMins) { 
+    if (totalTimeInMins < 60) return `${totalTimeInMins}mins` //{time: totalTimeInMins, units: "mins"}
+    const totalTaskHours = totalTimeInMins/60
+    return `${Number(totalTaskHours.toFixed(0))}hrs` //{time: Math.floor(totalTimeInMins/60), units: "hrs"}
+}

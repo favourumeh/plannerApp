@@ -6,7 +6,7 @@ import { genereateWorkloadFill } from "../../utils/plannerUtilis"
 import localPlannerPageContext from "./localPlannerPageContext"
 import globalContext from "../../context"
 import { defaultObjective, defaultProject, defaultTask } from "../../staticVariables"
-import { datetimeToString } from "../../utils/dateUtilis"
+import { datetimeToString, formatTotalMins } from "../../utils/dateUtilis"
 import { DraggableTaskCard } from "./DraggableTaskCard"
 
 export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAllDateCards, refetchPlannerTasks}) {
@@ -54,17 +54,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
     const styleDateCardTitle = {color: daysTasks.length === 0? "red" : "white"}
     const styleDateCard = {border:  + ( datetimeToString(new Date()) == datetimeToString(new Date(date.split(" ")[1])) )? "2px solid rgb(0,230,0)" : "1px solid" }
 
-    const displayedTaskDuration = () => { // calculates the total duration of tasks schedueld/started on the date in hrs and mins
-        if (totalTaskMins < 60) {
-            return `${totalTaskMins}mins`
-        } else {
-            const totalTaskHours = totalTaskMins/60
-            const minRemainder = Math.abs(Math.round(60*(Math.floor(totalTaskHours) - totalTaskHours)))
-            return `${Math.floor(totalTaskMins/60)}hrs ${minRemainder}mins`
-        }
-    }
-
-    // Create a workload bar to highlight the density of tasks scheduled for the day
+   // Create a workload bar to highlight the density of tasks scheduled for the day
     const headerDiv = useRef(null)
     useEffect(() => {
         if (headerDiv.current) {
@@ -112,7 +102,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
                         className="date-card-title" 
                         style={styleDateCardTitle}
                         onClick={openKanbanView}
-                    > {date} #{isPendingScheduled? "..." : daysTasks.length } ({displayedTaskDuration()})
+                    > {date} #{isPendingScheduled? "..." : daysTasks.length } ({formatTotalMins(totalTaskMins)})
                     </div>
                 </div>
                 <div onClick={handleExpandedDayCard} className="date-card-expand-btns side-btn">
