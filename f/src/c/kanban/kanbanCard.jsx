@@ -48,8 +48,8 @@ export default function KanbanCard ({task, entityName, refetchKanbanContent}) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({id: task.id}) //dnd
     const style = transform ? {transform: `translate(${transform.x}px, ${transform.y}px)`} : undefined; //dnd keeps track of x-y coordinate of task card
     
-    // Signal Parent task (P) (i.e., a task is not derived from another task )
-    const signalParentTask = () => !!task.parentTaskId?  "" : "(P)"
+    // Signal child task [C] (i.e., a task is not derived from another task )
+    const signalChildTask =  !!task.parentTaskId?  "[C]" : ""
 
     //indicate outstanding task
     const selectedDate = new Date(new Date(currentDate).toDateString())
@@ -81,7 +81,7 @@ export default function KanbanCard ({task, entityName, refetchKanbanContent}) {
         >
             <button onPointerDown={onClickEditBtn} > <i className="fa fa-pencil" aria-hidden="true"></i></button>
             <div style={kanbanContentStyle} className="kanban-card-content">
-                {generateEntityNumbers(entityName)} {signalParentTask() + " " + task.description}
+                {generateEntityNumbers(entityName)} {signalChildTask + " " + task.description}
             </div>
             <button onPointerDown ={onClickDeleteBtn}> &times;</button>
         </div>

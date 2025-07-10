@@ -54,7 +54,7 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
     }
 
     const stylePlannerTaskContent = {color:generateTaskCardFontColour()}
-
+    const indicateChildTask = !!task.parentTaskId? "[C]":""
     return (
         <div className="planner-task-card-container">
             <div className="planner-task-title-row">
@@ -64,7 +64,7 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, trans
 
                 <div 
                     style={stylePlannerTaskContent}  
-                    className="planner-task-card-content"> {pauseSignal()} {project?.projectNumber}.{objective?.objectiveNumber}.{task.taskNumber}: {task?.description}
+                    className="planner-task-card-content"> {pauseSignal()} {project?.projectNumber}.{objective?.objectiveNumber}.{task.taskNumber}: {indicateChildTask} {task?.description}
                 </div>
 
                 <button onPointerDown ={onClickDeleteBtn}> 
