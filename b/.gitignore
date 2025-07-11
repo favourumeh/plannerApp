@@ -4,3 +4,4 @@ planner_app_db*.db*
 proj_secrets.py
 DigiCertGlobalRootCA.crt.pem
 notes/
+azMysqlFirewall.sh
