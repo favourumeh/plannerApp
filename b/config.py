@@ -7,13 +7,13 @@ import plannerPackage as pp
 from itsdangerous import URLSafeTimedSerializer
 from dotenv import load_dotenv
 from azure.storage.blob import BlobServiceClient
+import warnings
 
 #cwd
 cwd = os.getcwd().replace("\\", "/")
 
 #load env vars from b/.env
 load_dotenv()
-
 
 #Create Flask app instance
 app = Flask(__name__)
@@ -31,8 +31,14 @@ serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 #generate the config dict
 params = sys.argv[1:]
 print("sys.argv: ", params)
-default_config_dict= {"--env":"dev", "--rdbms":"az_mysql"}
+default_config_dict= {"--env":"prod", "--rdbms":"az_mysql"}
 config_dict = pp.generate_config_dict(params, default_config_dict)
+
+if (config_dict["--env"] == "dev" and config_dict["--rdbms"] == "az_mysql"): #red error message
+    raise Exception("\033[31;1;4mFlask App Input Error: You cannot have the configuraion: --env:dev and --rdbms: az_mysql\033[0m")
+
+if ( config_dict["--rdbms"] == "az_mysql"): # yellow warning message
+    warnings.warn("\033[93;1;4mWARNING: Your app is connected to the prod db!!! Please ensure that this is what you want.\033[0m")
 
 #configure databse sqlite or az_mysql
 db_name = "planner_app_db"
