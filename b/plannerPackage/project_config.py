@@ -21,11 +21,10 @@ credential = ClientSecretCredential(tenant_id=tenant_id, client_id=client_id, cl
 
     #draw app secret key from key vault secrets
 key_vault_name = "devPlannerAppKV"
-secret_name = "plannerAppFlaskSecretKey"
 key_vault_uri = f"https://{key_vault_name}.vault.azure.net"
-client = SecretClient(vault_url=key_vault_uri, credential=credential)
-flask_app_secret_key = client.get_secret(secret_name).value #1
-session_key = client.get_secret("sessionEncryptionKey").value #1
+secret_client = SecretClient(vault_url=key_vault_uri, credential=credential)
+flask_app_secret_key = secret_client.get_secret("plannerAppFlaskSecretKey").value #1
+session_key = secret_client.get_secret("sessionEncryptionKey").value #1
 
 #generate a new secret key 
 #from uuid import uuid4

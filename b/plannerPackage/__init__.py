@@ -15,7 +15,7 @@ from .project_config import refresh_token_dur
 from .project_config import allowed_origins
 from .project_config import flask_app_secret_key
 from .project_config import session_key
-from .project_config import client
+from .project_config import secret_client
 from .routeHelper import token_required
 from .routeHelper import login_required
 from .routeHelper import update_refresh_token_table

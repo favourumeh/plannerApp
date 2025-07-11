@@ -34,10 +34,10 @@ print("sys.argv: ", params)
 default_config_dict= {"--env":"prod", "--rdbms":"az_mysql"}
 config_dict = pp.generate_config_dict(params, default_config_dict)
 
-if (config_dict["--env"] == "dev" and config_dict["--rdbms"] == "az_mysql"): #red error message
+if (config_dict["--env"] == "dev" and config_dict["--rdbms"] == "az_mysql"): #underlined red error message (;4)
     raise Exception("\033[31;1;4mFlask App Input Error: You cannot have the configuraion: --env:dev and --rdbms: az_mysql\033[0m")
 
-if ( config_dict["--rdbms"] == "az_mysql"): # yellow warning message
+if ( config_dict["--rdbms"] == "az_mysql"): # yellow warning message (;4)
     warnings.warn("\033[93;1;4mWARNING: Your app is connected to the prod db!!! Please ensure that this is what you want.\033[0m")
 
 #configure databse sqlite or az_mysql
@@ -52,7 +52,7 @@ if 'test' not in ",".join(sys.argv): #1
 
     if config_dict["--rdbms"] == "az_mysql":
         #download SSL Certificate from blob storage
-        connect_str = pp.client.get_secret(name = "PLANNER-APP-AZURE-STORAGE-CONNECTION-STRING").value
+        connect_str = pp.secret_client.get_secret(name = "PLANNER-APP-AZURE-STORAGE-CONNECTION-STRING").value
         ssl_cert_filename = os.environ["ssl_cert_filename"]
 
         blob_service_client = BlobServiceClient.from_connection_string(connect_str)
@@ -69,9 +69,9 @@ if 'test' not in ",".join(sys.argv): #1
             print(f"Download Successfull. SSL Cert at {ssl_cert_path}. To view use Ubuntu terminal and cd to the path.")
 
         #mysql db creds
-        db_user = pp.client.get_secret(name="mySQLUsername").value
-        db_password = pp.client.get_secret(name="mySQLPassword").value
-        db_host = pp.client.get_secret(name="mySQLServerName").value
+        db_user = pp.secret_client.get_secret(name="mySQLUsername").value
+        db_password = pp.secret_client.get_secret(name="mySQLPassword").value
+        db_host = pp.secret_client.get_secret(name="mySQLServerName").value
         app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}?ssl_ca={ssl_cert_path}"
 
 
