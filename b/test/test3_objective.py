@@ -43,7 +43,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
                 #create user project 
         user_project = Project(id=2, project_number=1, description="user project desc", user_id=1)
                 #create 2 objectives of type free object and project objective 
-        free_objective = Objective(objective_number=1, title="Free Objective", type="free objective", project_id=1)
+        free_objective = Objective(objective_number=2, title="Free Objective", type="free objective", project_id=1)
         project_objective = Objective(objective_number=1, title="Project Objective", project_id=2)
         
         with app.app_context():
@@ -56,8 +56,9 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
         print("         ...AND test user requesting their objectives after login is successfull and yields the expected output")
         filtered_objectives = self.read_and_filter_fields(read_endpoint="/read-objectives", entity="objectives", rel_fields=["id", "objectiveNumber", "projectId", "title", "type"])
         expected_output = [{'id': 1, 'objectiveNumber': 0, 'projectId': 1, 'title': 'No Objective', 'type': 'default project objective'},
-                           {'id': 2, 'objectiveNumber': 1, 'projectId': 1, 'title': 'Free Objective', 'type': 'free objective'}, 
-                           {'id': 3, 'objectiveNumber': 1, 'projectId': 2, 'title': 'Project Objective', 'type': 'project objective'}]
+                           {'id': 2, 'objectiveNumber': 1, 'projectId': 1, 'title': 'Break', 'type': 'break'}, 
+                           {'id': 3, 'objectiveNumber': 2, 'projectId': 1, 'title': 'Free Objective', 'type': 'free objective'}, 
+                           {'id': 4, 'objectiveNumber': 1, 'projectId': 2, 'title': 'Project Objective', 'type': 'project objective'}]
         self.assertListEqual(filtered_objectives, expected_output)
 
     #MARK: Test CREATE_OBJS
@@ -87,20 +88,17 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.json["message"], f"Failure: The title has over {objective_title_limit} chars")        
 
         # #create a user project then edit it
-        print("         Test request to create an objective (filled in all fields) succeeds")
-        data = {"title":"Test User Project", "description":"test description", 
-                "duration":10, "scheduledStart":now_str, "scheduledFinish":now_str, 
-                "status":"To-Do", "tag":"test", "projectId":1}
+        print("         Test request to create an objective (filled in most fields) succeeds")
+        data = {"title":"Test User Project", "description":"test description", "status":"To-Do", "tag":"test", "projectId":1}
         
         response = self.client.post(f"/create-objective", json=data)
         self.assertEqual(response.status_code, 201)
         objectives_entries_filtered_fields = self.read_and_filter_fields("/read-objectives", "objectives", list(data.keys()))
         filter_created_objective: Dict = list(filter(lambda objective: objective["title"]==data["title"], objectives_entries_filtered_fields))[0]
-        data["scheduledStart"], data["scheduledFinish"] = now_str_long, now_str_long
         self.assertDictEqual(data, filter_created_objective)
 
         print("         Test that creating a project also creates a default user project objective which houses all objectiveless tasks for a project")
-        self.client.post("/create-project", json={"description":"blah"})
+        self.client.post("/create-project", json={"title":"blah", "description":"blah"})
         resp_read_objectives = self.client.get("/read-objectives")
         objectives: List[Dict] = resp_read_objectives.json["objectives"]
         default_objective = list(filter(lambda objective: objective["type"]=="default user project objective", objectives))[0]
@@ -175,36 +173,34 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
         print("         Test request to update another user's objective fails")
         response = self.client.patch("/update-objective/1", json={"title":"blah"})
         self.assertEqual(response.json["message"], "Failure: The objective selected does not belong to the user.") 
-
-        print(f"         Test request with project title>{objective_title_limit} chars")
-        response = self.client.patch("/update-objective/2", json={"title":"1"*(objective_title_limit+1)})
-        self.assertEqual(response.json["message"], f"Failure: The title has over {objective_title_limit} chars")
         
         print("         Test attempting to update a default objective fails")
-        response = self.client.patch("/update-objective/2", json={"title":"blah"})
+        response = self.client.patch("/update-objective/3", json={"title":"blah"})
         self.assertEqual(response.json["message"], "Failure: User is attempting to update a default objective which is not allowed.")
-
+        
+        print(f"         Test request with objective title>{objective_title_limit} chars fails")
+        self.client.post("create-objective", json={"title":"blajh", "description":"blah", "projectId":"2"})
+        response = self.client.patch("/update-objective/5", json={"title":"1"*(objective_title_limit+1)})
+        self.assertEqual(response.json["message"], f"Failure: The title has over {objective_title_limit} chars")
+        
         print("         Test requesting to update a default user project objective fails")
-        self.client.post("/create-project", json={"description":"blah"})  
+        self.client.post("/create-project", json={"title":"blah", "description":"blah"})  
         objectives: List[Dict] = self.client.get("/read-objectives").json["objectives"]
         default_user_project_objective: Dict = filter_list_of_dicts(objectives, "type", "default user project objective")
         response = self.client.patch(f"/update-objective/{default_user_project_objective['id']}", json={"title":"blah1"})
         self.assertEqual(response.json["message"], "Failure: User is attempting to update a default objective which is not allowed.")
 
-        print("         Test request to update a user's objective (filled all fields) succeeds")
+        print("         Test request to update a user's objective (filled most fields) succeeds")
         self.client.post("/create-objective", json={"title":"User Objective for updating", "projectId":2})
         objectives: List[Dict] = self.client.get("/read-objectives").json["objectives"]
         user_objective: Dict = filter_list_of_dicts(objectives, "title", "User Objective for updating")
-        data = {"title":"Test User Project", "description":"test description", 
-                "duration":10, "scheduledStart":now_str, "scheduledFinish":now_str, 
-                "status":"To-Do", "tag":"test"}
+        data = {"title":"Test User Project", "description":"test description", "status":"To-Do", "tag":"test"}
         response: TestResponse = self.client.patch(f"/update-objective/{user_objective["id"]}", json=data)
         self.assertEqual(response.json["message"], "Success: Objective has been updated.")
         response_read_projects: TestResponse = self.client.get("/read-objectives")
         objectives: Dict =  response_read_projects.json["objectives"]
         updated_objective: Dict = filter_list_of_dicts(objectives, "title", "Test User Project")
         filtered_updated_objective: Dict = filter_dict(updated_objective, list(data.keys()))
-        data["scheduledStart"], data["scheduledFinish"] = now_str_long, now_str_long
         self.assertDictEqual(data, filtered_updated_objective)
 
 
@@ -237,7 +233,7 @@ class FlaskAPIObjectiveTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.json["message"], "Failure: User is attempting to delete a default objective which is not allowed.")
 
         print("         Test requesting to delete a default user project objective fails")
-        self.client.post("/create-project", json={"description":"blah"}) 
+        self.client.post("/create-project", json={"title":"blah", "description":"blah"}) 
         objectives = self.client.get("/read-objectives").json["objectives"]
         default_user_project_objective = filter_list_of_dicts(objectives, "type", "default user project objective")
         response = self.client.delete(f"/delete-objective/{default_user_project_objective['id']}")

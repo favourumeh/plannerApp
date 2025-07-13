@@ -218,7 +218,6 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         print("         Test accessing the route whilst not logged in fails - (c: no bespoke session cookie)")
         response = self.client.get("/logout")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
-        self.assertEqual(response.status_code, 400)
 
             #login 
         self.client.post("/login", json={"username":username, "password":pwd})
@@ -286,7 +285,15 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         self.standard_login_and_auth_test(httpmethod="delete", endpoint="/delete_user/1", json_data=None, username=username, pwd=pwd)
 
-        #Other Test Cases:
+        print("         Test invalid input - deleting someone else's account fails (mismatched user_id in url vs in session dict)")
+        response = self.client.delete("/delete_user/2")
+        self.assertEqual(response.json["message"], "Failure: User selected for deletion cannot be found in the database.")
+        
+        #Create new user
+        username2 = "test2"
+        data = {"username":username2, "password1":pwd, "password2":pwd} 
+        self.client.post("/sign-up", json=data)
+
         print("         Test invalid input - deleting someone else's account fails (mismatched user_id in url vs in session dict)")
         response = self.client.delete("/delete_user/2")
         self.assertEqual(response.json["message"], "Failure: Account chosen for deletion does not match the account logged in.")

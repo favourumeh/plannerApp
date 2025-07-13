@@ -14,6 +14,10 @@ from pytz import timezone
 now: datetime = datetime.now(tz=timezone('Europe/London'))
 now_str: str = datetime.strftime(now, '%Y-%m-%dT%H:%M')
 now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:00 GMT")
+now_date_str: str = datetime.strftime(now, "%Y-%m-%d")
+now_date_str_long: str = datetime.strftime(now, "%a, %d %b %Y 00:00:00 GMT")
+
+# now_str_long: str = datetime.strftime(now, "%a, %d %b %Y %H:%M:00 GMT")
 
 #configure app for testing #1
 app.config["TESTING"] = True # set to true so Exceptions can propagate to the test client (i.e. so we get HTTP status codes other than 500 when something goes wrong with client request)

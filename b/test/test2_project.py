@@ -53,13 +53,12 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.standard_login_and_auth_test(httpmethod="post", endpoint="/create-project", json_data={"description":"blah"} , username=username, pwd=pwd)
 
         print("         Test creating a project after login is successfull")
-        data = {"title":"Test User Project", "description":"test description", "status":"To-Do", "tag":"test", "deadline":now_str}
+        data = {"title":"Test User Project", "description":"test description", "status":"To-Do", "tag":"test"}
         response = self.client.post("/create-project", json=data)
         response_get_project = self.client.get("/read-projects")
         user_project = list(filter(lambda project: project["type"]=="user project", response_get_project.json["projects"]))[0]
-        filtered_project = filter_dict(user_project, ["title", "description", "status", "tag", "deadline"])
+        filtered_project = filter_dict(user_project, ["title", "description", "status", "tag"])
         self.assertEqual(response.status_code, 201)
-        data["deadline"] = now_str_long
         self.assertDictEqual(data, filtered_project)
 
         print("         Test creating a project with no description fails")
@@ -102,13 +101,12 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.client.post("/create-project", json=data)
         response_read_projects = self.client.get("/read-projects")
         user_project_id: int = list(filter(lambda project: project["type"]=="user project", response_read_projects.json["projects"]))[0]["id"]
-        data = {"title":"Test User Project", "description":"test description", "status":"In-Progress", "tag":"test", "deadline":now_str}
+        data = {"title":"Test User Project", "description":"test description", "status":"In-Progress", "tag":"test"}
         response = self.client.patch(f"/update-project/{user_project_id}", json=data)
         self.assertEqual(response.json["message"], "Success: Project has been updated.")
         response_read_projects = self.client.get("/read-projects")
         updated_project: dict = list(filter(lambda project: project["type"]=="user project", response_read_projects.json["projects"]))[0]
         filtered_updated_project: dict = filter_dict(updated_project, list(data.keys()))
-        data["deadline"] = now_str_long
         self.assertDictEqual(data, filtered_updated_project)
 
         print(f"         Test request with project title>{project_title_limit} chars")
@@ -130,7 +128,7 @@ class FlaskAPIProjectTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.json["message"], "Failure: User is attempting to delete the default project which is not allowed.")
 
         print("         Test request to delete a user project succeeds")
-        self.client.post("/create-project", json={"description":"test user project"}) #create a user project
+        self.client.post("/create-project", json={"title":"blah", "description":"test user project"}) #create a user project        
         response_read_projects = self.client.get("/read-projects")
         user_project_id = list(filter(lambda project: project["type"] == "user project", response_read_projects.json["projects"]))[0]["id"]
         response = self.client.delete(f"/delete-project/{user_project_id}")
