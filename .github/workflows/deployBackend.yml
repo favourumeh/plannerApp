@@ -41,6 +41,7 @@ jobs:
       - name: Run unit tests
         working-directory: b/
         run: |
+          source .venv/bin/activate
           python -m unittest discover
 
       # Step6: Deploy to Azure Web App
