@@ -1,3 +1,4 @@
+import re
 from typing import Tuple, List, Dict
 from cryptography.fernet import Fernet
 from models import User, Refresh_Token, Project, Objective, Task
