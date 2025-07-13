@@ -28,17 +28,12 @@ jobs:
       - name: Install Python vevn
         run: sudo apt install python${{ env.python_version }}-venv -y
 
-     # Step 4: create and activate venv
-      - name: Create and activate env
-        working-directory: b/
-        run: |
-            python -m venv .venv
-            source .venv/bin/activate
-
-      # Step 5: Install python dependencies
+      # Step 4: create and activate venv, then install python dependencies
       - name: Install dependencies
         working-directory: b/
         run: |
+          python -m venv .venv
+          source .venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
