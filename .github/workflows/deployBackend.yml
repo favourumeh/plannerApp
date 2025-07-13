@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: ${{ env.python_version }} 
 
-      #Step 3: install python venv in linux 
+      # Step 3: install python venv in linux 
       - name: Install Python vevn
         run: sudo apt install python${{ env.python_version }}-venv -y
 
@@ -37,7 +37,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 5: Deploy to Azure Web App
+      # Step 5: Run unit tests 
+      - name: Run unit tests
+        working-directory: b/
+        run: |
+          python -m unittest discover
+
+      # Step6: Deploy to Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
