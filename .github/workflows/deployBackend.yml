@@ -41,6 +41,17 @@ jobs:
 
       # Step 5: Run unit tests 
       - name: Run unit tests
+        env:
+          accessTokenDurationMins: ${{ secrets.ACCESSTOKENDURATIONMINS }}
+          refreshTokenDurationDays: ${{ secrets.REFRESHTOKENDURATIONDAYS }}
+          expired_bespoke_session_cookie: ${{ secrets.EXPIRED_BESPOKE_SESSION_COOKIE }}
+          expired_access_token_cookie: ${{ secrets.EXPIRED_ACCESS_TOKEN_COOKIE }}
+          azureTenantId: ${{ secrets.AZURETENANTID }}
+          kvClientId: ${{ secrets.KVCLIENTID }}
+          kvClientSecret: ${{ secrets.KVCLIENTSECRET }}
+          project_title_limit: 80
+          objective_title_limit: 80
+          task_description_limit: 200
         working-directory: b/
         run: |
           source .venv/bin/activate
