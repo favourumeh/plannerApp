@@ -1,10 +1,12 @@
 name: Deploy Flask Backend to Azure Web App
 
 on:
+  workflow_dispatch:
   push:
     branches: ["main"] 
     paths:
       - 'b/**'
+
 env:
     web_app_name: plannerAppBackendNC
     python_version: 3.12
