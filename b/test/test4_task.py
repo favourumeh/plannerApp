@@ -47,7 +47,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         #Test Cases 
         print("         Test that read request after login is successfull")
-        response = self.client.get("/read-tasks")
+        response: TestResponse = self.client.get("/read-tasks")
         task_entries_filtered_fields: list[dict] = self.read_response_field_filter(response=response, entity="tasks", rel_fields=list(task_input_camelCase.keys()))
         filter_tasks: Dict = list(filter(lambda task: task["description"]==task_input_camelCase["description"], task_entries_filtered_fields))[0]
         self.assertEqual(response.status_code, 200)
@@ -91,37 +91,37 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         #Test Cases 
         print("         Test that requests without objective id fails")
         task_input = {"description":"Test task", "taskNnumber":1, "duration_est":10}
-        response = self.client.post("/create-task", json=task_input)
+        response: TestResponse = self.client.post("/create-task", json=task_input)
         self.assertEqual(response.json["message"], "Failure: Objective ID missing. The Task is not assigned any project.")
 
         print("         Test that requests with an invalid objective id fails")
         task_input = {"description":"Test task", "taskNnumber":1, "duration_est":10, "objectiveId":51}
-        response = self.client.post("/create-task", json=task_input)
+        response: TestResponse = self.client.post("/create-task", json=task_input)
         self.assertEqual(response.json["message"], "Failure: The Objective ID provided does not exist.")
 
         print("         Test that requests made with another user's objective id fails")
         task_input = {"description":"Test task", "taskNumber":1, "duration_est":10, "objectiveId":user2_objective_id}
-        response = self.client.post("/create-task", json=task_input)
+        response: TestResponse = self.client.post("/create-task", json=task_input)
         self.assertEqual(response.json["message"], "Failure: The specified objective does not belong to the user.")
 
         print("         Test that requests made without task description fails")
         task_input = {"taskNumber":1, "duration_est":10, "objectiveId":1}
-        response = self.client.post("/create-task", json=task_input)
+        response: TestResponse = self.client.post("/create-task", json=task_input)
         self.assertEqual(response.json["message"], "Failure: Task is missing a description.")
 
         print(f"         Test that requests made with description > {task_description_limit} fails")
         task_input = {"description":"1"*(task_description_limit+1), "taskNumber":1, "duration_est":10, "objectiveId":1}
-        response = self.client.post("/create-task", json=task_input)
+        response: TestResponse = self.client.post("/create-task", json=task_input)
         self.assertEqual(response.json["message"], f"Failure: The description is over the {task_description_limit} char limit.")
 
         print("         Test that requests made without task duration_est fails")
         task_input = {"description":"blah", "taskNumber":1, "objectiveId":1}
-        response = self.client.post("/create-task", json=task_input)
+        response: TestResponse = self.client.post("/create-task", json=task_input)
         self.assertEqual(response.json["message"], "Failure: Task is missing a duration_est (mins).")
 
         print("         Test that create task request after login is successfull")
         task_input = {"description":"Test task", "taskNumber":1, "durationEst":10, "objectiveId":1}
-        response = self.client.post("/create-task", json=task_input)
+        response: TestResponse = self.client.post("/create-task", json=task_input)
         task_entries_filtered_fields: list[dict] = self.read_and_filter_fields(read_endpoint="/read-tasks", entity="tasks", rel_fields=list(task_input.keys()))
         filter_tasks: Dict = list(filter(lambda task: task["description"]==task_input["description"], task_entries_filtered_fields))[0]
         self.assertEqual(response.status_code, 201)
@@ -129,7 +129,7 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         print("         Test that user can create task without specifying a task number")
         task_input = {"description":"Test task", "durationEst":10, "objectiveId":1}
-        response = self.client.post("/create-task", json=task_input)
+        response: TestResponse = self.client.post("/create-task", json=task_input)
         task_entries_filtered_fields: list[dict] = self.read_and_filter_fields(read_endpoint="/read-tasks", entity="tasks", rel_fields=list(task_input.keys()))
         filter_tasks: Dict = list(filter(lambda task: task["description"]==task_input["description"], task_entries_filtered_fields))[0]
         self.assertEqual(response.status_code, 201)
@@ -140,14 +140,14 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
         default_objective: List[Dict] = self.read_and_filter_fields("/read-objectives", "objectives", ["id", "type"])
         default_objective_id: int = filter_list_of_dicts(default_objective, "type", "default user project objective")["id"]
         task_input = {"description":"Task 'without' objective", "durationEst":10, "objectiveId":default_objective_id}
-        response = self.client.post("/create-task", json=task_input)
+        response: TestResponse = self.client.post("/create-task", json=task_input)
         self.assertEqual(response.status_code, 201)
 
         print("         Test requesting to update a task after login succeeds")
         create_task_input = {"description":"created user1 task", "durationEst":20, "priorityScore":2,
                              "scheduledStart":now_date_str, "status":"To-Do",
                              "isRecurring":True, "tag":"test", "objectiveId":user1_objective_id}
-        response = self.client.post(f"/create-task", json=create_task_input) 
+        response: TestResponse = self.client.post(f"/create-task", json=create_task_input) 
         self.assertEqual(response.status_code, 201)
         rel_fields = list(create_task_input.keys())
         field_filter_tasks: List[Dict] = self.read_and_filter_fields(read_endpoint="read-tasks", entity="tasks", rel_fields=rel_fields)
@@ -260,22 +260,22 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         #Test cases
         print("         Test updating a non-existent task fails")
-        response = self.client.patch("/update-task/56")
+        response: TestResponse = self.client.patch("/update-task/56")
         self.assertEqual(response.json["message"], "Failure: The task referenced does not exist.")
 
         print("         Test requesting to update another user's task fails")
-        response = self.client.patch(f"/update-task/{user1_task_id}") 
+        response: TestResponse = self.client.patch(f"/update-task/{user1_task_id}") 
         self.assertEqual(response.json["message"], "Failure: The task referenced does not belong to user.")
 
         print(f"         Test requesting to update a task with a description > {task_description_limit} chars fails")
-        response = self.client.patch(f"/update-task/{user2_task_id}", json={"description":"1"*(task_description_limit+1)}) 
+        response: TestResponse = self.client.patch(f"/update-task/{user2_task_id}", json={"description":"1"*(task_description_limit+1)}) 
         self.assertEqual(response.json["message"], f"Failure: The task description is over the {task_description_limit} char limit.")
 
         print("         Test requesting to update a task after login succeeds")
         task_update_input = {"description":"updated user2 task", "durationEst":20, "priorityScore":2,
                              "scheduledStart":now_date_str, "status":"In-Progress",
                              "isRecurring":True, "tag":"test","objectiveId":user2_objective_id}
-        response = self.client.patch(f"/update-task/{user2_task_id}", json=task_update_input) 
+        response: TestResponse = self.client.patch(f"/update-task/{user2_task_id}", json=task_update_input) 
         self.assertEqual(response.status_code, 200)
         rel_fields = ["id"] + list(task_update_input.keys())
         field_filter_tasks: List[Dict] = self.read_and_filter_fields(read_endpoint="read-tasks", entity="tasks", rel_fields=rel_fields)
@@ -303,13 +303,13 @@ class FlaskAPITaskTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         #Test cases
         print("         Test attempting to delete a non-existent task fails")
-        response = self.client.delete("/delete-task/56")
+        response: TestResponse = self.client.delete("/delete-task/56")
         self.assertEqual(response.json["message"], "Failure: The task referenced does not exist.")
 
         print("         Test attempting to delete another user's task fails")
-        response = self.client.delete(f"/delete-task/{user1_task_id}") 
+        response: TestResponse = self.client.delete(f"/delete-task/{user1_task_id}") 
         self.assertEqual(response.json["message"], "Failure: The task referenced does not beloing to user.")
         
         print("         Test attempting to delete a task after login succeeds")
-        response = self.client.delete(f"/delete-task/{user2_task_id}") 
+        response: TestResponse = self.client.delete(f"/delete-task/{user2_task_id}") 
         self.assertEqual(response.status_code, 200)
