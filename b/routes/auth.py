@@ -19,7 +19,7 @@ from cryptography.fernet import Fernet
 load_dotenv()
 
 #create blueprint
-auth = Blueprint("auth", __name__)
+auth = Blueprint("auth", __name__, url_prefix="/api/")
 
 #Generate session data encoder
 @auth.route("/sign-up", methods =["POST"])

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from pytz import timezone
 
 #create blueprint
-task = Blueprint("task", __name__)
+task = Blueprint("task", __name__, url_prefix="/api/")
 
 #import env vars from b/.env
 load_dotenv()

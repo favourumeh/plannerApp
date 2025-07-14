@@ -7,7 +7,7 @@
                 # env = prod: same as prod-local but with backend url matching Azure App Service (source = code) Resource
                 # env = prod-docker: same as prod-local but with backend url matching Azure App Service (source=container) resouce
                 #note: the point of the prod env is to test the app in a prod-like env. 
-        # rdbms: determines what database is used to store the apps user data: sqlite, mysql or az_mysql. 
+        # rdbms (optional): determines what database is used to store the apps user data: sqlite, mysql or az_mysql. 
                 #note: by default the if the env is dev the local my_sql db is used. If the env = prod then the test az_msql db is used. 
 param (
     [string]$env,
@@ -41,9 +41,9 @@ if ($rdbms -eq "") {
 $backendPort = ($userEnv -in @("dev", "prod", "prod-docker") ) ? 5000 : ($userEnv -eq "prod-local") ?  5001 : 5002
 
 #Determine backend url 
-$localBackendBaseURL = $env:local_host_backend_base_url + $backendPort
-$prodBackendBaseURL = $env:VITE_PROD_NC_BACKEND_API_URL
-$prodDockerBackendBaseURL = $env:VITE_PROD_C_BACKEND_API_URL
+$localBackendBaseURL = $env:local_host_backend_base_url + $backendPort + "/api"
+$prodBackendBaseURL = $env:VITE_PROD_NC_BACKEND_API_URL + "/api"
+$prodDockerBackendBaseURL = $env:VITE_PROD_C_BACKEND_API_URL + "/api"
 
 #check if the docker image tag is already in use. If it is, prompt the user to enter a new tag or use the newest tag. If in prod-docker use the tag "latest".
 if ( $userEnv -in @("prod-local-docker", "prod-docker") ) {

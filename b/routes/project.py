@@ -12,7 +12,7 @@ from datetime import datetime
 from pytz import timezone
 
 #create blueprint
-project = Blueprint("project", __name__)
+project = Blueprint("project", __name__, url_prefix="/api/")
 
 #import env vars from b/.env
 load_dotenv()
