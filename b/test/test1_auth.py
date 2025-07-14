@@ -38,12 +38,12 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         #Test Cases:
         print("         Test accessing route without bsc fails")
-        response: TestResponse = self.client.get("/test-login-required")
+        response: TestResponse = self.client.get("/api/test-login-required")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
         
         print("         Test accessing route with an invalid bsc (i.e., bsc could not be decrypted, signed or deserialised)")
         self.client.set_cookie(key="bespoke_session", value="fasdfsad", httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/test-login-required")
+        response: TestResponse = self.client.get("/api/test-login-required")
         self.assertEqual(response.json["message"].split(". Reason")[0], "Failure: Could not decrypt the bespoke_session cookies")      
 
         print("         Test accessing route whilst logged in succeeds")
@@ -51,26 +51,26 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         with app.app_context():
             db.session.add(user)
             db.session.commit()
-        login_response: TestResponse = self.client.post("/login", json = {"username":username, "password":pwd})
+        login_response: TestResponse = self.client.post("/api/login", json = {"username":username, "password":pwd})
         bsc = self.client.get_cookie("bespoke_session").value
-        response: TestResponse = self.client.get("/test-login-required")
+        response: TestResponse = self.client.get("/api/test-login-required")
         self.assertEqual(response.status_code, 200)
 
         print("         Test accessing route after user has logged out with the previous bsc fails (i.e., user has no refresh_token entry in db but has a bsc)")        
-        logout_response: TestResponse = self.client.get("/logout")
+        logout_response: TestResponse = self.client.get("/api/logout")
         self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/test-login-required")
+        response: TestResponse = self.client.get("/api/test-login-required")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please login!")
 
         print("         Test accessing route with an mismatched rt in bsc fails (i.e., user's rt in bsc is different to db rt)")
-        login_response2: TestResponse = self.client.post("/login", json={"username":username, "password":pwd})
+        login_response2: TestResponse = self.client.post("/api/login", json={"username":username, "password":pwd})
         login_bsc = self.client.get_cookie("bespoke_session").value
         self.client.set_cookie(key="bespoke_session", value=expired_bsc, httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/test-login-required")
+        response: TestResponse = self.client.get("/api/test-login-required")
         self.assertEqual(response.json["message"], "Failure: Refresh token is invalid. Please login")
             #logout - must logout with the bsc used to login (i.e. login_bsc) otherwise logout fails
         self.client.set_cookie(key="bespoke_session", value=login_bsc, httponly=True, samesite="None", secure=True)
-        logout_response2: TestResponse = self.client.get("/logout")
+        logout_response2: TestResponse = self.client.get("/api/logout")
         
         print("         Test accessing route with expired with bsc containing expired rt fails (i.e. bsc rt == db rt but db's exp field in the past)")
         expired_rt = decrypt_bespoke_session_cookie(expired_bsc, serializer, session_key)["refreshToken"]
@@ -80,7 +80,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
             db.session.add(refresh_token_obj)
             db.session.commit()
         self.client.set_cookie(key="bespoke_session", value=expired_bsc, httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/test-login-required")
+        response: TestResponse = self.client.get("/api/test-login-required")
         self.assertEqual(response.json["message"], "Failure: Please login. Refresh token has expired.")
         
     def test0_B_test_token_required(self):
@@ -93,27 +93,27 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
             db.session.add(user)
             db.session.commit()
             
-        login_response: TestResponse = self.client.post("/login", json={"username":username, "password": pwd})
+        login_response: TestResponse = self.client.post("/api/login", json={"username":username, "password": pwd})
         satc = self.client.get_cookie("session_AT").value
         
         #Test cases 
         print("         Test that access the route with a satc works")
-        response: TestResponse = self.client.get("/test-token-required")
+        response: TestResponse = self.client.get("/api/test-token-required")
         self.assertEqual(response.status_code, 200)
         
         print("         Test access route without satc fails")
         self.client.set_cookie(key="session_AT", value="", httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/test-token-required")
+        response: TestResponse = self.client.get("/api/test-token-required")
         self.assertEqual(response.json["message"], "Request is missing access token. Please login to refresh access token")
         
         print("         Test access route with an invalid access_token fails (i.e., Deserialisation/signature fails)")
         self.client.set_cookie(key="session_AT", value="fasdfs", httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/test-token-required")
+        response: TestResponse = self.client.get("/api/test-token-required")
         self.assertEqual(response.json["message"].split("! Reason: ")[0], "Deserialisation or Signiture verificaiton of access token cookie has failed")
 
         print("         Test access route with an expired access_token fails")
         self.client.set_cookie(key="session_AT", value=expired_satc, httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/test-token-required")
+        response: TestResponse = self.client.get("/api/test-token-required")
         self.assertEqual(response.json["message"].split("! Reason: ")[0], "Invalid Access Token")
         self.assertEqual(response.json["message"].split("! Reason: ")[-1], "Signature has expired")
         
@@ -132,54 +132,54 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         #Test cases:
         print("         Test valid signup input")
         data = {"username":username2, "password1":pwd, "password2":pwd} 
-        response: TestResponse = self.client.post("/sign-up", json = data )
+        response: TestResponse = self.client.post("/api/sign-up", json = data )
         self.assertEqual(response.status_code, 201)
 
         print("         Test Valid Input w/email")
         data = {"username":username3, "password1":pwd, "password2":pwd, "email": email3} 
-        response: TestResponse = self.client.post("/sign-up", json = data )
+        response: TestResponse = self.client.post("/api/sign-up", json = data )
         self.assertEqual(response.status_code, 201)
         
         print("         Test invlaid Input - blank or NO username provided")
         data = {"username":"", "password1":"ttt", "password2":"ttt"}
-        response: TestResponse = self.client.post("/sign-up", json=data)
+        response: TestResponse = self.client.post("/api/sign-up", json=data)
         self.assertEqual(response.json["message"], "Failure: Username is missing!")
         data = {"password1":"ttt", "password2":"ttt"}
-        response: TestResponse = self.client.post("/sign-up", json=data)
+        response: TestResponse = self.client.post("/api/sign-up", json=data)
         self.assertEqual(response.json["message"], "Failure: Username is missing!")
         
         print("         Test invalid Input - existing user in db")
         data = {"username":username1, "password1": pwd, "password2": pwd} 
-        response: TestResponse = self.client.post("/sign-up", json = data)
+        response: TestResponse = self.client.post("/api/sign-up", json = data)
         self.assertEqual(response.json, {"message": "Failure: Username is taken. Please choose another one."})
         self.assertEqual(response.status_code, 400)
         
         print("         Test invalid Input - username too long")
         data = {"username":"test"*4, "password1": "ttt1", "password2": "ttt"} 
-        response: TestResponse = self.client.post("/sign-up", json = data)
+        response: TestResponse = self.client.post("/api/sign-up", json = data)
         self.assertEqual(response.json, {"message": "Failure: Username is too long. Must be <= 15 characters."})
         self.assertEqual(response.status_code, 400)
                
         print("         Test invalid Input - existing email in db")
         data = {"username":"test4", "password1": "ttt", "password2": "ttt", "email": "test@test.com"} 
-        response: TestResponse = self.client.post("/sign-up", json = data)
+        response: TestResponse = self.client.post("/api/sign-up", json = data)
         self.assertEqual(response.json, {"message": "Failure: Email is taken. Please choose another one."})
         self.assertEqual(response.status_code, 400)
     
         print("         Test invalid Input - email too long")
         data = {"username":"test5", "password1": "ttt", "password2": "ttt", "email": "test@test."+"com"*110} 
-        response: TestResponse = self.client.post("/sign-up", json = data)
+        response: TestResponse = self.client.post("/api/sign-up", json = data)
         self.assertEqual(response.json, {"message": "Failure: Email is too long. Must be <= 120 characters."})
         self.assertEqual(response.status_code, 400)
         
         print("         Test invalid Input - invalid email")
         data = {"username":"test6", "password1": "ttt", "password2": "ttt", "email": "blah@blah"} 
-        response: TestResponse = self.client.post("/sign-up", json = data)
+        response: TestResponse = self.client.post("/api/sign-up", json = data)
         self.assertEqual(response.json, {"message": "Failure: Email is not valid"})
         
         print("         Test invalid Input - password mismatch")
         data = {"username":"test7", "password1": "ttt1", "password2": "ttt"} 
-        response: TestResponse = self.client.post("/sign-up", json = data)
+        response: TestResponse = self.client.post("/api/sign-up", json = data)
         self.assertEqual(response.json, {"message": "Failure: Passwords do not match"})
         self.assertEqual(response.status_code, 400)
 
@@ -188,22 +188,22 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         #Add a user entry to the user table of the in-memory db
         username, pwd, email = "test", "ttt", "test@test.com"
         data = {"username":username, "password1":pwd, "password2":pwd, "email": email} 
-        signup_response: TestResponse = self.client.post("/sign-up", json=data)
+        signup_response: TestResponse = self.client.post("/api/sign-up", json=data)
         
         print("         Test valid input - refresh token creation")
         data = {"username": username, "password":pwd}
-        response: TestResponse = self.client.post("/login", json = data)
+        response: TestResponse = self.client.post("/api/login", json = data)
         self.assertEqual(response.json["user"], {"id":1, "username": "test"})
         self.assertEqual(response.status_code, 200)
 
         print("         Test invalid input - user not found")
         data = {"username": "test1", "password":pwd}
-        response: TestResponse = self.client.post("/login", json = data)
+        response: TestResponse = self.client.post("/api/login", json = data)
         self.assertEqual(response.json["message"], "Failure: User not found")
                
         print("         Test invalid input - incorrect password")
         data = {"username": username, "password":"ttt1"}
-        response: TestResponse = self.client.post("/login", json = data)
+        response: TestResponse = self.client.post("/api/login", json = data)
         self.assertEqual(response.json["message"], "Failure: Incorrect password")
 
     def test3_logout(self):
@@ -217,19 +217,19 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         #Test Cases 
         print("         Test accessing the route whilst not logged in fails - (c: no bespoke session cookie)")
-        response: TestResponse = self.client.get("/logout")
+        response: TestResponse = self.client.get("/api/logout")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
 
             #login 
-        login_response: TestResponse = self.client.post("/login", json={"username":username, "password":pwd})
+        login_response: TestResponse = self.client.post("/api/login", json={"username":username, "password":pwd})
         print("         Test successful logout")
-        response: TestResponse = self.client.get("/logout")
+        response: TestResponse = self.client.get("/api/logout")
         self.assertEqual(response.status_code, 200)
         
         print("         Test accessing the route whilst not logged in fails - (c: no refresh token)")
         bsc = os.environ["expired_bespoke_session_cookie"]
         self.client.set_cookie(key="bespoke_session", value=bsc,httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/logout")
+        response: TestResponse = self.client.get("/api/logout")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please login!")
 
     def test4_refresh(self):
@@ -247,12 +247,12 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         #Test Cases 
         print("         Test accessing the route whilst not logged in fails - (c: no bespoke_session cookie)")
-        response: TestResponse = self.client.get("/refresh")
+        response: TestResponse = self.client.get("/api/refresh")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no b_sc). Please login!")
 
         print("         Test accessing the route whilst not logged in fails - (c: no refresh token)")
         self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/refresh")
+        response: TestResponse = self.client.get("/api/refresh")
         self.assertEqual(response.json["message"], "Failure: User is not logged in (no rt). Please login!")
 
         print("         Test accessing the route with an expired refresh token fails")
@@ -265,42 +265,42 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
             db.session.commit()
 
         self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/refresh")
+        response: TestResponse = self.client.get("/api/refresh")
         self.assertEqual(response.json["message"], "Failure: Please login. Refresh token has expired.")
         
             #login
-        login_response: TestResponse = self.client.post("/login", json={"username":username, "password":pwd})
+        login_response: TestResponse = self.client.post("/api/login", json={"username":username, "password":pwd})
         
         print("         Test successful request")
-        response: TestResponse = self.client.get("/refresh")
+        response: TestResponse = self.client.get("/api/refresh")
         self.assertEqual(response.status_code, 200)
 
         print("         Test accessing the route with an invalid refresh token fails")
         self.client.set_cookie(key="bespoke_session", value=bsc, httponly=True, samesite="None", secure=True)
-        response: TestResponse = self.client.get("/refresh")
+        response: TestResponse = self.client.get("/api/refresh")
         self.assertEqual(response.json["message"], "Failure: Refresh token is invalid. Please login")
         
     def test5_delete_user(self):
         print("     \n5)Testing delete_user")
         username, pwd = "test","ttt"
 
-        self.standard_login_and_auth_test(httpmethod="delete", endpoint="/delete_user/1", json_data=None, username=username, pwd=pwd)
+        self.standard_login_and_auth_test(httpmethod="delete", endpoint="/api/delete_user/1", json_data=None, username=username, pwd=pwd)
 
         print("         Test invalid input - deleting someone else's account fails (mismatched user_id in url vs in session dict)")
-        response: TestResponse = self.client.delete("/delete_user/2")
+        response: TestResponse = self.client.delete("/api/delete_user/2")
         self.assertEqual(response.json["message"], "Failure: User selected for deletion cannot be found in the database.")
         
         #Create new user
         username2 = "test2"
         data = {"username":username2, "password1":pwd, "password2":pwd} 
-        signup_response: TestResponse = self.client.post("/sign-up", json=data)
+        signup_response: TestResponse = self.client.post("/api/sign-up", json=data)
 
         print("         Test invalid input - deleting someone else's account fails (mismatched user_id in url vs in session dict)")
-        response: TestResponse = self.client.delete("/delete_user/2")
+        response: TestResponse = self.client.delete("/api/delete_user/2")
         self.assertEqual(response.json["message"], "Failure: Account chosen for deletion does not match the account logged in.")
 
         print("         Testing valid input - deleting an account when logged in")
-        response: TestResponse = self.client.delete("/delete_user/1")
+        response: TestResponse = self.client.delete("/api/delete_user/1")
         self.assertEqual(response.status_code, 200)
         
         print("     Test that all user's content (rts, projects, objectives and tasks) was deleted")
@@ -318,7 +318,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         pwd = "ttt"
 
         #test sign-up and login of reg account (logs into reg account )
-        self.standard_login_and_auth_test(httpmethod="get", endpoint="/get-user/1", json_data=None, username=reg_username, pwd=pwd)
+        self.standard_login_and_auth_test(httpmethod="get", endpoint="/api/get-user/1", json_data=None, username=reg_username, pwd=pwd)
 
         #create admin account
         with app.app_context():
@@ -327,18 +327,18 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
             db.session.commit()
  
         print("         Test accessing the route from reg account fails")
-        response_get_user: TestResponse = self.client.get("/get-user/1")
+        response_get_user: TestResponse = self.client.get("/api/get-user/1")
         self.assertEqual(response_get_user.status_code, 403)
         
         #login to admin account
-        login_response: TestResponse = self.client.post("/login", json = {"username":admin_username, "password":pwd})
+        login_response: TestResponse = self.client.post("/api/login", json = {"username":admin_username, "password":pwd})
 
         print("         Test successfully accessing the route as an admin")       
-        response_get_user: TestResponse = self.client.get("/get-user/1")
+        response_get_user: TestResponse = self.client.get("/api/get-user/1")
         self.assertEqual(response_get_user.status_code, 200)
         
         print("         Test trying get an account that does not exist fails")       
-        response_get_user: TestResponse = self.client.get("/get-user/3")
+        response_get_user: TestResponse = self.client.get("/api/get-user/3")
         self.assertEqual(response_get_user.json["message"], "Failure: the user you are trying to get does not exist")
 
 
@@ -347,7 +347,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         username, password, email = "test", "ttt" , "test@example.com"
         new_username, new_password, new_email = "test1", "ttt1", "new_email@example.com"
 
-        self.standard_login_and_auth_test(httpmethod="patch", endpoint="/edit_user/1", json_data={"":""}, username=username, pwd=password, email=email)
+        self.standard_login_and_auth_test(httpmethod="patch", endpoint="/api/edit_user/1", json_data={"":""}, username=username, pwd=password, email=email)
 
         #Make user1 admin
         user = User(username=username, password=generate_password_hash(password, "pbkdf2"), email=email, is_admin=True)
@@ -358,22 +358,22 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         #Other Test Cases:
         print("         Test invalid input - editing someone else's account fails (mismatched user_id in url vs in session dict)")
-        response: TestResponse = self.client.patch("/edit_user/2")
+        response: TestResponse = self.client.patch("/api/edit_user/2")
         self.assertEqual(response.json["message"], "Failure: The account you are attempting to edit does not match the account that is logged in")
         
         print("         Testing valid input - editing your account when logged in works")
-        response_get_user_old: TestResponse = self.client.get("/get-user/1")
+        response_get_user_old: TestResponse = self.client.get("/api/get-user/1")
         time.sleep(0.1)
         new_data = {"username":new_username, "password":password, "password1":new_password, "password2":new_password, "email":new_email }
-        response: TestResponse = self.client.patch("/edit_user/1", json=new_data)
+        response: TestResponse = self.client.patch("/api/edit_user/1", json=new_data)
         self.assertEqual(response.json["message"], "Success: User was successfully edited")
 
         print("         Test successful login with new credentitals")
-        response_login: TestResponse = self.client.post("/login", json= {"username":new_username, "password":new_password})
+        response_login: TestResponse = self.client.post("/api/login", json= {"username":new_username, "password":new_password})
         self.assertEqual(response_login.status_code, 200)
 
         print("         Test verify the changes made to email and lastUpdated")
-        response_get_user: TestResponse = self.client.get("/get-user/1")
+        response_get_user: TestResponse = self.client.get("/api/get-user/1")
         older_user_details = response_get_user_old.json["user"]
         new_user_details = response_get_user.json["user"]
         self.assertNotEqual(older_user_details["email"], new_user_details["email"])
@@ -385,7 +385,7 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         pwd = "ttt"
 
         #test sign-up and login of reg account (logs into reg account )
-        self.standard_login_and_auth_test(httpmethod="get", endpoint="/get-user-rts/1", json_data=None, username=reg_username, pwd=pwd)
+        self.standard_login_and_auth_test(httpmethod="get", endpoint="/api/get-user-rts/1", json_data=None, username=reg_username, pwd=pwd)
 
         #create admin account
         with app.app_context():
@@ -394,17 +394,17 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
             db.session.commit()
 
         print("         Test accessing route without admin rights fails")
-        response: TestResponse = self.client.get("/get-user-rts/1")
+        response: TestResponse = self.client.get("/api/get-user-rts/1")
         self.assertEqual(response.json["message"], "Failure: User is not permitted to access this route")
         
         print("         Test accessing route with admin rights succeeds")
-        login_response: TestResponse = self.client.post("/login", json={"username":admin_username, "password":pwd})
-        response: TestResponse = self.client.get("/get-user-rts/1")
+        login_response: TestResponse = self.client.post("/api/login", json={"username":admin_username, "password":pwd})
+        response: TestResponse = self.client.get("/api/get-user-rts/1")
         self.assertEqual(response.json["message"], "Success: retrieved user rt")
 
         print("         Test getting the rts of a user that does not exit fails")
-        login_response2: TestResponse = self.client.post("/login", json={"username":admin_username, "password":pwd})
-        response: TestResponse = self.client.get("/get-user-rts/3")
+        login_response2: TestResponse = self.client.post("/api/login", json={"username":admin_username, "password":pwd})
+        response: TestResponse = self.client.get("/api/get-user-rts/3")
         self.assertEqual(response.json["message"], "Failure: the user you are trying to get does not exist")
 
 if __name__ == "__main__":

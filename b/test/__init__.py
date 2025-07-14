@@ -28,12 +28,12 @@ app.register_blueprint(objective)
 app.register_blueprint(task)
 
     #add these test routes which will only be used to test the login_required and token_requied decorators
-@app.route("/test-login-required", methods=["GET"])
+@app.route("/api/test-login-required", methods=["GET"])
 @login_required(serializer=serializer)
 def test_login() -> Tuple[Response, int]:
     return jsonify({"message": "Success: login test completed"}), 200
 
-@app.route("/test-token-required", methods=["GET"])
+@app.route("/api/test-token-required", methods=["GET"])
 @token_required(app=app, serializer=serializer)
 def test_token() -> Tuple[Response, int]:
     return jsonify({"message": "Success: token test completed"}), 200
@@ -80,8 +80,8 @@ class plannerAppTestDependecies():
 
         #signup and login #
         print("         Test valid sign up and login")
-        rs = self.client.post("/sign-up", json={"username":username, "password1":pwd, "password2":pwd, "email":email})
-        rl = self.client.post("/login", json={"username":username, "password":pwd})
+        rs = self.client.post("/api/sign-up", json={"username":username, "password1":pwd, "password2":pwd, "email":email})
+        rl = self.client.post("/api/login", json={"username":username, "password":pwd})
         self.assertEqual(rs.status_code, 201)
         self.assertEqual(rl.status_code, 200)
         satc = self.client.get_cookie("session_AT").value #session_AT cookie(satc)

@@ -225,7 +225,7 @@ def query_tasks():
         resp_dict["message"] = f"Failure: Could not read user task! Reason: {e}"
         return jsonify(resp_dict), 404
 
-@app.route("/get-tasks-objective-and-project/<int:task_id>", methods=["GET"])
+@task.route("/get-tasks-objective-and-project/<int:task_id>", methods=["GET"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def get_tasks_objective_and_project(task_id: int):
@@ -253,7 +253,7 @@ def get_tasks_objective_and_project(task_id: int):
     return jsonify(resp_dict), 200
 
 #read - all projects, objectives and tasks
-@app.route("/read-all", methods=["GET"])
+@app.route("/api/read-all", methods=["GET"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def read_all():
