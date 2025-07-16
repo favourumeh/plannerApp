@@ -181,7 +181,7 @@ def logout() -> Tuple[Response, int]:
         return resp, 200
     except Exception as e:
         resp_dict["message"] = f"Could not logout due to db issues. Reason: {e}."
-        return jsonify(resp_dict), 400
+        return jsonify(resp_dict), 404
         
 
 #refresh route
