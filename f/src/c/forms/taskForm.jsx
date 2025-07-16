@@ -70,12 +70,7 @@ function TaskForm ({form}) {
     const taskObjective = objectiveTitles.includes(objectiveQuery)?
         relevantObjectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ) : {}
 
-    useEffect( () => { //clear objective if the project field is not valid (given that the projects have been )
-        if (!getProjectsQuery.isPending && !projectTitles.includes(projectQuery)) {
-            setObjectiveQuery("")
-        }}, [projectQuery])
-
-    useEffect(() => {
+    useEffect(() => { //get the objective Id that belongs to the project when the objective query matches the projects objective
         if (!isPendingObjectives && !!objectiveQuery) {
             // console.log("Objective query", objectiveQuery, "objectiveTitles", objectiveTitles) 
             // console.log("relevantObjectives", relevantObjectives)
@@ -152,6 +147,23 @@ function TaskForm ({form}) {
         )
     }
 
+    const handleSearchFieldChange =  async (e) => {
+        const {name, value} = e.target
+        if (name==="project"){
+            setProjectQuery(value)
+            if  (!getProjectsQuery.isPending && !projectTitles.includes(value)) {
+                setObjectiveQuery("")
+            }
+        }
+        if (name==="objective") {
+            if (!projectTitles.includes(projectQuery)){ // stops user from editing the Objective field when the project field is not valid. This causes endless run or the useEffect with relevantObjectives dependecy because relevant objective is [{}]
+                setObjectiveQuery("")
+                return
+            }
+            setObjectiveQuery(value)
+        }
+    }
+
     const formSearchField = (params) => {
         /*Returns the label and input tags of for a field in the content form*/
         const { labelName, inputName, queryField, setQueryField, entityArray} = params
@@ -166,7 +178,7 @@ function TaskForm ({form}) {
                     name = {inputName} // used in the request made to the server
                     value = {(isPendingTasksParents && form==="update-task")? "...": queryField}
                     autoComplete="off"
-                    onChange = {e => setQueryField(e.target.value)}
+                    onChange = {handleSearchFieldChange}
                     onClick = {(e) => toggleShowSearchResult(e, labelName)}/>
                 <SearchResult searchFieldLabel={labelName} query={queryField} setQuery={setQueryField} entityArray={entityArray}/>
             </div>
@@ -182,7 +194,7 @@ function TaskForm ({form}) {
     // Handle Form Input Validation
     const handleDisableFormSubmitBtn = () =>{ //disables the submit button when the form's input is invalid OR if form is waiting on the response from POST/PATCH request. 
         var disabled = false
-        if ( !taskProject.title || !taskObjective.title ) {
+        if ( !taskProject?.title || !taskObjective?.title ) {
             disabled = true
         }
         if ( !currentTask.description ) {
