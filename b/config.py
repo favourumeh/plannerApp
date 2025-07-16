@@ -2,6 +2,7 @@ import os, sys
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
+from flask_swagger_ui import get_swaggerui_blueprint
 from models import db
 import plannerPackage as pp
 from itsdangerous import URLSafeTimedSerializer
@@ -18,10 +19,23 @@ load_dotenv()
 #Create Flask app instance
 app = Flask(__name__)
 CORS(app, 
-     resources={r"/*":{"origins":pp.allowed_origins}},
-     methods=["GET","POST","PATCH", "DELETE"],
-     supports_credentials=True
+    resources={r"/*":{"origins":pp.allowed_origins}},
+    methods=["GET","POST","PATCH", "DELETE"],
+    supports_credentials=True,
 )
+
+#create API docs blueprint
+SWAGGER_URL = '/api/docs'
+API_URL = '/static/swagger.yaml'
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "Planner App",
+    }
+)
+
+app.register_blueprint(swaggerui_blueprint)
 
 #configure app secret key
 app.config["SECRET_KEY"] = pp.flask_app_secret_key

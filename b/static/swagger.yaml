@@ -1,0 +1,228 @@
+openapi: 3.0.1
+info:
+  description: >-
+    This is the API for Planner App, a A Task Management System with Planner,
+    Kanban, and Journal Features.
+  version: 1.0.0
+  title: Planner App
+  contact:
+    email: favourudev@gmail.com
+servers:
+  - url: http://127.0.0.1:5000/api
+    description: Testing server
+  - url: https://plannerappbackendnc-dad9ghcgd6ame2cc.ukwest-01.azurewebsites.net/api
+    description:  Main (production) server
+
+tags:
+  - name: user
+    description: User Operations about user
+  - name: Project
+    description: Operations about the Project entity
+  - name: Objective
+    description: Operations about the Objective entity
+  - name: Task
+    description: Operations about the Task entity
+
+login_required_status:
+  '401':
+    description: |
+      Failure: User is not logged in (no b_sc). Please login!<br/>
+      Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+      Failure: Refresh token is invalid. Please login<br/>
+      Failure: Please login. Refresh token has expired.<br/>
+  '404': |
+    Failure: User is not logged in (no rt). Please login!
+
+
+paths:
+  /sign-up:
+    post:
+      summary: Sign up to planner App
+      description: Sign up to planner app
+      tags: [user]
+      requestBody:
+        description: User Object to be created 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/requestBody/schemas/SignUp'
+      security: []
+      responses:
+        '201':
+          description: 'Created: Success: Account Created! Login to start planning'
+        '400':
+          description: |
+            Bad Request: <br/>
+            Failure: Username is missing! <br/>
+            Failure: Username is taken. Please choose another one.<br/>
+            Failure: Username is too long. Must be <= 15 characters.<br/>
+            Failure: Email is not valid. <br/>
+            Failure: Email is taken. Please choose another one.<br/>
+            Failure: Email is too long. Must be <= 120 characters.<br/>
+            Failure: Passwords do not match.
+        '401':
+          description: 'Unathorised. Failure: User not found; Failure: Incorrect password"
+        '404':
+          description: |
+            Not Found. <br/>
+            Failure: Account Sign-up failed. Reason {e}
+
+  /login:
+    post:
+      summary: login to user account
+      description: "Login to user account. <br/>Note: This route generates the response header 'Set-Cookie' which contains the cookies: **bespoke_session** and **session_AT**"
+      tags: [user]
+      requestBody:
+        description: User Login Credentials 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/requestBody/schemas/Login'
+      security: []
+      responses:
+        '200':
+          description: 'Ok: Success: Login Successfull. Welcome {user.username}'
+          headers:
+            Set-Cookie1:
+              description: Refresh Token cookie
+              schema: 
+                type: string
+                example: "bespoke_session=[value]; Secure; HttpOnly; SameSite=None"
+            Set-Cookie2:
+              description: Access Token cookie (JWT)
+              schema: 
+                type: string
+                example: "session_AT=[value]; Secure; HttpOnly; SameSite=None"
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User not found; <br/>
+            Failure: Incorrect password"
+        '404':
+          description: |
+            Not Found. <br/> 
+            Failure: Could not update the user's refresh token entry. Reason: {e};<br/>
+            Failure: Could not create a refresh token entry for the user. Reason: {e}
+
+  /logout:
+    get:
+      summary: Sign up to planner App
+      description: "Sign up to user planner app. <br/> Note:This route uses the cookie **bespoke_session** to authenticate the user"
+      tags: [user]
+      security:
+        - bespoke_session: []
+      responses:
+        '200':
+          description: "Ok. Success: Logout completed"
+        '401':
+          description: |
+            Bad Request: <br/>
+            Failure: Could not logout due to db issues. Reason: {e}.<br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+        '404':
+          description: |
+            Not Found: <br/>
+            Could not logout due to db issues. Reason: {e}.<br/>
+            Failure: User is not logged in (no rt). Please login!
+
+  /refresh:
+    get:
+      summary: "Refresh Access Token"
+      description: "Refresh Access Token. <br/> Note:This route uses the cookie **bespoke_session** to authenticate the user"
+      tags: [user]
+      security:
+        - bespoke_session: []
+      responses:
+        '200':
+          description: Ok. Successfully refreshed access_token
+          headers:
+            Set-Cookie:
+              description: Access Token cookie
+              schema: 
+                type: string
+                example: "session_AT=[value]; Secure; HttpOnly; SameSite=None"
+        '401':
+          description: |
+            Bad Request: <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+        '404':
+          description: |
+            Not Found: <br/>
+            Failure: User is not logged in (no rt). Please login!
+
+
+  /example:
+    get:
+      summary: ""
+      description: ""
+      tags: [user]
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:
+        '200':
+          description: Ok.
+        '401':
+          description: |
+            Bad Request: <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+        '404':
+          description: |
+            Not Found: <br/>
+            Failure: User is not logged in (no rt). Please login!
+
+components:
+  securityDefinitions:
+    bespoke_session:
+      type: apiKey
+      name: bespoke_session
+      in: cookie
+    session_AT:
+      type: apiKey
+      name: session_AT
+      in: cookie
+
+requestBody:
+  schemas:
+    SignUp:
+      type: object
+      properties:
+        username:
+          type: string
+          description: username for the user 
+        email:
+          type: string
+        password1:
+          type: string
+        password2:
+          type: string
+    Login:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+
