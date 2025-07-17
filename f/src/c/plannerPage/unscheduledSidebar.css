@@ -6,3 +6,7 @@ div.planner-unscheduled-container-scroller-wrapper{
     margin: 0 0px 0 0px;
     background-color: rgba(48, 48, 100, 1);
 }
+div.planner-unscheduled-container-droppable{
+    height: 100%;
+    width: 100%;
+}
