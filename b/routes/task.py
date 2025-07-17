@@ -113,7 +113,8 @@ def read_tasks():
     resp_dict = {"message":"", "tasks":""}
     user_id: int = session["userId"]
     try:
-        tasks: List[Task] = generate_user_content(user_id=user_id, content="tasks")
+        # tasks: List[Task] = generate_user_content(user_id=user_id, content="tasks")
+        tasks: List[Task] = Task.query.join(Objective).join(Project).filter(Project.user_id==user_id)
         resp_dict["message"] = "Success: user's tasks loaded"
         resp_dict["tasks"] = [task.to_dict() for task in tasks]
         return jsonify(resp_dict), 200
@@ -203,7 +204,7 @@ def query_tasks():
 
         if (resp_dict["_itemCount"]>0): # returns the objectives and projects of the queried tasks
             objective_ids: list[int] = [task.objective_id for task in query.all()]
-            objectives: list[Objective] = Objective.query.filter(
+            objectives: list[Objective] = Objective.query.join(Project).filter(Project.user_id==user_id).filter(
                 db.or_(
                     Objective.id.in_(objective_ids),
                     db.func.date(Objective.date_added) >= (datetime.now(tz=timezone('Europe/London')) - timedelta(days=1)).date(),  # objectives created on or after the previous day. Ensures objectives are visible in the planner page once created. 
@@ -211,7 +212,7 @@ def query_tasks():
             ).all()
 
             project_ids: List[int] = [objective.project_id for objective in objectives]
-            projects: list[Project] = Project.query.filter(
+            projects: list[Project] = Project.query.filter(Project.user_id==user_id).filter(
                 db.or_(
                     Project.id.in_(project_ids),
                     db.func.date(Project.date_added) >= (datetime.now(tz=timezone('Europe/London')) - timedelta(days=1)).date(),  # projects created on or after the previous day. Ensures ...
