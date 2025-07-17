@@ -148,7 +148,7 @@ def get_project_progress(project_id: int) -> Tuple[Response, int]:
         resp_dict["message"] = "Failure: The requested project does not belong to the user. Choose another one."
         return jsonify(resp_dict), 403
 
-    project_tasks_query: Query = Task.query.join(Objective).filter(Objective.project_id==project_id)
+    project_tasks_query: Query = Task.query.join(Objective).filter(Objective.project_id==project_id, Objective.type!="break")
     tasks: List[Task] = project_tasks_query.all()
     total_task_count: int = len(tasks)
     total_task_duration: int = sum([task.duration if isinstance(task.duration, int) else task.duration_est for task in tasks])
