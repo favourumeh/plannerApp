@@ -217,8 +217,14 @@ function TaskForm ({form}) {
         if ( (!currentTask.finish || !currentTask.start) && currentTask.status==="Completed" ) {
             disabled=true
         }
-        if ( currentTask.description.length > 200 ) {disabled=true}
-        if ( createOrEditTaskMutation.isPending ) {disabled=true} // when waiting for the post/patch request to complete. the submit button must be disabled
+        if ( currentTask.description.length > 200 ) {
+            disabled=true}
+        
+        if ( currentTask.status==="In-Progress" && !currentTask.start ) {
+            disabled=true
+        }
+        if ( createOrEditTaskMutation.isPending ) {
+            disabled=true} // when waiting for the post/patch request to complete. the submit button must be disabled
         return disabled
     }
 
@@ -273,6 +279,13 @@ function TaskForm ({form}) {
             setFormInputIssues(prev => prev.includes(message7) ? prev : prev + message7)
         } else {
             setFormInputIssues(prev => prev.replace(message7, ""))
+        }
+
+        const message8 = " Task's status is 'In-Progress' with empty 'start' field"
+        if ( currentTask.status==="In-Progress" && !currentTask.start ) {
+            setFormInputIssues(prev => prev.includes(message8) ? prev : prev + message8)
+        } else {
+            setFormInputIssues(prev => prev.replace(message8, ""))
         }
     }, [currentTask, projectQuery, objectiveQuery] )
 
