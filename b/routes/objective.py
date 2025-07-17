@@ -293,9 +293,9 @@ def delete_objective(objective_id: int) -> Tuple[Response, int]:
     if not project:
         resp_dict["message"] = "Failure: The objective selected does not belong to the user."
         return jsonify(resp_dict), 403
-
-    if objective.type in ["default user project objective", "default project objective"]:
-        resp_dict["message"] = "Failure: User is attempting to delete a default objective which is not allowed."
+    print("objective type", objective.type)
+    if objective.type in ["default user project objective", "default project objective", "break"]:
+        resp_dict["message"] = f"Failure: User is attempting to delete a {objective.type} which is not allowed."
         return jsonify(resp_dict),  403
     
     # tasks: List[Task] = Task.query.filter_by(objective_id=objective_id).delete()
