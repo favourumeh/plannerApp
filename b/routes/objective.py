@@ -264,8 +264,8 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
         objective.objective_number = generate_entity_number(entity_number=None, parent_entity_id=project_id, parent_entity_name="project", entity_name="objective", entity=Objective)
         objective.project_id = project_id 
         
-    if objective.type in ["default user project objective", "default project objective"]:
-        resp_dict["message"] = "Failure: User is attempting to update a default objective which is not allowed."
+    if objective.type in ["default user project objective", "default project objective", "break"]:
+        resp_dict["message"] = f"Failure: User is attempting to update an objective of type '{objective.type}' which is not allowed."
         return jsonify(resp_dict),  403
 
     try:
@@ -295,7 +295,7 @@ def delete_objective(objective_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 403
     print("objective type", objective.type)
     if objective.type in ["default user project objective", "default project objective", "break"]:
-        resp_dict["message"] = f"Failure: User is attempting to delete a {objective.type} which is not allowed."
+        resp_dict["message"] = f"Failure: User is attempting to delete an objective of type '{objective.type}' which is not allowed."
         return jsonify(resp_dict),  403
     
     # tasks: List[Task] = Task.query.filter_by(objective_id=objective_id).delete()
