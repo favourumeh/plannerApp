@@ -70,6 +70,11 @@ function TaskForm ({form}) {
     const taskObjective = objectiveTitles.includes(objectiveQuery)?
         relevantObjectives.find(objective => (objective.title == objectiveQuery) && (objective.projectId == taskProject.id) ) : {}
 
+    useEffect( () => { //clear objective if the project field is not valid (given that the projects have been )
+        if (!getProjectsQuery.isPending && !projectTitles.includes(projectQuery)) {
+            setObjectiveQuery("")
+        }}, [projectQuery])
+
     useEffect(() => { //get the objective Id that belongs to the project when the objective query matches the projects objective
         if (!isPendingObjectives && !!objectiveQuery) {
             // console.log("Objective query", objectiveQuery, "objectiveTitles", objectiveTitles) 
@@ -219,7 +224,7 @@ function TaskForm ({form}) {
 
     useEffect( ()=> { //specifies what form validation error messages to show/remove
 
-        const message1 = " Task is missing one of 'Project' or 'Objective' field."
+        const message1 = " Task is missing all or one of 'Project' or 'Objective' field."
         if (!!taskProject && !!taskObjective) {
             ( !currentTask.objectiveId ||  !taskProject.title || !taskObjective.title ) ?
                 setFormInputIssues(prev => prev.includes(message1) ? prev : prev +message1)
@@ -275,7 +280,7 @@ function TaskForm ({form}) {
         <>
         <div className="form-overlay" onClick={closeSearchResult}>
             <div className="form-header">
-                <div className="form-title"> {form.split("-").join(" ").toUpperCase()}  {form==="create-task"? undefined :`#${currentTask.taskNumber} (${currentTask.id})`} </div>
+                <div className="form-title"> {form.split("-").join(" ").toUpperCase()}  {form==="create-task"? undefined :`#${currentTask.taskNumber || ""} (${currentTask.id})`} </div>
             </div>
 
             <div className="form-body">
