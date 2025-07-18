@@ -23,15 +23,15 @@ tags:
   - name: Task
     description: Operations about the Task entity
 
-login_required_status:
-  '401':
-    description: |
-      Failure: User is not logged in (no b_sc). Please login!<br/>
-      Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
-      Failure: Refresh token is invalid. Please login<br/>
-      Failure: Please login. Refresh token has expired.<br/>
-  '404': |
-    Failure: User is not logged in (no rt). Please login!
+# login_required_status:
+#   '401':
+#     description: |
+#       Failure: User is not logged in (no b_sc). Please login!<br/>
+#       Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+#       Failure: Refresh token is invalid. Please login<br/>
+#       Failure: Please login. Refresh token has expired.<br/>
+#   '404': |
+#     Failure: User is not logged in (no rt). Please login!
 
 
 paths:
