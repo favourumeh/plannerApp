@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   description: >-
     This is the API for Planner App, a A Task Management System with Planner,
-    Kanban, and Journal Features.
+    Kanban, and Journal Features (V1. Will be completed 25/07/25).
   version: 1.0.0
   title: Planner App
   contact:
@@ -50,10 +50,12 @@ paths:
       security: []
       responses:
         '201':
-          description: 'Created: Success: Account Created! Login to start planning'
+          description: |
+            Ok. <br/>
+            Success: Account Created! Login to start planning
         '400':
           description: |
-            Bad Request: <br/>
+            Bad Request. <br/>
             Failure: Username is missing! <br/>
             Failure: Username is taken. Please choose another one.<br/>
             Failure: Username is too long. Must be <= 15 characters.<br/>
@@ -61,8 +63,6 @@ paths:
             Failure: Email is taken. Please choose another one.<br/>
             Failure: Email is too long. Must be <= 120 characters.<br/>
             Failure: Passwords do not match.
-        '401':
-          description: 'Unathorised. Failure: User not found; Failure: Incorrect password"
         '404':
           description: |
             Not Found. <br/>
@@ -99,7 +99,7 @@ paths:
           description: |
             Unathorised. <br/>
             Failure: User not found; <br/>
-            Failure: Incorrect password"
+            Failure: Incorrect password
         '404':
           description: |
             Not Found. <br/> 
@@ -108,8 +108,8 @@ paths:
 
   /logout:
     get:
-      summary: Sign up to planner App
-      description: "Sign up to user planner app. <br/> Note:This route uses the cookie **bespoke_session** to authenticate the user"
+      summary: Logout User
+      description: "Logs user out of planner app. <br/> Note:This route removes the user RT from the backend db and clears (sets to empty string) the **bespoke_session** and **session_AT** cookies"
       tags: [user]
       security:
         - bespoke_session: []
@@ -118,7 +118,7 @@ paths:
           description: "Ok. Success: Logout completed"
         '401':
           description: |
-            Bad Request: <br/>
+            Unathorised.<br/> 
             Failure: Could not logout due to db issues. Reason: {e}.<br/>
             Failure: User is not logged in (no b_sc). Please login!<br/>
             Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
@@ -126,9 +126,9 @@ paths:
             Failure: Please login. Refresh token has expired.<br/>
         '404':
           description: |
-            Not Found: <br/>
-            Could not logout due to db issues. Reason: {e}.<br/>
-            Failure: User is not logged in (no rt). Please login!
+            Not Found. <br/>
+            Failure: User is not logged in (no rt). Please login!<br/>
+            Could not logout due to db issues. Reason: {e}
 
   /refresh:
     get:
@@ -148,18 +148,169 @@ paths:
                 example: "session_AT=[value]; Secure; HttpOnly; SameSite=None"
         '401':
           description: |
-            Bad Request: <br/>
-            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Bad Request. <br/>Unathorised Failure: User is not logged in (no b_sc). Please login!<br/>
             Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
             Failure: Refresh token is invalid. Please login<br/>
             Failure: Please login. Refresh token has expired.<br/>
         '404':
           description: |
-            Not Found: <br/>
+            Not Found. <br/>
             Failure: User is not logged in (no rt). Please login!
 
 
-  /example:
+  /create-project:
+    post:
+      summary: "Creates a project object"
+      description: "Creates a project object. This also automatically creates an objective called 'No Objective' under the created project. This objective stores all project tasks that do not belong to a specific project objective"
+      tags: [user]
+      requestBody:
+        description: Project's properties 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/requestBody/schemas/Project'
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:
+        '201':
+          description: |
+            Ok. <br/> 
+            Success: Project Added!
+        '400':
+          description: |
+            Bad Request.<br/>
+            Failure: Project is missing a description. Please add one.<br/>
+            Failure: Project is missing a title. Please add one.<br/>
+            Failure: The title has over {project_title_limit} chars<br/>
+            Failure: The project title provided already exists for this user. Please provide a different title.
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+            Request is missing access token. Please login to refresh access token<br/>
+            Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}<br/>
+            Invalid Access Token! Reason: {e}<br/>
+        '404':
+          description: |
+            Not Found. <br/>
+            Failure: User is not logged in (no rt). Please login!<br/>
+            Failure: Could not add the project to the db! Reason: {e}
+
+
+  /read-projects:
+    get:
+      summary: "gets all the user's projects"
+      description: "gets all the user's projects"
+      tags: [user]
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:
+        '200':
+          description: |
+            Ok.<br/>
+            Success: user's projects loaded
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+            Request is missing access token. Please login to refresh access token<br/>
+            Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}<br/>
+            Invalid Access Token! Reason: {e}<br/>
+        '404':
+          description: |
+            Not Found.<br/>
+            Failure: User is not logged in (no rt). Please login!<br/>
+            Failure: Could not read user's projects! Reason: {e}
+
+  /query-projects:
+    get:
+      summary: "Queries a project"
+      description: |
+        Used in the Planner Entity Page to paginate the user's projects.<br/>
+        Also can filter projects by status.
+      tags: [user]
+      requestBody:
+        description: Project's properties 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/requestBody/schemas/QueryProjects'
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:
+        '200':
+          description: |
+            Ok.<br/>
+            Success: user's projects loaded
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+            Request is missing access token. Please login to refresh access token<br/>
+            Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}<br/>
+            Invalid Access Token! Reason: {e}<br/>
+        '404':
+          description: |
+            Not Found.<br/>
+            Failure: User is not logged in (no rt). Please login!<br/>
+            Failure: Could not query user's project! Reason: {e}
+
+  /get-project-progress/{projectId}:
+    get:
+      summary: "Gets the progress of a project. "
+      description: "Gets the progress of a project using 2 metrics: total task duration and total task count"
+      tags: [user]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: The ID of the project who progress is to be retrieved
+          schema:
+            type: integer
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:
+        '200':
+          description: |
+            Ok.<br/>
+            Success: Projects's progress retrieved.
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+            Request is missing access token. Please login to refresh access token<br/>
+            Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}<br/>
+            Invalid Access Token! Reason: {e}<br/>
+        '403':
+          description: |
+            Forbidden.<br/>
+            Failure: The requested project does not belong to the user. Choose another one.
+
+        '404':
+          description: |
+            Not Found.<br/>
+            Failure: User is not logged in (no rt). Please login!<br/>
+            Failure: The requested project is not in the database. Choose another one.
+
+  /example-just-rt:
     get:
       summary: ""
       description: ""
@@ -169,17 +320,45 @@ paths:
         - bespoke_session: []
       responses:
         '200':
-          description: Ok.
+          description: |
+            Ok.<br/>
         '401':
           description: |
-            Bad Request: <br/>
+            Unathorised. <br/>
             Failure: User is not logged in (no b_sc). Please login!<br/>
             Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
             Failure: Refresh token is invalid. Please login<br/>
             Failure: Please login. Refresh token has expired.<br/>
         '404':
           description: |
-            Not Found: <br/>
+            Not Found.<br/>
+            Failure: User is not logged in (no rt). Please login!
+
+  /example-both-rt-and-at-checks:
+    get:
+      summary: ""
+      description: ""
+      tags: [user]
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:
+        '200':
+          description: |
+            Ok.<br/>
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+            Request is missing access token. Please login to refresh access token<br/>
+            Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}<br/>
+            Invalid Access Token! Reason: {e}<br/>
+        '404':
+          description: |
+            Not Found.<br/>
             Failure: User is not logged in (no rt). Please login!
 
 components:
@@ -200,7 +379,6 @@ requestBody:
       properties:
         username:
           type: string
-          description: username for the user 
         email:
           type: string
         password1:
@@ -214,6 +392,57 @@ requestBody:
           type: string
         password:
           type: string
+
+    Project:
+      type: object
+      properties:
+        projectNumber:
+          type: integer
+          example: Null
+          description: (Optional, auto-filled) The project's identifier. Not to be mistaken with projectId (a unique project identifier) as it is only unique within a user (i.e. other users can have project's with the same projectNumber as the current user).
+        status:
+          type: string
+          example: To-Do
+          description: "(Optional, default: To-Do) The project's status: To-Do, In-Progress and Completed. Hardly used."
+        title:
+          type: string
+          description: (required) The project's title
+        description:
+          type: string
+          example: "blah"
+          description: (required) The project's description
+        deadline:
+          type: string
+          example: Null
+          description: (optional, hardly used) The project's deadline date ('%Y-%m-%d')
+        scheduledStart:
+          type: string
+          example: Null
+          description: (optional, hardly used) The project's start date ('%Y-%m-%d')
+        scheduledFinish:
+          type: string
+          example: Null
+          description: (optional, hardly used) The project's end date ('%Y-%m-%d')
+        tag:
+          type: string
+          example: Null
+          description: (optional) The project's tags.
+
+    QueryProjects:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+          description: "(Optional, default: None). The project page being returned. If not inputted then projects are not paginated thus all projects matching the query are returned"
+        perPage:
+          type: integer
+          example: 1
+          description: "(Optional, default: None). The max number of number of projects returned per page. If not inputted then projects are not paginated thus all projects matching the query are returned"
+        status:
+          type: string
+          example: To-Do
+          description: "(Optional, default: None) The status of the projects being returned."
 
     User:
       type: object

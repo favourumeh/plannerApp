@@ -34,7 +34,7 @@ def create_project() -> Tuple[Response, int]:
     status: str = content.get("status", "To-Do")
     title: str = content.get("title", None)
     description: str = content.get("description", None)
-    deadline: datetime = content.get("deadline", None)
+    deadline: str = content.get("deadline", None)
     scheduled_start: str|None = content.get("scheduledStart", None)
     scheduled_finish: str|None = content.get("scheduledFinish", None) 
     last_updated: datetime = datetime.now(tz=timezone('Europe/London'))
@@ -128,7 +128,7 @@ def query_projects():
         resp_dict["_itemCount"] = len(projects)
         return jsonify(resp_dict), 200
     except Exception as e:
-        resp_dict["message"] = f"Failure: Could not read user project! Reason: {e}"
+        resp_dict["message"] = f"Failure: Could not query user's project! Reason: {e}"
         return jsonify(resp_dict), 404
 
 @project.route("/get-project-progress/<int:project_id>", methods=["GET"])
