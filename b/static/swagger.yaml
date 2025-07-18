@@ -162,7 +162,7 @@ paths:
     post:
       summary: "Creates a project object"
       description: "Creates a project object. This also automatically creates an objective called 'No Objective' under the created project. This objective stores all project tasks that do not belong to a specific project objective"
-      tags: [user]
+      tags: [Project]
       requestBody:
         description: Project's properties 
         required: true
@@ -206,7 +206,7 @@ paths:
     get:
       summary: "gets all the user's projects"
       description: "gets all the user's projects"
-      tags: [user]
+      tags: [Project]
       security:
         - session_AT: []
         - bespoke_session: []
@@ -237,7 +237,7 @@ paths:
       description: |
         Used in the Planner Entity Page to paginate the user's projects.<br/>
         Also can filter projects by status.
-      tags: [user]
+      tags: [Project]
       requestBody:
         description: Project's properties 
         required: true
@@ -273,7 +273,7 @@ paths:
     get:
       summary: "Gets the progress of a project. "
       description: "Gets the progress of a project using 2 metrics: total task duration and total task count"
-      tags: [user]
+      tags: [Project]
       parameters:
         - name: projectId
           in: path
