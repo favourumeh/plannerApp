@@ -71,7 +71,9 @@ paths:
   /login:
     post:
       summary: login to user account
-      description: "Login to user account. <br/>Note: This route generates the response header 'Set-Cookie' which contains the cookies: **bespoke_session** and **session_AT**"
+      description: |
+        Login to user account. <br/>
+        Note: This route generates the response header 'Set-Cookie' which contains the cookies: **bespoke_session** and **session_AT**
       tags: [user]
       requestBody:
         description: User Login Credentials 
@@ -109,7 +111,9 @@ paths:
   /logout:
     get:
       summary: Logout User
-      description: "Logs user out of planner app. <br/> Note:This route removes the user RT from the backend db and clears (sets to empty string) the **bespoke_session** and **session_AT** cookies"
+      description: |
+        Logs user out of planner app. <br/> Note:This route removes the user RT from the backend db and clears (sets to empty string) the **bespoke_session** and **session_AT** cookies<br/>
+        Note: this route is protected thus uses the auth cookie: **bespoke_session** in its request
       tags: [user]
       security:
         - bespoke_session: []
@@ -133,7 +137,9 @@ paths:
   /refresh:
     get:
       summary: "Refresh Access Token"
-      description: "Refresh Access Token. <br/> Note:This route uses the cookie **bespoke_session** to authenticate the user"
+      description: |
+        Refresh Access Token. <br/> Note:This route uses the cookie **bespoke_session** to authenticate the user<br/>
+        Note: this route is protected thus uses the auth cookie: **bespoke_session** in its request
       tags: [user]
       security:
         - bespoke_session: []
@@ -161,7 +167,9 @@ paths:
   /create-project:
     post:
       summary: "Creates a project object"
-      description: "Creates a project object. This also automatically creates an objective called 'No Objective' under the created project. This objective stores all project tasks that do not belong to a specific project objective"
+      description: |
+        Creates a project object. This also automatically creates an objective called 'No Objective' under the created project. This objective stores all project tasks that do not belong to a specific project objective<br/>
+        Note: this route is protected thus uses the auth cookies: **bespoke_session** and **session_AT** in its request
       tags: [Project]
       requestBody:
         description: Project's properties 
@@ -169,7 +177,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/requestBody/schemas/Project'
+              $ref: '#/requestBody/schemas/create-project'
       security:
         - session_AT: []
         - bespoke_session: []
@@ -205,7 +213,9 @@ paths:
   /read-projects:
     get:
       summary: "gets all the user's projects"
-      description: "gets all the user's projects"
+      description: | 
+        gets all the user's projects<br/>
+        Note: this route is protected thus uses the auth cookies: **bespoke_session** and **session_AT** in its request
       tags: [Project]
       security:
         - session_AT: []
@@ -236,15 +246,25 @@ paths:
       summary: "Queries a project"
       description: |
         Used in the Planner Entity Page to paginate the user's projects.<br/>
-        Also can filter projects by status.
+        Also can filter projects by status.<br/>
+        Note: this route is protected thus uses the auth cookies: **bespoke_session** and **session_AT** in its request
       tags: [Project]
-      requestBody:
-        description: Project's properties 
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/requestBody/schemas/QueryProjects'
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: "(Optional, default: None). The project page being returned. If not inputted then projects are not paginated thus all projects matching the query are returned"
+        - in:  query
+          name: perPage
+          schema:
+            type: integer
+          description: "(Optional, default: None). The max number of number of projects returned per page. If not inputted then projects are not paginated thus all projects matching the query are returned"
+        - in:  query
+          name: status
+          schema:
+            type: string
+          description: "(Optional, default: None) The status of the projects being returned."
       security:
         - session_AT: []
         - bespoke_session: []
@@ -272,7 +292,10 @@ paths:
   /get-project-progress/{projectId}:
     get:
       summary: "Gets the progress of a project. "
-      description: "Gets the progress of a project using 2 metrics: total task duration and total task count"
+      description: | 
+        Gets the progress of a project using 2 metrics: total task duration and total task count<br/>
+        Note: this route is protected thus uses the auth cookies: **bespoke_session** and **session_AT** in its request
+
       tags: [Project]
       parameters:
         - name: projectId
@@ -309,6 +332,110 @@ paths:
             Not Found.<br/>
             Failure: User is not logged in (no rt). Please login!<br/>
             Failure: The requested project is not in the database. Choose another one.
+
+  /update-project/{projectId}:
+    patch:
+      summary: "Updates a project."
+      description: |
+        Updates a project.<br/>
+        Note: this route is protected thus uses the auth cookies: **bespoke_session** and **session_AT** in its request
+
+      tags: [Project]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: The ID of the project which is being edited. 
+          schema:
+            type: integer
+      requestBody:
+        description: Project's properties 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/requestBody/schemas/update-project'
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:
+        '200':
+          description: |
+            Ok.<br/>
+            Success: Project has been updated.
+        '400':
+          description: |
+            Bad Request.<br/>
+            Failure: Project is missing a title. Please add one.<br/>
+            Failure: The title has over {project_title_limit} chars<br/>
+            Failure: The project title provided already exists for this user. Please provide a different title.<br/>
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+            Request is missing access token. Please login to refresh access token<br/>
+            Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}<br/>
+            Invalid Access Token! Reason: {e}<br/>
+        '403':
+          description: |
+            Forbidden.<br/>
+            Failure: User is attempting to edit the default project which is not allowed.<br/>
+            Failure: User is attempting to update a default project which is not allowed.
+        '404':
+          description: |
+            Not Found.<br/>
+            Failure: User is not logged in (no rt). Please login!<br/>
+            Failure: Could not find the selected project in the db. Please choose another project id.<br/>
+            Failure: Could not update the project! Reason: {e}
+
+  /delete-project/{projectId}:
+    delete:
+      summary: "Deletes a project."
+      description: |
+        Deletes a project and its children (objectives and tasks)<br/>
+        Note: this route is protected thus uses the auth cookies: **bespoke_session** and **session_AT** in its request
+      tags: [Project]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: The ID of the project which is being deleted. 
+          schema:
+            type: integer
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:
+        '200':
+          description: |
+            Ok.<br/>
+            Success: The project was successfully deleted!
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+            Request is missing access token. Please login to refresh access token<br/>
+            Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}<br/>
+            Invalid Access Token! Reason: {e}<br/>
+        '403':
+          description: |
+            Forbidden. <br/>
+            Failure: The project you are trying to delete does not belong to the user <br/>
+            Failure: User is attempting to delete the default project which is not allowed.
+
+        '404':
+          description: |
+            Not Found.<br/>
+            Failure: User is not logged in (no rt). Please login!<br/>
+            Failure: The project you are trying to delete does not exist<br/>
+            Failure: Could not delete the project! Reason: {e}
+
 
   /example-just-rt:
     get:
@@ -393,7 +520,7 @@ requestBody:
         password:
           type: string
 
-    Project:
+    create-project:
       type: object
       properties:
         projectNumber:
@@ -403,7 +530,7 @@ requestBody:
         status:
           type: string
           example: To-Do
-          description: "(Optional, default: To-Do) The project's status: To-Do, In-Progress and Completed. Hardly used."
+          description: "(Optional, default: To-Do, hardly used) The project's status: To-Do, In-Progress and Completed. Hardly used."
         title:
           type: string
           description: (required) The project's title
@@ -414,44 +541,47 @@ requestBody:
         deadline:
           type: string
           example: Null
-          description: (optional, hardly used) The project's deadline date ('%Y-%m-%d')
+          description: (optional, hardly used) The project's deadline date ('%Y-%m-%d' e.g., "2025-02-01")
         scheduledStart:
           type: string
           example: Null
-          description: (optional, hardly used) The project's start date ('%Y-%m-%d')
+          description: (optional, hardly used) The project's start date ('%Y-%m-%d' e.g., "2025-02-01")
         scheduledFinish:
           type: string
           example: Null
-          description: (optional, hardly used) The project's end date ('%Y-%m-%d')
+          description: (optional, hardly used) The project's end date ('%Y-%m-%d', e.g., "2025-02-01")
         tag:
           type: string
-          example: Null
-          description: (optional) The project's tags.
+          example: test|api-example|
+          description: (optional) The project's tags <tag1>|<tag2>|...<tagN>|.
 
-    QueryProjects:
+    update-project:
       type: object
       properties:
-        page:
-          type: integer
-          example: 1
-          description: "(Optional, default: None). The project page being returned. If not inputted then projects are not paginated thus all projects matching the query are returned"
-        perPage:
-          type: integer
-          example: 1
-          description: "(Optional, default: None). The max number of number of projects returned per page. If not inputted then projects are not paginated thus all projects matching the query are returned"
         status:
           type: string
           example: To-Do
-          description: "(Optional, default: None) The status of the projects being returned."
-
-    User:
-      type: object
-      properties:
-        username:
+          description: "(Optional, default: To-Do, hardly used) The project's status: To-Do, In-Progress and Completed. Hardly used."
+        title:
           type: string
-        email:
+          description: (required) The project's title
+        description:
           type: string
-        password:
+          example: "blah"
+          description: (required) The project's description
+        deadline:
           type: string
-
-
+          example: "2025-02-20"
+          description: (optional, hardly used) The project's deadline date ('%Y-%m-%d' e.g., "2025-02-01")
+        scheduledStart:
+          type: string
+          example: "2025-02-01"
+          description: (optional, hardly used) The project's start date ('%Y-%m-%d', e.g., "2025-02-01")
+        scheduledFinish:
+          type: string
+          example: "2025-02-15"
+          description: (optional, hardly used) The project's end date ('%Y-%m-%d', e.g., "2025-02-01")
+        tag:
+          type: string
+          example: test|api-example|
+          description: (optional) The project's tags in the format {tag1}|{tag2}|...{tagN}|.
