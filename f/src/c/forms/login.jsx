@@ -1,40 +1,22 @@
 import "./login.css"
 import {useState, useContext} from "react"
 import globalContext from "../../context"
-import { backendBaseUrl } from "../../../project_config"
-
-const Login = ({isLoggedIn}) => {
-    const {setIsModalOpen, setSitePage, form, setForm, handleNotification, handleLogin} = useContext(globalContext)
+import { useMutation} from "@tanstack/react-query"
+import { login } from "../../user_requests"
+const Login = () => {
+    const {form, handleNotification, handleLogin} = useContext(globalContext)
     const [accountDetails, setAccountDetails] = useState({username:"", password:"" })
 
     if (form != 'login') {
         return null
     }
+    const loginMutation = useMutation({
+        mutationFn: login
+    })
 
     const onSubmit = async(e) =>{
         e.preventDefault()
-        const url = `${backendBaseUrl}/login`
-        const options = {
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(accountDetails),
-            credentials:"include"
-        }
-        const resp = await fetch(url, options)
-        const resp_json = await resp.json()
-
-        if (resp.status == 200){
-            console.log(resp_json.message)
-            handleLogin(resp_json.user)
-            handleNotification(resp_json.message, "success")
-            setSitePage("view-homepage")
-            setForm("")
-            console.log("isLoggedIn", isLoggedIn)
-        } else {
-            console.log(resp_json.message)
-            setIsModalOpen(false)
-            handleNotification(resp_json.message, "failure")
-        }
+        loginMutation.mutate({accountDetails, handleLogin, handleNotification})
     }
 
     const mandatoryIndicator = (fieldStateVar, indicator) => {
@@ -76,7 +58,7 @@ const Login = ({isLoggedIn}) => {
                         disabled={
                             accountDetails.username=="" || typeof accountDetails.username==undefined ||
                             accountDetails.password=="" || typeof accountDetails.password==undefined? true:false} 
-                        onClick={(e)=>onSubmit(e)}>Login </button>
+                        onClick={(e)=>onSubmit(e)}> {loginMutation.isPending? "loading...":"Login"} </button>
                     </div>
                 </form>
             </div>

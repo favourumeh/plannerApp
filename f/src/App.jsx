@@ -177,7 +177,7 @@ function App() {
                 <GuestPage isLoggedIn={isLoggedIn}/>
                 <Modal>
                     <SignUp/>
-                    <Login isLoggedIn={isLoggedIn}/>
+                    <Login />
                     <TaskForm form={form}/>
                     <ProjectForm form={form}/>
                     <ObjectiveForm form={form}/>
