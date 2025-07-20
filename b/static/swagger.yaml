@@ -436,6 +436,97 @@ paths:
             Failure: The project you are trying to delete does not exist<br/>
             Failure: Could not delete the project! Reason: {e}
 
+  /create-objective:
+    post:
+      summary: "Creates an obective"
+      description: |
+        Creates an objective under a specified project<br/>
+        Note: this route is protected thus uses the auth cookies: **bespoke_session** and **session_AT** in its request
+      tags: [Objective]
+      requestBody:
+        description: Objective's properties 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/requestBody/schemas/create-objective'
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:          
+        '201':
+          description: |
+            Ok. <br/> 
+            Success: objective Added!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    sdescription: The response message
+
+        '400':
+          description: |
+            Bad Request.<br/>
+            Failure: Objective is missing a project ID. Please add one!<br/>
+            Failure: objective is missing a title. Please add one.<br/>
+            Failure: The title has over {objective_title_limit} chars<br/>
+            Failure: The title provided already exists in the project. Please provide a different title.
+            
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+            Request is missing access token. Please login to refresh access token<br/>
+            Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}<br/>
+            Invalid Access Token! Reason: {e}<br/>
+        '404':
+          description: |
+            Not Found. <br/>
+            Failure: User is not logged in (no rt). Please login!<br/>
+            Failure: User does not have any project in the db with the project ID provided.<br/>
+            Failure: Could not add the objective to the db! Reason: {e}
+
+
+  /read-objectives:
+    get:
+      summary: "gets all the user's objectives"
+      description: | 
+        gets all the user's objectives<br/>
+        Note: this route is protected thus uses the auth cookies: **bespoke_session** and **session_AT** in its request
+      tags: [Objective]
+      security:
+        - session_AT: []
+        - bespoke_session: []
+      responses:
+        '200':
+          description: |
+            Ok.<br/>
+            Success: user's objectives loaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/responseBody/schemas/read-objectives-200-response'
+        '401':
+          description: |
+            Unathorised. <br/>
+            Failure: User is not logged in (no b_sc). Please login!<br/>
+            Failure: Could not decrypt the **bespoke_session** cookies. Reason: {e}<br/>
+            Failure: Refresh token is invalid. Please login<br/>
+            Failure: Please login. Refresh token has expired.<br/>
+            Request is missing access token. Please login to refresh access token<br/>
+            Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {e}<br/>
+            Invalid Access Token! Reason: {e}<br/>
+        '404':
+          description: |
+            Not Found.<br/>
+            Failure: User is not logged in (no rt). Please login!<br/>
+            Failure: Could not read user's objectives! Reason: {e}
 
   /example-just-rt:
     get:
@@ -533,6 +624,7 @@ requestBody:
           description: "(Optional, default: To-Do, hardly used) The project's status: To-Do, In-Progress and Completed. Hardly used."
         title:
           type: string
+          example: "blah project"
           description: (required) The project's title
         description:
           type: string
@@ -564,6 +656,7 @@ requestBody:
           description: "(Optional, default: To-Do, hardly used) The project's status: To-Do, In-Progress and Completed. Hardly used."
         title:
           type: string
+          example: "blah project"
           description: (required) The project's title
         description:
           type: string
@@ -585,3 +678,122 @@ requestBody:
           type: string
           example: test|api-example|
           description: (optional) The project's tags in the format {tag1}|{tag2}|...{tagN}|.
+
+    create-objective:
+      type: object
+      properties:
+        objectiveNumber:
+          type: integer
+          example: Null
+          description: (Optional, auto-filled) An objective identifier. Not to be mistaken with objectiveId (the unique objective identifier). ObjectiveNumber is only unique within a project (i.e. other projects can have objectives with the same objectiveNumber as in the current project).
+        status:
+          type: string
+          example: To-Do
+          description: "(Optional, default: To-Do, hardly used) The objective's status: To-Do, In-Progress and Completed."
+        title:
+          type: string
+          example: blah objective
+          description: (required) The objective's title
+        description:
+          type: string
+          example: "blah"
+          description: (required) The objective's description
+        deadline:
+          type: string
+          example: Null
+          description: (optional, hardly used) The objective's deadline date ('%Y-%m-%d' e.g., "2025-02-01")
+        scheduledStart:
+          type: string
+          example: Null
+          description: (optional, hardly used) The objective's start date ('%Y-%m-%d' e.g., "2025-02-01")
+        scheduledFinish:
+          type: string
+          example: Null
+          description: (optional, hardly used) The objective's end date ('%Y-%m-%d', e.g., "2025-02-01")
+        tag:
+          type: string
+          example: test|api-example|
+          description: (optional) The objective's tags <tag1>|<tag2>|...<tagN>|.
+        projectId:
+          type: integer
+          example: Null
+          description: (Optional, auto-filled) The unique id of the project which the created objective belongs to.
+        
+
+
+responseBody:
+  schemas:
+    read-objectives-200-response:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Success: user's objectives loaded"
+        objectives:
+          type: array
+          items:
+            $ref: '#/responseBody/schemas/Objective'
+
+    Objective:
+      type: object
+      properties:
+        dateAdded:
+          type: string
+          format: date-time
+          example: "Thu, 17 Jul 2025 10:47:57 GMT"
+        deadline:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        description:
+          type: string
+          example: "Stores all tasks that don't belong to a user-created project"
+        id:
+          type: integer
+          format: int64
+          example: 53
+        lastUpdated:
+          type: string
+          format: date-time
+          example: "Thu, 17 Jul 2025 10:47:57 GMT"
+        objectiveNumber:
+          type: integer
+          example: 0
+        projectId:
+          type: integer
+          format: int64
+          example: 15
+        scheduledFinish:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        scheduledStart:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        status:
+          type: string
+          example: "To-Do"
+        tag:
+          type: string
+          example: "default"
+        title:
+          type: string
+          example: "No Objective"
+        type:
+          type: string
+          example: "default project objective"
+      required:
+        - dateAdded
+        - description
+        - id
+        - lastUpdated
+        - objectiveNumber
+        - projectId
+        - status
+        - tag
+        - title
+        - type
