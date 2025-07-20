@@ -1,39 +1,24 @@
 import "./signUp.css"
 import {useState, useContext} from "react"
 import globalContext from "../../context"
-import { backendBaseUrl } from "../../../project_config"
+import { useMutation } from "@tanstack/react-query"
+import { signup } from "../../user_requests"
 
 const SignUp = () => {
-    const {setIsModalOpen, form, setSitePage, handleNotification} = useContext(globalContext)
+    const {setIsModalOpen, form, handleNotification} = useContext(globalContext)
     const [accountDetails, setAccountDetails] = useState({username:"", email:undefined, password1:"", password2:""})
 
     if (form != 'sign-up') {
         return null
     }
 
+    const signupMutation = useMutation({
+        mutationFn: signup
+    })
+
     const handleSignUp = async(e) =>{
         e.preventDefault()
-        const url = `${backendBaseUrl}/sign-up`
-        //const body = {username,email,password1, password2}
-        const options = {
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(accountDetails),
-            credentials:"include"
-        }
-        const resp = await fetch(url, options)
-        const resp_json = await resp.json()
-        
-        if (resp.status == 201){
-            console.log(resp_json.message)
-            setIsModalOpen(false)
-            setSitePage("view-guest-page")
-            handleNotification(resp_json.message, "success")
-        } else {
-            console.log(resp_json.message)
-            setIsModalOpen(false)
-            handleNotification(resp_json.message, "failure")
-        }
+        signupMutation.mutate({accountDetails, setIsModalOpen, handleNotification})
     }
 
     return (
@@ -88,7 +73,7 @@ const SignUp = () => {
                     </div>
 
                     <div className="btn-div">
-                        <button type="submit" className="sign-up-btn" onClick={(e)=>handleSignUp(e)}>Sign-up </button>
+                        <button type="submit" className="sign-up-btn" onClick={(e)=>handleSignUp(e)}>{signupMutation.isPending? "loading...":"Sign-up"} </button>
                     </div>
                 </form>
             </div>

@@ -1,5 +1,30 @@
 import { backendBaseUrl } from "../project_config"
 
+export async function signup({accountDetails, setIsModalOpen, handleNotification}){
+        const url = `${backendBaseUrl}/sign-up`
+        const options = {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(accountDetails),
+            credentials:"include"
+        }
+        try{
+            var resp = await fetch(url, options)
+            var resp_json = await resp.json()
+        } catch (err){
+            handleNotification(err.message + `. Failed to Signup. Likely DB connection error.`, "failure")
+        }
+
+        if (resp.status == 201){
+            console.log(resp_json.message)
+            setIsModalOpen(false)
+            handleNotification(resp_json.message, "success")
+        } else {
+            console.log(resp_json.message)
+            handleNotification(resp_json.message, "failure")
+        }
+}
+
 export async function login({accountDetails, handleLogin, handleNotification}){
     const url = `${backendBaseUrl}/login`
     const options = {
@@ -24,3 +49,4 @@ export async function login({accountDetails, handleLogin, handleNotification}){
         handleNotification(resp_json.message, "failure")
     }
 }
+
