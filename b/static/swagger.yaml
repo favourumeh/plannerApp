@@ -1,0 +1,2047 @@
+openapi: 3.0.0
+info:
+  title: Objective API
+  description: API endpoints for the planner app's backend
+  version: 1.0.0
+tags:
+  - name: User
+    description: Operations related to user authentication and management
+  - name: Project
+    description: Operations related to projects
+  - name: Objective
+    description: Operations related to objectives
+  - name: Task
+    description: Operations related to tasks
+
+
+servers:
+  - url: http://127.0.0.1:5000/api
+    description: Testing server
+  - url: https://plannerappbackendnc-dad9ghcgd6ame2cc.ukwest-01.azurewebsites.net/api
+    description:  Main (production) server
+
+paths:
+  /sign-up:
+    post:
+      tags: [User]
+      summary: Register a new user
+      description: Create a new user account with username, email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username (must be <= 15 characters)
+                email:
+                  type: string
+                  format: email
+                  description: Email address (optional, must be <= 120 characters if provided)
+                password1:
+                  type: string
+                  description: Password
+                password2:
+                  type: string
+                  description: Password confirmation (must match password1)
+              required:
+                - username
+                - password1
+                - password2
+      responses:
+        '201':
+          description: |
+            Success: User created successfully. Possible messages:
+            - "Success: Account Created! Login to start planning"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: |
+            Bad request. Possible validation errors:
+            - "Failure: Username is missing!"
+            - "Failure: Username is taken. Please choose another one."
+            - "Failure: Username is too long. Must be <= 15 characters."
+            - "Failure: Email is not valid"
+            - "Failure: Email is taken. Please choose another one."
+            - "Failure: Email is too long. Must be <= 120 characters."
+            - "Failure: Passwords do not match"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Account Sign-up failed. Reason {error details}"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /login:
+    post:
+      tags: [User]
+      summary: Authenticate user
+      description: Log in with username and password to get authentication tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username
+                password:
+                  type: string
+                  description: Password
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: |
+            Success: Login successful. Possible messages:
+            - "Success: Login Successfull. Welcome {username}"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Sets HTTP-only cookies (bespoke_session and session_AT)
+        '401':
+          description: |
+            Unauthorized. Possible messages:
+            - "Failure: User not found"
+            - "Failure: Incorrect password"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not update/create the user's refresh token entry. Reason: {error details}"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /logout:
+    get:
+      tags: [User]
+      summary: Log out user
+      description: Invalidate session and clear authentication tokens
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      responses:
+        '200':
+          description: |
+            Success: Logout successful. Possible messages:
+            - "Success: Logout completed"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Clears HTTP-only cookies (bespoke_session and session_AT)
+        '401':
+          description: |
+            Unauthorized. Possible messages from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Could not logout due to db issues. Reason: {error details}."
+            - "Failure: User is not logged in (no rt). Please login!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /refresh:
+    get:
+      tags: [User]
+      summary: Refresh access token
+      description: Get a new access token using the current session
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      responses:
+        '200':
+          description: |
+            Success: Token refreshed successfully. Possible messages:
+            - "Successfully refreshed access_token"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Sets new HTTP-only session_AT cookie
+        '401':
+          description: |
+            Unauthorized. Possible messages from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: User is not logged in (no rt). Please login!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /delete-user/{user_id}:
+    delete:
+      tags: [User]
+      summary: Delete user account
+      description: Delete a user account and all associated data (admin can delete any account except admin)
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user to delete
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: |
+            Success: User deleted successfully. Possible messages:
+            - "Deleted account ({username}) and associated rt, projects, objectives and tasks."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  userId:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible messages from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: Cannot delete the admin account."
+            - "Failure: Account chosen for deletion does not match the account logged in."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: User selected for deletion cannot be found in the database."
+            - "Could not delete the chosen user. Reason {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /edit-user/{user_id}:
+    patch:
+      tags: [User]
+      summary: Edit user account
+      description: Update user account information (username, email, password)
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user to edit
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: New username
+                email:
+                  type: string
+                  format: email
+                  description: New email address
+                password:
+                  type: string
+                  description: Current password (required for any changes)
+                password1:
+                  type: string
+                  description: New password
+                password2:
+                  type: string
+                  description: New password confirmation
+              required:
+                - password
+      responses:
+        '200':
+          description: |
+            Success: User updated successfully. Possible messages:
+            - "Success: User was successfully edited"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: |
+            Bad request. Possible messages:
+            - "Failure: Passwords do not match"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible messages:
+            - "Failure: Please enter your current password"
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The account you are attempting to edit does not match the account that is logged in"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: User changes could not be committed to db. Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /create-project:
+    post:
+      tags: [Project]
+      summary: Create a new project
+      description: Create a new project with objectives and tasks
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectNumber:
+                  type: integer
+                  description: Optional project number
+                status:
+                  type: string
+                  default: "To-Do"
+                  enum: ["To-Do", "In Progress", "Completed"]
+                title:
+                  type: string
+                  description: Title of the project (must be unique per user)
+                description:
+                  type: string
+                  description: Description of the project
+                deadline:
+                  type: string
+                  format: date
+                  description: Deadline date (YYYY-MM-DD)
+                scheduledStart:
+                  type: string
+                  format: date
+                  description: Scheduled start date (YYYY-MM-DD)
+                scheduledFinish:
+                  type: string
+                  format: date
+                  description: Scheduled finish date (YYYY-MM-DD)
+                tag:
+                  type: string
+                  description: Tag for the project
+              required:
+                - title
+                - description
+      responses:
+        '201':
+          description: |
+            Success: Project created successfully. Possible messages:
+            - "Success: Project Added!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: |
+            Bad request. Possible validation errors:
+            - "Failure: Project is missing a description. Please add one."
+            - "Failure: Project is missing a title. Please add one."
+            - "Failure: The title has over {project_title_limit} chars"
+            - "Failure: The project title provided already exists for this user. Please provide a different title."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not add the project to the db! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /read-projects:
+    get:
+      tags: [Project]
+      summary: Get all projects
+      description: Retrieve all projects for the current user
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      responses:
+        '200':
+          description: |
+            Success: Projects retrieved successfully. Possible messages:
+            - "Success: user's projects loaded"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  projects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not read user's projects! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /query-projects:
+    get:
+      tags: [Project]
+      summary: Query projects with filters
+      description: Retrieve projects with optional filtering and pagination
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          description: Items per page for pagination
+          schema:
+            type: integer
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: ["To-Do", "In Progress", "Completed"]
+      responses:
+        '200':
+          description: |
+            Success: Projects retrieved successfully. Possible messages:
+            - "Success: user's projects loaded"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  projects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+                  _pages:
+                    type: integer
+                  _currentPage:
+                    type: integer
+                  _perPage:
+                    type: integer
+                  _hasNext:
+                    type: boolean
+                  _hasPrev:
+                    type: boolean
+                  _itemCount:
+                    type: integer
+                  _status:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not query user's project! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /get-project-progress/{project_id}:
+    get:
+      tags: [Project]
+      summary: Get progress for a project
+      description: Retrieve progress metrics for a specific project
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: ID of the project
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: |
+            Success: Progress retrieved successfully. Possible messages:
+            - "Success: Projects's progress retrieved."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  projectName:
+                    type: string
+                  progressPercentageCount:
+                    type: number
+                    format: float
+                  progressPercentageDuration:
+                    type: number
+                    format: float
+                  totalTaskCount:
+                    type: integer
+                  completedTaskCount:
+                    type: integer
+                  totalTaskDuration:
+                    type: number
+                    format: float
+                  completedTaskDuration:
+                    type: number
+                    format: float
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The requested project does not belong to the user. Choose another one."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: The requested project is not in the database. Choose another one."
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /update-project/{project_id}:
+    patch:
+      tags: [Project]
+      summary: Update a project
+      description: Update details of a specific project
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: ID of the project to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: New title (must be unique per user)
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum: ["To-Do", "In Progress", "Completed"]
+                deadline:
+                  type: string
+                  format: date
+                scheduledStart:
+                  type: string
+                  format: date
+                scheduledFinish:
+                  type: string
+                  format: date
+                tag:
+                  type: string
+      responses:
+        '200':
+          description: |
+            Success: Project updated successfully. Possible messages:
+            - "Success: Project has been updated."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: |
+            Bad request. Possible validation errors:
+            - "Failure: Project is missing a title. Please add one."
+            - "Failure: The title has over {project_title_limit} chars"
+            - "Failure: The project title provided already exists for this user. Please provide a different title."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: User is attempting to edit the default project which is not allowed."
+            - "Failure: User is attempting to update a default project which is not allowed."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not find the selected project in the db. Please choose another project id."
+            - "Failure: Could not update the project! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /delete-project/{project_id}:
+    delete:
+      tags: [Project]
+      summary: Delete a project
+      description: Delete a specific project and its associated objectives and tasks
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: ID of the project to delete
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: |
+            Success: Project deleted successfully. Possible messages:
+            - "Success: The project was successfully deleted!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The project you are trying to delete does not belong to the user"
+            - "Failure: User is attempting to delete the default project which is not allowed."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: The project you are trying to delete does not exist"
+            - "Failure: Could not delete the project! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /create-objective:
+    post:
+      tags: [Objective]
+      summary: Create a new objective
+      description: Create a new objective within a project
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objectiveNumber:
+                  type: integer
+                  description: Optional objective number
+                status:
+                  type: string
+                  default: "To-Do"
+                  enum: ["To-Do", "In Progress", "Completed"]
+                title:
+                  type: string
+                  description: Title of the objective (must be unique within project)
+                description:
+                  type: string
+                  description: Description of the objective
+                deadline:
+                  type: string
+                  format: date
+                  description: Deadline date (YYYY-MM-DD)
+                scheduledStart:
+                  type: string
+                  format: date
+                  description: Scheduled start date (YYYY-MM-DD)
+                scheduledFinish:
+                  type: string
+                  format: date
+                  description: Scheduled finish date (YYYY-MM-DD)
+                tag:
+                  type: string
+                  description: Tag for the objective
+                projectId:
+                  type: integer
+                  description: ID of the project this objective belongs to
+              required:
+                - title
+                - projectId
+      responses:
+        '201':
+          description: |
+            Success: Objective created successfully. Possible messages:
+            - "Success: objective Added!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: |
+            Bad request. Possible validation errors:
+            - "Failure: Objective is missing a project ID. Please add one!"
+            - "Failure: objective is missing a title. Please add one."
+            - "Failure: The title has over {objective_title_limit} chars"
+            - "Failure: The title provided already exists in the project. Please provide a different title."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: User does not have any project in the db with the project ID provided."
+            - "Failure: Could not add the objective to the db! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /read-objectives:
+    get:
+      tags: [Objective]
+      summary: Get all objectives
+      description: Retrieve all objectives for the current user across all projects
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      responses:
+        '200':
+          description: |
+            Success: Objectives retrieved successfully. Possible messages:
+            - "Success: user's objectives loaded"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  objectives:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Objective'
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not read user's objectives! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /query-objectives:
+    get:
+      tags: [Objective]
+      summary: Query objectives with filters
+      description: Retrieve objectives with optional filtering and pagination
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          description: Items per page for pagination
+          schema:
+            type: integer
+        - name: projectId
+          in: query
+          description: Filter by project ID
+          schema:
+            type: integer
+        - name: objectiveId
+          in: query
+          description: Filter by objective ID
+          schema:
+            type: integer
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: ["To-Do", "In Progress", "Completed"]
+        - name: type
+          in: query
+          description: Filter by type
+          schema:
+            type: string
+      responses:
+        '200':
+          description: |
+            Success: Objectives retrieved successfully. Possible messages:
+            - "Success: user's objectives loaded"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  objectives:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Objective'
+                  objectivesProjects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+                  _pages:
+                    type: integer
+                  _currentPage:
+                    type: integer
+                  _perPage:
+                    type: integer
+                  _hasNext:
+                    type: boolean
+                  _hasPrev:
+                    type: boolean
+                  _itemCount:
+                    type: integer
+                  _projectId:
+                    type: integer
+                  _status:
+                    type: string
+                  _type:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not read user objective! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /get-objectives-project/{objective_id}:
+    get:
+      tags: [Objective]
+      summary: Get project for an objective
+      description: Retrieve the project associated with a specific objective
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: objective_id
+          in: path
+          required: true
+          description: ID of the objective
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: |
+            Success: Project retrieved successfully. Possible messages:
+            - "Success: Objective's project was retrieved."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  objective:
+                    $ref: '#/components/schemas/Objective'
+                  project:
+                    $ref: '#/components/schemas/Project'
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The requested objective does not belong to the user. Choose another one."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: The requested objective is not in the database. Choose another one."
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /get-objective-progress/{objective_id}:
+    get:
+      tags: [Objective]
+      summary: Get progress for an objective
+      description: Retrieve progress metrics for a specific objective
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: objective_id
+          in: path
+          required: true
+          description: ID of the objective
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: |
+            Success: Progress retrieved successfully. Possible messages:
+            - "Success: Objective's progress retrieved."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  objectiveName:
+                    type: string
+                  progressPercentageCount:
+                    type: number
+                    format: float
+                  progressPercentageDuration:
+                    type: number
+                    format: float
+                  totalTaskCount:
+                    type: integer
+                  completedTaskCount:
+                    type: integer
+                  totalTaskDuration:
+                    type: number
+                    format: float
+                  completedTaskDuration:
+                    type: number
+                    format: float
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The requested objective does not belong to the user. Choose another one."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: The requested objective is not in the database. Choose another one."
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /update-objective/{objective_id}:
+    patch:
+      tags: [Objective]
+      summary: Update an objective
+      description: Update details of a specific objective
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: objective_id
+          in: path
+          required: true
+          description: ID of the objective to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: ["To-Do", "In Progress", "Completed"]
+                title:
+                  type: string
+                description:
+                  type: string
+                deadline:
+                  type: string
+                  format: date
+                scheduledStart:
+                  type: string
+                  format: date
+                scheduledFinish:
+                  type: string
+                  format: date
+                tag:
+                  type: string
+                projectId:
+                  type: integer
+      responses:
+        '200':
+          description: |
+            Success: Objective updated successfully. Possible messages:
+            - "Success: Objective has been updated."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: |
+            Bad request. Possible validation errors:
+            - "Failure: The title has over {objective_title_limit} chars"
+            - "Failure: The title provided already exists in the project. Please provide a different title."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The objective selected does not belong to the user."
+            - "Failure: User is attempting to update an objective of type '{objective.type}' which is not allowed."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not find the selected objective."
+            - "Failure: Could not update the objective! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /delete-objective/{objective_id}:
+    delete:
+      tags: [Objective]
+      summary: Delete an objective
+      description: Delete a specific objective and its associated tasks
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: objective_id
+          in: path
+          required: true
+          description: ID of the objective to delete
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: |
+            Success: Objective deleted successfully. Possible messages:
+            - "Success: The objective -- and its tasks -- were successfully deleted!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The objective selected does not belong to the user."
+            - "Failure: User is attempting to delete an objective of type '{objective.type}' which is not allowed."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: The objective you are trying to delete does not exist."
+            - "Failure: Could not delete the objective! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /create-task:
+    post:
+      tags: [Task]
+      summary: Create a new task
+      description: Create a new task within an objective
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                taskNumber:
+                  type: integer
+                  description: Optional task number
+                status:
+                  type: string
+                  default: "To-Do"
+                  enum: ["To-Do", "In Progress", "Paused", "Completed"]
+                description:
+                  type: string
+                  description: Task description (character limit defined in env)
+                durationEst:
+                  type: integer
+                  description: Estimated duration in minutes (required)
+                duration:
+                  type: integer
+                  description: Actual duration in minutes
+                priorityScore:
+                  type: integer
+                  default: 1
+                  description: Priority score (higher = more important)
+                scheduledStart:
+                  type: string
+                  format: date
+                  description: Scheduled start date (YYYY-MM-DD)
+                start:
+                  type: string
+                  format: date-time
+                  description: Actual start time (YYYY-MM-DDTHH:MM)
+                finish:
+                  type: string
+                  format: date-time
+                  description: Actual finish time (YYYY-MM-DDTHH:MM)
+                isRecurring:
+                  type: boolean
+                  default: false
+                wasPaused:
+                  type: boolean
+                  default: false
+                parentTaskId:
+                  type: integer
+                  description: ID of parent task if this is a subtask
+                tag:
+                  type: string
+                objectiveId:
+                  type: integer
+                  description: ID of the objective this task belongs to (required)
+              required:
+                - description
+                - durationEst
+                - objectiveId
+      responses:
+        '201':
+          description: |
+            Success: Task created successfully. Possible messages:
+            - "Success: Added Task to db!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  task:
+                    $ref: '#/components/schemas/Task'
+        '400':
+          description: |
+            Bad request. Possible validation errors:
+            - "Failure: Objective ID missing. The Task is not assigned any project."
+            - "Failure: Task is missing a description."
+            - "Failure: The description is over the {task_description_limit} char limit."
+            - "Failure: Task is missing a duration_est (mins)."
+            - "Failure: Task duration cannot be zero or negative."
+            - "Failure: Task cannot have a finish date and be incomplete."
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The specified objective does not belong to the user."
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: The Objective ID provided does not exist."
+            - "Failure: The Task could not be added to the db! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /read-tasks:
+    get:
+      tags: [Task]
+      summary: Get all tasks
+      description: Retrieve all tasks for the current user
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      responses:
+        '200':
+          description: |
+            Success: Tasks retrieved successfully. Possible messages:
+            - "Success: user's tasks loaded"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not read user task! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /query-tasks:
+    get:
+      tags: [Task]
+      summary: Query tasks with filters
+      description: Retrieve tasks with extensive filtering and pagination options
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          description: Items per page for pagination
+          schema:
+            type: integer
+        - name: objectiveId
+          in: query
+          description: Filter by objective ID
+          schema:
+            type: integer
+        - name: status
+          in: query
+          description: Filter by status (comma-separated for multiple values)
+          schema:
+            type: string
+        - name: selectedDate
+          in: query
+          description: Filter by specific date (format YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: sitePage
+          in: query
+          description: Context for filtering (homepage, kanban, planner)
+          schema:
+            type: string
+        - name: periodStart
+          in: query
+          description: Start date for period filter (format YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: periodEnd
+          in: query
+          description: End date for period filter (format YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: |
+            Success: Tasks retrieved successfully. Possible messages:
+            - "Success: user's tasks loaded"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  taskObjectives:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Objective'
+                  taskProjects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+                  _pages:
+                    type: integer
+                  _currentPage:
+                    type: integer
+                  _perPage:
+                    type: integer
+                  _hasNext:
+                    type: boolean
+                  _hasPrev:
+                    type: boolean
+                  _itemCount:
+                    type: integer
+                  _objectiveId:
+                    type: integer
+                  _status:
+                    type: string
+                  _selectedDate:
+                    type: string
+                  periodStart:
+                    type: string
+                  periodEnd:
+                    type: string
+        '400':
+          description: |
+            Bad request. Possible messages:
+            - "Failure: End date cannot be before start date. Please change this."
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not read user task! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /get-tasks-objective-and-project/{task_id}:
+    get:
+      tags: [Task]
+      summary: Get objective and project for a task
+      description: Retrieve the objective and project associated with a specific task
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          description: ID of the task
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: |
+            Success: Objective and project retrieved successfully. Possible messages:
+            - "Success: Task's objective and project was retrieved."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  task:
+                    $ref: '#/components/schemas/Task'
+                  objective:
+                    $ref: '#/components/schemas/Objective'
+                  project:
+                    $ref: '#/components/schemas/Project'
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The requested task does not belong to the user. Choose another one."
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: The requested task is not in the database. Choose another one."
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /update-task/{task_id}:
+    patch:
+      tags: [Task]
+      summary: Update a task
+      description: Update details of a specific task
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          description: ID of the task to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: ["To-Do", "In Progress", "Completed"]
+                description:
+                  type: string
+                durationEst:
+                  type: integer
+                duration:
+                  type: integer
+                priorityScore:
+                  type: integer
+                start:
+                  type: string
+                  format: date-time
+                finish:
+                  type: string
+                  format: date-time
+                scheduledStart:
+                  type: string
+                  format: date
+                isRecurring:
+                  type: boolean
+                wasPaused:
+                  type: boolean
+                tag:
+                  type: string
+                objectiveId:
+                  type: integer
+      responses:
+        '200':
+          description: |
+            Success: Task updated successfully. Possible messages:
+            - "Success: Task has been updated!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  task:
+                    $ref: '#/components/schemas/Task'
+        '400':
+          description: |
+            Bad request. Possible validation errors:
+            - "Failure: The task description is over the {task_description_limit} char limit."
+            - "Failure: Task duration cannot be zero or negative."
+            - "Failure: Task cannot have a finish date and be incomplete."
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The task referenced does not belong to user."
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: The task referenced does not exist."
+            - "Failure: Task could not be updated! Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+
+  /delete-task/{task_id}:
+    delete:
+      tags: [Task]
+      summary: Delete a task
+      description: Delete a specific task (and its subtasks if it's a parent task)
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          description: ID of the task to delete
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: |
+            Success: Task deleted successfully. Possible messages:
+            - "Success: The task was deleted!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+        '403':
+          description: |
+            Forbidden. Possible messages:
+            - "Failure: The task referenced does not belong to user."
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: The task referenced does not exist."
+            - "Failure: The task could not be deleted. Reason {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        is_admin:
+          type: boolean
+        date_created:
+          type: string
+          format: date-time
+        last_updated:
+          type: string
+          format: date-time
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+        projectNumber:
+          type: integer
+        type:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        last_updated:
+          type: string
+          format: date-time
+        tag:
+          type: string
+        user_id:
+          type: integer
+
+    Objective:
+      type: object
+      properties:
+        id:
+          type: integer
+        objectiveNumber:
+          type: integer
+        status:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        scheduled_start:
+          type: string
+          format: date-time
+        scheduled_finish:
+          type: string
+          format: date-time
+        last_updated:
+          type: string
+          format: date-time
+        tag:
+          type: string
+        project_id:
+          type: integer
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        task_number:
+          type: integer
+        status:
+          type: string
+        description:
+          type: string
+        duration_est:
+          type: integer
+        duration:
+          type: integer
+        priority_score:
+          type: integer
+        scheduled_start:
+          type: string
+          format: date-time
+        start:
+          type: string
+          format: date-time
+        finish:
+          type: string
+          format: date-time
+        is_recurring:
+          type: boolean
+        last_updated:
+          type: string
+          format: date-time
+        was_paused:
+          type: boolean
+        parent_task_id:
+          type: integer
+        tag:
+          type: string
+        objective_id:
+          type: integer
+
+    bespoke_session:
+      type: apiKey
+      name: bespoke_session
+      in: cookie
+    session_AT:
+      type: apiKey
+      name: session_AT
+      in: cookie
