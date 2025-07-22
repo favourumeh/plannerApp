@@ -1,7 +1,12 @@
 openapi: 3.0.0
 info:
-  title: Objective API
-  description: API endpoints for the planner app's backend
+  title: Planner App API. 
+  description: |
+    API documnetation for the Flask Planner App backend.<br/>
+    How to test the API:
+      1) Use /sign-up to create an account
+      2) Use /login to the login to account created
+      3) You now have sufficient auth to test other endpoints (e.g., test /read-project, read-objetives and read-task to inspect the automatically created entities)
   version: 1.0.0
 tags:
   - name: User
@@ -12,7 +17,6 @@ tags:
     description: Operations related to objectives
   - name: Task
     description: Operations related to tasks
-
 
 servers:
   - url: http://127.0.0.1:5000/api
@@ -25,7 +29,7 @@ paths:
     post:
       tags: [User]
       summary: Register a new user
-      description: Create a new user account with username, email and password
+      description: Create a new user account with username and password (email is optional). Also creates a default project, a default objective and an example task.
       requestBody:
         required: true
         content:
