@@ -24,7 +24,7 @@ This web app is a **task management system** that allows users to:
 - Track task progress using a **Kanban board** (To Do, In Progress, Paused, Completed).
 - Automatically log task start and completion times in the **Homepage** (journal).<br/>
 For planner app tutorial video see:<br/>
-[![Tutorial Video](static\videoThumbnail.png)](https://www.youtube.com/watch?v=DPIR3Oeixjo)
+[![Tutorial Video](static/videoThumbnail.png)](https://www.youtube.com/watch?v=DPIR3Oeixjo)
 
 # 2. Key Features
 ### **1. Task Hierarchy**
@@ -71,45 +71,45 @@ For planner app tutorial video see:<br/>
 
 # 4. Technical Details
 ## Tech Stack
-![techStack](static\techStack.png)
+![techStack](static/techStack.png)
 - Python (3.12): for dependencies see b/requirements.txt
 - React (19.0.8): for dependencies see f/package.json
 - Azure Static Web App (Free Tier)
 - Azure App Service (Tier: F1, RAM: 1GB, Storage: 1GB)
 - Azure Database for MySQL flexible server: Burstable, B1ms, 1 vCores, 2 GiB RAM, 20 GiB storage, 360 IOPS
 ## Data Model 
-![dataModel](static\dataModel.png)
+![dataModel](static/dataModel.png)
 
 ## Data/Info Flow
-![dataFlow](static\dataFlow.png)
+![dataFlow](static/dataFlow.png)
 
 ## Deployment Flow
-![deploymentFlow](static\deploymentFlow.png)
+![deploymentFlow](static/deploymentFlow.png)
 ## API Docs
 Swagger UI API docs can be found [here](https://plannerappbackendnc-dad9ghcgd6ame2cc.ukwest-01.azurewebsites.net/api/docs): 
 # 5. App Visuals
 ## Guest Page
 Purpose: Facilitate User signup and login. 
-![guestPage](static\guestPage.png)
+![guestPage](static/guestPage.png)
 ## Homepage (Journal)
 Purpose: Logs in real time when the user starts/completes tasks.<br/>
-![homepage](static\homepage.png)
+![homepage](static/homepage.png)
 
 ## Entity Page (Tasks)
 Purpose: Lists all the user's projects, objectives or tasks<br/>
-![taskEntityPage](static\taskEntityPage.png)
+![taskEntityPage](static/taskEntityPage.png)
 ## Entity Form (Task)
 Purpose: Allows users to create a new entity (projects, objectives or tasks); or edit the fields of an existing entity. 
-![taskForm](static\taskForm.png)
+![taskForm](static/taskForm.png)
 ## Kanban Page
 Purpose: Drag and drop interface allows users to quickly edit the status of a task (To Do, In Progress, Paused and Completed) as well as the second order effects of changing status* without having to manually edit the task form. 
 \*e.g. when a task moves from "To Do" --> "In Progress" log the start time)  
-![kanban](static\kanban.png)
+![kanban](static/kanban.png)
 ## Progress Page
 Purpose: View the progress of projects and objectives based on task duration or task count. 
-![processPage](static\processPage.png)
+![processPage](static/processPage.png)
 
 ## Planner Page
 Purpose: To quickly create and schedule tasks via drag and drop interface. 
-![plannerPage](static\plannerPage.png)
+![plannerPage](static/plannerPage.png)
 
