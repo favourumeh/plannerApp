@@ -24,7 +24,7 @@ This web app is a **task management system** that allows users to:
 - Track task progress using a **Kanban board** (To Do, In Progress, Paused, Completed).
 - Automatically log task start and completion times in the **Homepage** (journal).<br/>
 For planner app tutorial video see:<br/>
-[![Tutorial Video](https://img.youtube.com/vi/DPIR3Oeixjo/1.jpg)](https://www.youtube.com/watch?v=DPIR3Oeixjo)
+[![Tutorial Video](static\videoThumbnail.png)](https://www.youtube.com/watch?v=DPIR3Oeixjo)
 
 # 2. Key Features
 ### **1. Task Hierarchy**
