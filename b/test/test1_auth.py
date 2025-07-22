@@ -281,13 +281,13 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         self.assertEqual(response.json["message"], "Failure: Refresh token is invalid. Please login")
         
     def test5_delete_user(self):
-        print("     \n5)Testing delete_user")
+        print("     \n5)Testing delete-user")
         username, pwd = "test","ttt"
 
-        self.standard_login_and_auth_test(httpmethod="delete", endpoint="/api/delete_user/1", json_data=None, username=username, pwd=pwd)
+        self.standard_login_and_auth_test(httpmethod="delete", endpoint="/api/delete-user/1", json_data=None, username=username, pwd=pwd)
 
         print("         Test invalid input - deleting someone else's account fails (mismatched user_id in url vs in session dict)")
-        response: TestResponse = self.client.delete("/api/delete_user/2")
+        response: TestResponse = self.client.delete("/api/delete-user/2")
         self.assertEqual(response.json["message"], "Failure: User selected for deletion cannot be found in the database.")
         
         #Create new user
@@ -296,11 +296,11 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
         signup_response: TestResponse = self.client.post("/api/sign-up", json=data)
 
         print("         Test invalid input - deleting someone else's account fails (mismatched user_id in url vs in session dict)")
-        response: TestResponse = self.client.delete("/api/delete_user/2")
+        response: TestResponse = self.client.delete("/api/delete-user/2")
         self.assertEqual(response.json["message"], "Failure: Account chosen for deletion does not match the account logged in.")
 
         print("         Testing valid input - deleting an account when logged in")
-        response: TestResponse = self.client.delete("/api/delete_user/1")
+        response: TestResponse = self.client.delete("/api/delete-user/1")
         self.assertEqual(response.status_code, 200)
         
         print("     Test that all user's content (rts, projects, objectives and tasks) was deleted")
@@ -343,11 +343,11 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
 
     def test7_edit_user(self):
-        print("     \n7)Testing edit_user")
+        print("     \n7)Testing edit-user")
         username, password, email = "test", "ttt" , "test@example.com"
         new_username, new_password, new_email = "test1", "ttt1", "new_email@example.com"
 
-        self.standard_login_and_auth_test(httpmethod="patch", endpoint="/api/edit_user/1", json_data={"":""}, username=username, pwd=password, email=email)
+        self.standard_login_and_auth_test(httpmethod="patch", endpoint="/api/edit-user/1", json_data={"":""}, username=username, pwd=password, email=email)
 
         #Make user1 admin
         user = User(username=username, password=generate_password_hash(password, "pbkdf2"), email=email, is_admin=True)
@@ -358,14 +358,14 @@ class FlaskAPIAuthTestCase(unittest.TestCase, plannerAppTestDependecies):
 
         #Other Test Cases:
         print("         Test invalid input - editing someone else's account fails (mismatched user_id in url vs in session dict)")
-        response: TestResponse = self.client.patch("/api/edit_user/2")
+        response: TestResponse = self.client.patch("/api/edit-user/2")
         self.assertEqual(response.json["message"], "Failure: The account you are attempting to edit does not match the account that is logged in")
         
         print("         Testing valid input - editing your account when logged in works")
         response_get_user_old: TestResponse = self.client.get("/api/get-user/1")
         time.sleep(0.1)
         new_data = {"username":new_username, "password":password, "password1":new_password, "password2":new_password, "email":new_email }
-        response: TestResponse = self.client.patch("/api/edit_user/1", json=new_data)
+        response: TestResponse = self.client.patch("/api/edit-user/1", json=new_data)
         self.assertEqual(response.json["message"], "Success: User was successfully edited")
 
         print("         Test successful login with new credentitals")

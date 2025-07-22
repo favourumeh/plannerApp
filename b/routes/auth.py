@@ -218,7 +218,7 @@ def refresh() -> Tuple[Response, int]:
     return resp, 200
 
 
-@auth.route("/delete_user/<int:user_id>", methods = ["DELETE"])
+@auth.route("/delete-user/<int:user_id>", methods = ["DELETE"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def delete_user(user_id: int) -> Tuple[Response, int]:
@@ -259,7 +259,7 @@ def delete_user(user_id: int) -> Tuple[Response, int]:
         resp_dict["message"] = f"Could not delete the chosen user. Reason {e}"
         return jsonify(resp_dict), 404
 
-@auth.route("/edit_user/<int:user_id>", methods = ["PATCH"])
+@auth.route("/edit-user/<int:user_id>", methods = ["PATCH"])
 @login_required(serializer=serializer)
 @token_required(app=app, serializer=serializer)
 def edit_user(user_id: int) -> Tuple[Response, int]:
