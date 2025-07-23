@@ -276,4 +276,25 @@ export async function fetchPlannerTasks({periodStart, periodEnd, handleNotificat
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
 }
+
+export async function fetchDefaultProjectObjective({projectId, handleNotification, handleLogout}) {
+    try {
+        const baseUrl =  `${backendBaseUrl}/query-objectives?`
+        const query = new URLSearchParams({projectId:1, type:"default project objective"})
+        const url = baseUrl + query
+        const options = {
+            method:"GET",
+            headers:{"Content-Type":"application/json"},
+            credentials:"include"
+        }
+        var resp = await fetch(url, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + `. Failed to get the default project objective. Likely database connection error.`, "failure")
+    }
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
+    const requestFn = async() => fetchPlannerTasks({periodStart, periodEnd, handleNotification, handleLogout})
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+}
 export {fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject, fetchKanbanTasks}

@@ -195,6 +195,7 @@ const Kanban = ({sitePage}) => {
                             columnTitle={column.title}
                             taskArr={taskArr}
                             entityName={entityName}
+                            breakObjective={breakObjective}
                             refetchKanbanContent={refetchKanbanContent}/>
                     )}
                 </div>

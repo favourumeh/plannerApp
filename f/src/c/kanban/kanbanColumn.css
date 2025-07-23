@@ -1,4 +1,5 @@
 div.kanban-column {
+    position: relative;
     width: 220px;
     margin-right: 10px;
     border-radius: 5px;
@@ -11,4 +12,10 @@ div.kanban-item-overlay {
     display: flex;
     justify-content: space-between;
     width: 100%;
+}
+
+div.kanban-column i.quick-add-btn {
+    position: absolute;
+    left: 10px;
+    top: 5px;
 }
