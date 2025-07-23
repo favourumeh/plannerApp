@@ -6,6 +6,7 @@ div.kanban-card-overlay{
     /* background: grey; */
     margin: 5px;
     width: 100%;
+    touch-action: none;
 }
 
 div.kanban-card-overlay:hover{
