@@ -42,25 +42,66 @@ For planner app tutorial video see:<br/>
 ### **4. [Journal](#homepage-journal) (Activity Log)**
 - As user moves tasks in Kanban from To Do ->In Progress -> Completed, the homepage automatically records task start/finish times.
 - Provides an audit trail of task progress.
-# 3. Installation and Setup
+# 3. Local Setup
 ## **Prerequisites**
 - Node.js (for React)
-- Python 3.x (for Flask)
-- MySQL Workbench (to test app locally)
+- Python 3.12.x (for Flask)
+- Create the following .env files
+    ```
+    # .env
+    backend_host_port=5000
+    VITE_APP_ENV=dev
+    local_host_backend_base_url=http://127.0.0.1:
+
+    # b/.env
+    flaskAppSecretKey='e868207f-3376-46cb-923f-e1b885b0a276'
+    sessionEncryptionKey='qdokKcFMxoQBBkSXq6rxavCsxtLrzlOZIwAguWoMrZ0='
+
+    accessTokenDurationMins=
+    refreshTokenDurationDays=
+
+    mySQLHost=
+    mySQLPassword=
+    mySQLPort=
+    mySQLUser=
+
+    username_limit=15
+    email_limit=120
+    project_title_limit=80
+    objective_title_limit=80
+    task_description_limit=200
+
+    #f/.env.development
+    VITE_APP_ENV=dev
+    VITE_BACKEND_API_URL=http://127.0.0.1:5000/api
+    ```
+- Optional: MySQL Workbench 8.0.43 (to test app with mysql backend)
+note: choosing the mysql backend means setting up a mysql db for the app and copying the db connection creds into the b/.env file. 
 
 ## Local Testing Steps
 1) Create Database in MySQL workbench called "planner_app_db"
-2) Create the environment variables (to do) 
+2) Create the environment variables in the prequisite (mysql vars are optional)
 3) Run development env for backend flask app and frontend
 	 - If user has PowerShell 
 		```
-		> ./runApp.ps1 -env dev
+        # sqlite backend
+		> ./runApp.ps1 -env dev -rdbms sqlite
+
+        # mysql backend
+        > ./runApp.ps1 -env dev
 		```
 		This creates opens a PowerShell window with split terminals: 1 for the flask app and one for the react app.
+
+
 	- if user has bash terminal. Open 2 terminal<br/>
 		terminal 1 - flask app
 		```
 		$ cd b
+
+        #sqlite backend
+        $ python main.py --env dev --rdbms sqlite
+
+        # mysql backend
 		$ python main.py --env dev --rdbms mysql
 		```
 		terminal 2 - react app
