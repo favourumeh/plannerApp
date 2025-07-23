@@ -42,31 +42,25 @@ app.config["SECRET_KEY"] = pp.flask_app_secret_key
     #create serialiser object which wraps a signer (secret key) to enable serialising and securely signing data
 serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
-#generate the config dict
-params = sys.argv[1:]
-print("sys.argv: ", params)
-default_config_dict= {"--env":"prod", "--rdbms":"az_mysql"}
-config_dict = pp.generate_config_dict(params, default_config_dict)
-
 #configure databse sqlite or az_mysql
 db_name = "planner_app_db"
 
 if 'test' not in ",".join(sys.argv): #1
     
     #messages below stop dev from accidentally writing to the prod db during testing.
-    if (config_dict["--env"] == "dev" and config_dict["--rdbms"] == "az_mysql"): #underlined red error message (;4)
+    if (pp.config_dict["--env"] == "dev" and pp.config_dict["--rdbms"] == "az_mysql"): #underlined red error message (;4)
         raise Exception("\033[31;1;4mFlask App Input Error: You cannot have the configuraion: --env:dev and --rdbms: az_mysql\033[0m")
 
-    if ( config_dict["--rdbms"] == "az_mysql"): # yellow warning message (;4)
+    if ( pp.config_dict["--rdbms"] == "az_mysql"): # yellow warning message (;4)
         warnings.warn("\033[93;1;4mWARNING: Your app is connected to the prod db!!! Please ensure that this is what you want.\033[0m")
     
-    if config_dict["--rdbms"] == "sqlite":
+    if pp.config_dict["--rdbms"] == "sqlite":
         app.config["SQLALCHEMY_DATABASE_URI"]= f"sqlite:///{cwd}/{db_name}.db"
 
-    if config_dict["--rdbms"] == "mysql":
+    if pp.config_dict["--rdbms"] == "mysql":
         app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{os.environ["mySQLUser"]}:{os.environ["mySQLPassword"]}@{os.environ["mySQLHost"]}/{db_name}"
 
-    if config_dict["--rdbms"] == "az_mysql":
+    if pp.config_dict["--rdbms"] == "az_mysql":
         #download SSL Certificate from blob storage
         connect_str = pp.secret_client.get_secret(name = "PLANNER-APP-AZURE-STORAGE-CONNECTION-STRING").value
         ssl_cert_filename = os.environ["ssl_cert_filename"]

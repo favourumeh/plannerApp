@@ -16,6 +16,7 @@ from .project_config import allowed_origins
 from .project_config import flask_app_secret_key
 from .project_config import session_key
 from .project_config import secret_client
+from .project_config import config_dict
 from .routeHelper import token_required
 from .routeHelper import login_required
 from .routeHelper import update_refresh_token_table

@@ -38,7 +38,7 @@ if ($rdbms -eq "") {
 }
 
 #Determine backend port 
-$backendPort = ($userEnv -in @("dev", "prod", "prod-docker") ) ? 5000 : ($userEnv -eq "prod-local") ?  5001 : 5002
+$backendPort = ($userEnv -in @("dev", "prod", "prod-docker") ) ? $env:backend_host_port : ($userEnv -eq "prod-local") ?  5001 : 5002
 
 #Determine backend url 
 $localBackendBaseURL = $env:local_host_backend_base_url + $backendPort + "/api"
@@ -72,7 +72,7 @@ $backendDevCommands = @"
 "@
 
 $backendProdLocalCommands = @"
-    cd b && source .venv_wsl/bin/activate && gunicorn --bind 0.0.0.0:$backendPort --timeout 300 main:app 
+    cd b && source .venv_wsl/bin/activate && pip install -r requirements.txt && gunicorn --bind 0.0.0.0:$backendPort --timeout 300 main:app 
 "@
 
 $frontendProdLocalCommands = @"
