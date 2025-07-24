@@ -24,6 +24,8 @@ function HomePage ({isLoggedIn, sitePage}) {
     const currentDay = daysOfWeek[new Date(currentDate).getDay()]
     const selectedDate = new Date(currentDate).toISOString().split("T")[0]
     const { isPending, data, refetch:refetchHomePageTasks } = useQuery( homepageTasksQueryOptions(selectedDate, handleNotification, handleLogout) )
+    const userDayStart = new Date(currentDate).setHours(userSettings["dayStartTime"].split(":")[0], userSettings["dayStartTime"].split(":")[1], 0, 0) - new Date().getTimezoneOffset()*60*1000 // in milliseconds
+    const userDayEnd = new Date(currentDate).setHours(userSettings["dayEndTime"].split(":")[0], userSettings["dayEndTime"].split(":")[1], 0, 0) - new Date().getTimezoneOffset()*60*1000 // in milliseconds
 
     useEffect(() => {// refetchHomePageTasks after exiting an entity form
         if (!isModalOpen) {
@@ -36,6 +38,21 @@ function HomePage ({isLoggedIn, sitePage}) {
     const projects = homePageTasksResponse.taskProjects
     const objectives = homePageTasksResponse.taskObjectives
 
+    const earliestTaskStart = homePageTasks?.reduce((earliest, task) => {
+        const taskStart = new Date(task.start).getTime()
+        return (taskStart < earliest ? taskStart : earliest)
+    }, userDayStart)
+
+    const latestTaskFinish = homePageTasks?.reduce((latest, task) => {
+        const timezoneOffset = new Date().getTimezoneOffset()*60*1000 // in milliseconds
+        const taskFinish = !!task.finish?  new Date(task.finish).getTime()  - timezoneOffset : new Date(task.start).getTime() + task.durationEst*60*1000 - timezoneOffset
+        return (taskFinish > latest ? taskFinish : latest)
+    }, userDayEnd)
+
+    const dayStartDT = earliestTaskStart < userDayStart ? earliestTaskStart : userDayStart
+    const dayEndDT = latestTaskFinish > userDayEnd ? latestTaskFinish : userDayEnd
+
+    // console.log("dayStartDT",new Date(dayStartDT), "dayEndDT", new Date(dayEndDT))
     // change the colour of (the text of) the day if it is not today's date
     const todayIndicator = () => todaysDate === new Date(currentDate).toDateString()? "rgb(0, 230, 0)" : "red"
 
@@ -65,10 +82,10 @@ function HomePage ({isLoggedIn, sitePage}) {
                 </div>
             </div>
             <div style={{"position":"relative"}} className="homepage-body"> 
-                <TimerLine/>
-                <TimeslotCards dayStart={userSettings["dayStartTime"]} dayEnd={userSettings["dayEndTime"]} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]}/>
+                <TimerLine dayStartDT={dayStartDT} dayEndDT={dayEndDT}/>
+                <TimeslotCards dayStartDT={dayStartDT} dayEndDT={dayEndDT} timeIntervalInMinutes={userSettings["timeIntervalInMinutes"]} />
                 <div style={{"position":"relative"}} className="task-card-overlay">
-                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchHomePageTasks={refetchHomePageTasks}/>)}
+                    {homePageTasks?.map((task)=> <TaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchHomePageTasks={refetchHomePageTasks} dayStartDT={dayStartDT}/>)}
                 </div>
 
             </div>

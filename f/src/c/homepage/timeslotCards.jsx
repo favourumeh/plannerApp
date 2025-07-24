@@ -1,36 +1,34 @@
 import "./timeslotCards.css";
-import { useState} from "react";
 
-function TimeslotCards({dayStart, dayEnd, timeIntervalInMinutes}) {
+function TimeslotCards({dayStartDT, dayEndDT, timeIntervalInMinutes}) {
+    const timezoneOffset = new Date().getTimezoneOffset()*60*1000 // adjust for timezone
+    dayStartDT = new Date(dayStartDT).getTime() + timezoneOffset // adjust for timezone
+    dayEndDT = new Date(dayEndDT).getTime() + timezoneOffset// adjust for timezone
 
-    const generateTimeSlots = (dayStart, dayEnd, timeIntervalInMinutes) => {
-        const dayStartDT = new Date().setHours(dayStart.split(":")[0], dayStart.split(":")[1], 0, 0) 
-        const dayEndDT = new Date().setHours(dayEnd.split(":")[0], dayEnd.split(":")[1], 0, 0) 
+    const generateTimeSlots = (dayStartDT, dayEndDT, timeIntervalInMinutes) => {
         const numberOfSlots = Math.floor((dayEndDT - dayStartDT) / (timeIntervalInMinutes * 60 * 1000)) 
         const timeSlots = []
-        var finalSlotInterval = timeIntervalInMinutes
         for (let i = 0; i <= numberOfSlots; i++) {
             const time = new Date(dayStartDT + i * timeIntervalInMinutes * 60 * 1000) 
             const formattedTime = time.toLocaleDateString('en-uk', { hour: '2-digit', minute: '2-digit', hour12: false })
             timeSlots.push(formattedTime.slice(-5))
         }
-        const finalSlot = new Date(dayEndDT).toLocaleDateString("en-uk", { hour: "2-digit", minute: "2-digit", hour12:false}).slice(-5)
-        if (timeSlots[timeSlots.length-1] != finalSlot){
-            console.log(timeSlots)
-            timeSlots.push(finalSlot)
-            const finalSlotIntervalMs = new Date(dayEndDT)- new Date(dayStartDT + (numberOfSlots) * timeIntervalInMinutes * 60 * 1000)
-            finalSlotInterval =  Math.floor(finalSlotIntervalMs / (1000 * 60)); //conver ms to mins
+        const finalTime = new Date().setHours(timeSlots[timeSlots.length-1].split(":")[0], timeSlots[timeSlots.length-1].split(":")[1], 0, 0)
 
+        if (finalTime < dayEndDT){
+            const finalTimeSlot = finalTime + timeIntervalInMinutes * 60 * 1000
+            const finalSlot = new Date(finalTimeSlot).toLocaleDateString("en-uk", { hour: "2-digit", minute: "2-digit", hour12:false}).slice(-5)
+            timeSlots.push(finalSlot)
         }
         const timeSlotText = []
         for (let i=0; i< timeSlots.length-1; i+=1 ) {
             timeSlotText.push(`${timeSlots[i]}-${timeSlots[i+1]}`)
-
         }
-        return {"timeSlots": timeSlotText, "finaltimeSlotInterval": finalSlotInterval}
+        return {"timeSlots": timeSlotText, "finaltimeSlotInterval": "blah"}
+
     }
 
-    const [timeSlots, setTimeSlots] = useState(generateTimeSlots(dayStart, dayEnd, timeIntervalInMinutes))
+    const timeSlots = generateTimeSlots(dayStartDT, dayEndDT, timeIntervalInMinutes)
 
     return (
         <div className="timeslots-overlay">
@@ -40,7 +38,7 @@ function TimeslotCards({dayStart, dayEnd, timeIntervalInMinutes}) {
                     style={{
                         "borderBottom": index==timeSlots.timeSlots.length-1? "none":"1px solid", 
                         "borderBottomLeftRadius": index==timeSlots.timeSlots.lengtht-1? "8px":"0px",
-                        "height": index == timeSlots.timeSlots.length-1? 1.5*timeSlots.finaltimeSlotInterval : 1.5*timeIntervalInMinutes,
+                        "height":1.5*timeIntervalInMinutes,
                         "boxSizing":"border-box" }}
                     id = {`timeslot-${index}`} 
                     className="timeslot"> 

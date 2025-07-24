@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query"
 import globalContext from "../../context"
 import TaskInfoCard from "../InfoCards/taskInfoCard"
 import { mutateEntityRequest } from "../../fetch_entities"
-function TaskCard ({task, projects, objectives, refetchHomePageTasks}) {
+function TaskCard ({task, projects, objectives, refetchHomePageTasks, dayStartDT}) {
     const {setForm, setIsModalOpen, setCurrentTask, userSettings, handleNotification, handleLogout } = useContext(globalContext)
     const taskObjective = objectives?.find( (objective) => objective.id===task.objectiveId )
     const taskProject = projects?.find( (project) => project.id===taskObjective.projectId )
@@ -50,9 +50,9 @@ function TaskCard ({task, projects, objectives, refetchHomePageTasks}) {
 
     //calculate the position of the task row card relative to the top of the homepage body (purple box with timeslots)
     const taskPosition = () => {
-        const dayStartMs = new Date(task.start).setHours(userSettings.dayStartTime.split(":")[0], userSettings.dayStartTime.split(":")[1], 0, 0)
+        const dayStartMS = new Date(dayStartDT).getTime() + new Date().getTimezoneOffset()*60*1000 
         const taskStartMs = new Date(task.start).getTime()
-        const deltaMinutes = (taskStartMs - dayStartMs)/(1000*60) + new Date().getTimezoneOffset()
+        const deltaMinutes = (taskStartMs - dayStartMS)/(1000*60) + new Date().getTimezoneOffset()
         return String(deltaMinutes*15/10) // convert minutes to px
     }
     const taskRowCardStyle = { "position": "absolute", "top":taskPosition()+ "px"}
