@@ -1,1 +1,1 @@
-gunicorn --bind 0.0.0.0 --timeout 300 main:app
+gunicorn --workers=2 --threads=2  --worker-connections=100 --worker-class=gthread  --timeout=30 --max-requests=500 --bind=0.0.0.0 main:app

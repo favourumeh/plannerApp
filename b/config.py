@@ -86,6 +86,13 @@ if 'test' not in ",".join(sys.argv): #1
 
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    
+    #enable concurrent request to the database
+    app.config['SQLALCHEMY_POOL_SIZE'] = 3          # Max connections per worker
+    app.config['SQLALCHEMY_MAX_OVERFLOW'] = 1       # Extra connections if pool is full
+    app.config['SQLALCHEMY_POOL_RECYCLE'] = 300     # Recycle connections after 1h
+    app.config['SQLALCHEMY_POOL_PRE_PING'] = True    # Test connections before reuse    
+    
     #bind the database instance to flask app instance 
     db.init_app(app=app)
 
