@@ -68,9 +68,14 @@
     /* border: 1px solid; */
 }
 
+.task-card-overlay{ 
+    --task-card-overlay-width: 400px ;
+    --progress-card-tools-width: 58px;
+}
+
 .task-card-overlay {
-    max-width:400px;
-    min-width:400px;    
+    min-width: var(--task-card-overlay-width);
+    max-width: var(--task-card-overlay-width);
     /* border: 1px solid; */
 }
 
@@ -84,6 +89,7 @@
 .progress-card-content{
     position: relative;
     top: -100%;
+    width: calc( var(--task-card-overlay-width) - var(--progress-card-tools-width) );
 
     display: -webkit-box;
     overflow: hidden;
@@ -94,7 +100,6 @@
 
     /* border: 1px solid; */
     border-radius: 5px;
-    /* width: 100%; */
     text-align: left;
     transition: width 0.5s ease-out;
     padding-left: 5px;
@@ -106,7 +111,7 @@
     justify-content: center;
     align-items: center;
     border-left: 1px solid;
-    min-width: 58px;
+    min-width:  var(--progress-card-tools-width);
 }
 .progress-percentage{
     min-width: 39px; 

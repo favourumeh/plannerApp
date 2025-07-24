@@ -140,7 +140,7 @@ export default function ProjectProgressCard ({entity, entityName, metric, refetc
                     className={`progress-card-overlay ${entityName}-card-overlay`}
                     onClick={onClickEditBtn}
                 >
-                    <ProjectInfoCard project={entity} translate="-110% 0%" progress={rawMetricValues(completedTaskMetric, totalTaskMetric)} />
+                    <ProjectInfoCard project={entity} translate="195% 0%" progress={rawMetricValues(completedTaskMetric, totalTaskMetric)} />
                     <div className="progress-bar">
                         <div className="progress-bar-fill" 
                             style={{"width":`${progressBarDivWidth}px`, "backgroundColor":generateProgressBarColour(progressPercentage)}}

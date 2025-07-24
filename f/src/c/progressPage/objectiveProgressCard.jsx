@@ -136,7 +136,7 @@ export default function ObjectiveProgressCard ({entity, entityName, project, met
                     className={`progress-card-overlay ${entityName}-card-overlay`}
                     onClick={onClickEditBtn}
                 >
-                    <ObjectiveInfoCard objective={entity} translate="-120% 0%" objectiveProject={project} progress={rawMetricValues(completedTaskMetric, totalTaskMetric)}/>
+                    <ObjectiveInfoCard objective={entity} translate="175% 0%" objectiveProject={project} progress={rawMetricValues(completedTaskMetric, totalTaskMetric)}/>
                     <div className="progress-bar">
                         <div className="progress-bar-fill" 
                             style={{"width":`${progressBarDivWidth}px`, "backgroundColor":generateProgressBarColour(progressPercentage)}}

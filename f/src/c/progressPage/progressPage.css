@@ -29,5 +29,8 @@
 
 /* prevent page from jumping when clicking the progress card dropdown */
 .progress-page-body{ 
-    min-height: 900px;
+    /* min-height: 900px; */
+    border: 1px solid;
+    border-radius: 10px;
+    background-color: rgb(30, 23, 36);
 }

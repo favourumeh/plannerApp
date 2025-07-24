@@ -62,7 +62,7 @@ export default function TaskProgressCard ({entity, entityName, project, objectiv
                     className={`progress-card-overlay ${entityName}-card-overlay`}
                     onClick={onClickEditBtn}
                 >
-                    <TaskInfoCard task={entity} taskObjective={objective} taskProject={project} translate="-140% 0%"/>
+                    <TaskInfoCard task={entity} taskObjective={objective} taskProject={project} translate="155% -50%"/>
                     <div className="progress-bar">
                         <div className="progress-bar-fill" 
                             style={{"width":"0%"}}
