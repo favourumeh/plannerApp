@@ -24,9 +24,9 @@ function HomePage ({isLoggedIn, sitePage}) {
     const currentDay = daysOfWeek[new Date(currentDate).getDay()]
     const selectedDate = new Date(currentDate).toISOString().split("T")[0]
     const { isPending, data, refetch:refetchHomePageTasks } = useQuery( homepageTasksQueryOptions(selectedDate, handleNotification, handleLogout) )
-    const userDayStart = new Date(currentDate).setHours(userSettings["dayStartTime"].split(":")[0], userSettings["dayStartTime"].split(":")[1], 0, 0) - new Date().getTimezoneOffset()*60*1000 // in milliseconds
-    const userDayEnd = new Date(currentDate).setHours(userSettings["dayEndTime"].split(":")[0], userSettings["dayEndTime"].split(":")[1], 0, 0) - new Date().getTimezoneOffset()*60*1000 // in milliseconds
-
+    const userDayStart = new Date(currentDate).setHours(userSettings["dayStartTime"].split(":")[0], userSettings["dayStartTime"].split(":")[1], 0, 0)
+    const userDayEnd = new Date(currentDate).setHours(userSettings["dayEndTime"].split(":")[0], userSettings["dayEndTime"].split(":")[1], 0, 0) 
+    // console.log("userDayStart", new Date(userDayStart), "userDayEnd", new Date(userDayEnd))
     useEffect(() => {// refetchHomePageTasks after exiting an entity form
         if (!isModalOpen) {
             refetchHomePageTasks()
@@ -39,13 +39,12 @@ function HomePage ({isLoggedIn, sitePage}) {
     const objectives = homePageTasksResponse.taskObjectives
 
     const earliestTaskStart = homePageTasks?.reduce((earliest, task) => {
-        const taskStart = new Date(task.start).getTime()
+        const taskStart = new Date(task.start.replace(" GMT", "")).getTime()
         return (taskStart < earliest ? taskStart : earliest)
     }, userDayStart)
 
     const latestTaskFinish = homePageTasks?.reduce((latest, task) => {
-        const timezoneOffset = new Date().getTimezoneOffset()*60*1000 // in milliseconds
-        const taskFinish = !!task.finish?  new Date(task.finish).getTime()  - timezoneOffset : new Date(task.start).getTime() + task.durationEst*60*1000 - timezoneOffset
+        const taskFinish = !!task.finish?  new Date(task.finish.replace(" GMT", "")).getTime() : new Date(task.start.replace(" GMT", "")).getTime() + task.durationEst*60*1000
         return (taskFinish > latest ? taskFinish : latest)
     }, userDayEnd)
 

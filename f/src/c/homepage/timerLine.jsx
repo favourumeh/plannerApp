@@ -3,8 +3,8 @@ import {useState, useEffect} from 'react'
 
 const TimerLine = ({dayStartDT, dayEndDT}) => {
     const currentDateStr = new Date().toDateString()
-    const startOfDay =  new Date(currentDateStr + " " + new Date(dayStartDT).toLocaleTimeString()).getTime() + new Date().getTimezoneOffset()*60*1000 // adjust for timezone
-    const endOfDay =  new Date(currentDateStr + " " + new Date(dayEndDT.dayEndTime).toLocaleTimeString()).getTime() + new Date().getTimezoneOffset()*60*1000 // adjust for timezone
+    const startOfDay =  new Date(currentDateStr + " " + new Date(dayStartDT).toLocaleTimeString()).getTime() 
+    const endOfDay =  new Date(currentDateStr + " " + new Date(dayEndDT).toLocaleTimeString()).getTime() 
     
     if (new Date().getTime() < startOfDay || new Date().getTime() > endOfDay) return 
 

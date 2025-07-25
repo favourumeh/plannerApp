@@ -1,9 +1,13 @@
+import { useContext } from "react";
 import "./timeslotCards.css";
+import globalContext from "../../context";
 
 function TimeslotCards({dayStartDT, dayEndDT, timeIntervalInMinutes}) {
-    const timezoneOffset = new Date().getTimezoneOffset()*60*1000 // adjust for timezone
-    dayStartDT = new Date(dayStartDT).getTime() + timezoneOffset // adjust for timezone
-    dayEndDT = new Date(dayEndDT).getTime() + timezoneOffset// adjust for timezone
+    console.log("dayStartDT", new Date(dayStartDT))
+    console.log("dayEndDT", new Date(dayEndDT))
+    const {currentDate} = useContext(globalContext)
+    dayStartDT = new Date(dayStartDT).getTime()
+    dayEndDT = new Date(dayEndDT).getTime()
 
     const generateTimeSlots = (dayStartDT, dayEndDT, timeIntervalInMinutes) => {
         const numberOfSlots = Math.floor((dayEndDT - dayStartDT) / (timeIntervalInMinutes * 60 * 1000)) 
@@ -13,8 +17,8 @@ function TimeslotCards({dayStartDT, dayEndDT, timeIntervalInMinutes}) {
             const formattedTime = time.toLocaleDateString('en-uk', { hour: '2-digit', minute: '2-digit', hour12: false })
             timeSlots.push(formattedTime.slice(-5))
         }
-        const finalTime = new Date().setHours(timeSlots[timeSlots.length-1].split(":")[0], timeSlots[timeSlots.length-1].split(":")[1], 0, 0)
-
+        const finalTime = new Date(currentDate).setHours(timeSlots[timeSlots.length-1].split(":")[0], timeSlots[timeSlots.length-1].split(":")[1], 0, 0)
+        console.log("finalTime", new Date(finalTime))
         if (finalTime < dayEndDT){
             const finalTimeSlot = finalTime + timeIntervalInMinutes * 60 * 1000
             const finalSlot = new Date(finalTimeSlot).toLocaleDateString("en-uk", { hour: "2-digit", minute: "2-digit", hour12:false}).slice(-5)
@@ -24,6 +28,7 @@ function TimeslotCards({dayStartDT, dayEndDT, timeIntervalInMinutes}) {
         for (let i=0; i< timeSlots.length-1; i+=1 ) {
             timeSlotText.push(`${timeSlots[i]}-${timeSlots[i+1]}`)
         }
+        console.log("timeslots", timeSlots)
         return {"timeSlots": timeSlotText, "finaltimeSlotInterval": "blah"}
 
     }

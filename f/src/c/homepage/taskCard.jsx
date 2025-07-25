@@ -50,9 +50,9 @@ function TaskCard ({task, projects, objectives, refetchHomePageTasks, dayStartDT
 
     //calculate the position of the task row card relative to the top of the homepage body (purple box with timeslots)
     const taskPosition = () => {
-        const dayStartMS = new Date(dayStartDT).getTime() + new Date().getTimezoneOffset()*60*1000 
-        const taskStartMs = new Date(task.start).getTime()
-        const deltaMinutes = (taskStartMs - dayStartMS)/(1000*60) + new Date().getTimezoneOffset()
+        const dayStartMS = new Date(dayStartDT).getTime()
+        const taskStartMs = new Date(task.start.replace(" GMT", "")).getTime()
+        const deltaMinutes = (taskStartMs - dayStartMS)/(1000*60)
         return String(deltaMinutes*15/10) // convert minutes to px
     }
     const taskRowCardStyle = { "position": "absolute", "top":taskPosition()+ "px"}
