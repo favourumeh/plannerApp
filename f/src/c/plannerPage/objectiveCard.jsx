@@ -88,8 +88,8 @@ export function ObjectiveCard({entityName, objective, projects, objectives, unsc
                     
                     <div>
                         {isExpanded? 
-                            <i className="fa fa-caret-up dropdown-btn" aria-hidden="true" onClick={handleEntityExpansion}></i>
-                            : <i className="fa fa-caret-down dropdown-btn" aria-hidden="true" onClick={handleEntityExpansion}></i>
+                            <i className="fa fa-caret-up dropdown-btn" aria-hidden="true" onClick={handleEntityExpansion} onDoubleClick={ (e) => e.stopPropagation() }></i>
+                            : <i className="fa fa-caret-down dropdown-btn" aria-hidden="true" onClick={handleEntityExpansion} onDoubleClick={ (e) => e.stopPropagation() }></i>
                         }
                     </div>
 
