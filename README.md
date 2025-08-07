@@ -8,7 +8,7 @@
    - Planner 
    - Kanban 
    - Journal
-3. [Installation & Setup](#3-installation-and-setup)
+3. [Local App Setup](#3-local-setup)
 4. [Technical Details](#4-technical-details)
    - Tech Stack
    - Data Model
