@@ -1,7 +1,10 @@
 import os, sys
+from dotenv import load_dotenv
 from azure.keyvault.secrets import SecretClient
 from azure.identity import ClientSecretCredential
 from . import generate_config_dict
+
+load_dotenv(dotenv_path="./.env")
 
 allowed_origins= [
     "http://localhost:3000",

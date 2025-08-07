@@ -13,8 +13,9 @@ import warnings
 #cwd
 cwd = os.getcwd().replace("\\", "/")
 
-#load env vars from b/.env
-load_dotenv()
+#load env vars from b/.env and .env
+load_dotenv(dotenv_path="./.env")
+load_dotenv(dotenv_path="../.env")
 
 #Create Flask app instance
 app = Flask(__name__)

@@ -4,10 +4,7 @@ from cryptography.fernet import Fernet
 from models import User, Refresh_Token, Project, Objective, Task
 import json
 from itsdangerous import URLSafeTimedSerializer
-from dotenv import load_dotenv
 from datetime import datetime
-
-load_dotenv()
 
 def generate_config_dict(params: List[str], default_config_dict: Dict[str, str]) -> Dict[str, str]:
     """

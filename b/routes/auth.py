@@ -1,5 +1,4 @@
 import re
-from dotenv import load_dotenv
 import json
 from config import db, app, serializer
 from flask import Blueprint, request, jsonify, Response, session
@@ -14,9 +13,6 @@ from uuid import uuid4
 from plannerPackage import login_required, token_required, update_refresh_token_table, access_token_dur, filter_dict, generate_all_user_content 
 from plannerPackage import session_key
 from cryptography.fernet import Fernet
-
-#import env vars from b/.env file
-load_dotenv()
 
 #create blueprint
 auth = Blueprint("auth", __name__, url_prefix="/api/")

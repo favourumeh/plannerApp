@@ -9,11 +9,7 @@ from datetime import datetime, timedelta
 from . import refresh_token_dur, decrypt_bespoke_session_cookie #alternative: from plannerPackage import refre...
 from . import session_key
 from werkzeug.security import generate_password_hash, check_password_hash
-from dotenv import load_dotenv
 from pytz import timezone
-
-#import env vars from b/.env file
-load_dotenv()
 
 #create authorisation decorator 
 def token_required(app: Flask, serializer: URLSafeTimedSerializer):
