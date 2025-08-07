@@ -1,6 +1,6 @@
 
 # Planner App  
-**A Task Management System with Planner, Kanban, and Journal Features. Visit site [here]([PlannerApp](https://lively-meadow-088461003.6.azurestaticapps.net/))**
+**A Task Management System with Planner, Kanban, and Journal Features. Visit site [here](https://lively-meadow-088461003.6.azurestaticapps.net/)**
 ## **Table of Contents**
 1. [Overview](#overview)
 2. [Key Features](#2-key-features)
