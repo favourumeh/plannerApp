@@ -53,7 +53,7 @@ For planner app tutorial video see:<br/>
     VITE_APP_ENV=dev
     local_host_backend_base_url=http://127.0.0.1:
 
-    # b/.env
+    # b/.env (not actual flask secret and encryption keys)
     flaskAppSecretKey='e868207f-3376-46cb-923f-e1b885b0a276'
     sessionEncryptionKey='qdokKcFMxoQBBkSXq6rxavCsxtLrzlOZIwAguWoMrZ0='
 
@@ -76,38 +76,59 @@ For planner app tutorial video see:<br/>
     VITE_BACKEND_API_URL=http://127.0.0.1:5000/api
     ```
 - Optional: MySQL Workbench 8.0.43 (to test app with mysql backend)
-note: choosing the mysql backend means setting up a mysql db for the app and copying the db connection creds into the b/.env file. 
+note: choosing the mysql backend means setting up a mysql db for the app and filling in the myql credentials env vars in  the b/.env file. 
 
-## Local Testing Steps
-1) Create Database in MySQL workbench called "planner_app_db"
-2) Create the environment variables in the prequisite (mysql vars are optional)
-3) Run development env for backend flask app and frontend
+## Local App Setup Steps
+1) Create the environment variables in the prequisite (mysql vars are optional)
+2) Create python venv, activate it and install backend dependencies
+    ```bash 
+    #go to backend dir  
+    cd b/
+    
+    #create python env
+    python -m venv .venv
+    
+    #activate the created env
+    source .venv/Scripts/Activate
+    
+    #install the backend dependencies
+    pip install -r requirements.txt
+    ```
+3) Install frontend dependencies. 
+    ```bash
+    #go to frontend dir  
+    cd f/
+    # install frontend dependencies
+    npm i
+    ``` 
+4) Optional: Create Database in MySQL workbench called "planner_app_db" (if using mysql db)
+5) Run development env for backend flask app and frontend
 	 - If user has PowerShell 
-		```
-        # sqlite backend
-		> ./runApp.ps1 -env dev -rdbms sqlite
+		```powershell
+        # sqlite db
+		./runApp.ps1 -env dev -rdbms sqlite
 
-        # mysql backend
-        > ./runApp.ps1 -env dev
+        # mysql db
+        ./runApp.ps1 -env dev
 		```
 		This creates opens a PowerShell window with split terminals: 1 for the flask app and one for the react app.
 
 
-	- if user has bash terminal. Open 2 terminal<br/>
+	- if user has bash terminal. Open 2 terminals<br/>
 		terminal 1 - flask app
-		```
-		$ cd b
+		```bash
+		cd b
 
-        #sqlite backend
-        $ python main.py --env dev --rdbms sqlite
+        #sqlite db
+        python main.py --env dev --rdbms sqlite
 
-        # mysql backend
-		$ python main.py --env dev --rdbms mysql
+        # mysql db
+		python main.py --env dev --rdbms mysql
 		```
 		terminal 2 - react app
-		```
-		$ cd f
-		$ npm run dev
+		```bash
+		cd f
+		npm run dev
 		```
 
 # 4. Technical Details
