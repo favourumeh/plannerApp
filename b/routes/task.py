@@ -7,7 +7,7 @@ from flask_sqlalchemy.query import Query
 from models import User, Project, Objective, Task
 from plannerPackage import login_required, token_required, generate_all_user_content, generate_user_content, generate_entity_number, convert_date_str_to_datetime 
 from config import db, app, serializer
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from datetime import datetime, timedelta
 from pytz import timezone
 
@@ -317,6 +317,71 @@ def update_task(task_id: int) -> Tuple[Response, int]:
         return jsonify(resp_dict), 200
     except Exception as e:
         resp_dict["message"] = f"Failure: Task could not be updated! Reason: {e}"
+        return jsonify(resp_dict), 404
+
+@task.route("bulk-update-task_schedules", methods=["PATCH"])
+@login_required(serializer=serializer)
+@token_required(app=app, serializer=serializer)
+def bulk_update_task_schedules():
+    """updated the scheduled start date of multiple tasks"""
+    resp_dict = {"message":"", "tasks":"", "issues":[]}
+    user_id: int = session["userId"]
+    content = request.json
+    tasks: List[Dict] = content.get("tasks", None)
+
+    MAX_BATCH_SIZE = 100
+    if len(tasks) > MAX_BATCH_SIZE:
+        resp_dict["message"] = f"Failure: Too many tasks provided for bulk update. Max {MAX_BATCH_SIZE} tasks per batch."
+        return jsonify(resp_dict), 400
+
+    task_ids: List[int] = [task.get("id") for task in tasks if task.get("id") is not None]
+    db_tasks: Query = Task.query.filter(Task.id.in_(task_ids)).join(Objective).join(Project).filter(Project.user_id == user_id) #tasks that belong to the user that are being updated
+    db_tasks: Dict[int, List[int]] = {task.id : task for task in db_tasks.all()}
+
+    if not tasks:
+        resp_dict["message"] = "Failure: No tasks provided for bulk update."
+        return jsonify(resp_dict), 400
+
+    updated_tasks: List[Task] = []
+    try:
+        for task in tasks:
+            #get task from db
+            task_id = task.get("id", None)
+
+            #check if task id is provided in request
+            if not task_id:
+                resp_dict["issues"].append({"error": "Task ID is missing in one or more tasks."})
+                continue
+
+            #check if task exists in db
+            if task_id not in db_tasks:
+                resp_dict["issues"].append({"task-id": task_id, "error": "Task does not belong to the user or exist in the database"})
+                continue
+
+            #update task
+            db_task = db_tasks.get(task_id)
+            try:
+                db_task.scheduled_start = convert_date_str_to_datetime(task.get("scheduledStart", db_task.scheduled_start), '%Y-%m-%d')
+            except ValueError as e:
+                resp_dict["issues"].append({"task-id": task_id, "error": f"Invalid date format for scheduledStart: {e}"})
+                continue
+
+            db_task.last_updated = datetime.now(tz=timezone('Europe/London'))
+            updated_tasks.append(db_task)
+
+        db.session.commit() 
+        resp_dict["message"] = "Success: Tasks have been updated!"
+        resp_dict["updatedTasks"] = [task.to_dict() for task in updated_tasks]
+        resp_dict["tasks"] = tasks
+        resp_dict["noOfUpdatedTasks"] = len(updated_tasks)
+        resp_dict["totalTasks"] = len(tasks)
+
+        if resp_dict["totalTasks"] > resp_dict["noOfUpdatedTasks"]:
+            resp_dict["message"] = "Partial Success: Some tasks could not be updated. See issues for details."
+            return jsonify(resp_dict), 206  
+        return jsonify(resp_dict), 200
+    except Exception as e:
+        resp_dict["message"] = f"Failure: Could not update tasks. Reason: {e}"
         return jsonify(resp_dict), 404
 
 #delete

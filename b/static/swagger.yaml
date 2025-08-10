@@ -1881,6 +1881,119 @@ paths:
             - "Failure: Task could not be updated! Reason: {error details}"
             - "Failure: User is not logged in (no rt). Please login!"
 
+  /bulk-update-task_schedules:
+    patch:
+      tags: [Task]
+      summary: Bulk update task schedules
+      description: Update the scheduled start dates of multiple tasks in a single batch operation (max 100 tasks per batch)
+      security:
+        - bespoke_session: []
+        - session_AT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tasks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: ID of the task to update
+                      scheduledStart:
+                        type: string
+                        format: date
+                        description: New scheduled start date (YYYY-MM-DD)
+                  required:
+                    - id
+      responses:
+        '200':
+          description: |
+            Success: All tasks updated successfully. Possible messages:
+            - "Success: Tasks have been updated!"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  updatedTasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  tasks:
+                    type: array
+                    items:
+                      type: object
+                  noOfUpdatedTasks:
+                    type: integer
+                  totalTasks:
+                    type: integer
+        '206':
+          description: |
+            Partial Success: Some tasks updated successfully. Possible messages:
+            - "Partial Success: Some tasks could not be updated. See issues for details."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  updatedTasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  tasks:
+                    type: array
+                    items:
+                      type: object
+                  noOfUpdatedTasks:
+                    type: integer
+                  totalTasks:
+                    type: integer
+                  issues:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        task-id:
+                          type: integer
+                        error:
+                          type: string
+        '400':
+          description: |
+            Bad request. Possible messages:
+            - "Failure: No tasks provided for bulk update."
+            - "Failure: Too many tasks provided for bulk update. Max 100 tasks per batch."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: |
+            Unauthorized. Possible authentication errors from decorators:
+            - "Request is missing access token. Please login to refresh access token"
+            - "Deserialisation or Signiture verificaiton of access token cookie has failed! Reason: {error details}"
+            - "Invalid Access Token! Reason: {error details}"
+            - "Failure: User is not logged in (no b_sc). Please login!"
+            - "Failure: Could not decrypt the bespoke_session cookies. Reason: {error details}"
+            - "Failure: Refresh token is invalid. Please login"
+            - "Failure: Please login. Refresh token has expired."
+        '404':
+          description: |
+            Not found. Possible messages:
+            - "Failure: Could not update tasks. Reason: {error details}"
+            - "Failure: User is not logged in (no rt). Please login!"
+            
   /delete-task/{task_id}:
     delete:
       tags: [Task]
