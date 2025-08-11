@@ -21,7 +21,8 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
         }
         return (datetimeToString(new Date(task.scheduledStart)) === date.split(" ")[1])
     }
-    const tasksAndPreview = !isPreviewBulkShift ? tasks : [...tasks, ...updatedTasks]
+    const filterOutMovingTasks = (task) => !idsOfTasksToUpdate.includes(task.id)
+    const tasksAndPreview = !isPreviewBulkShift ? tasks : [...tasks?.filter(filterOutMovingTasks), ...updatedTasks]
     const daysTasks = tasksAndPreview?.filter(taskFilter)
 
     const calcTotalTaskDuration  = (task) => {

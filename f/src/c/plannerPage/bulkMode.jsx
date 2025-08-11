@@ -76,7 +76,9 @@ function BulkMode({refetchPlannerTasks}) {
         <div  className="planner-settings-box">
             <div className="planner-setting-header bulk-settings-header"> 
                 <i className="fa fa-arrow-left period-navigator" aria-hidden="true" onClick={exitBulkMode}/> 
-                &nbsp; Bulk Shift Settings (beta)</div>
+                &nbsp; Bulk Shift Settings (beta)    
+            </div>
+            <div className="selected-task-count planner-settings-item bulk-settings"> Number of task selected: {idsOfTasksToUpdate.length}</div>
 
             <div className="add-days-to-task-scheduled planner-settings-item bulk-settings">
                 <span> Add "n" days to the scheduled date: </span>&nbsp; &nbsp;
