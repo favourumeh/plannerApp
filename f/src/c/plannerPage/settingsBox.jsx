@@ -3,6 +3,7 @@ import "./settingsBox.css"
 import { useContext, useState } from "react"
 import localPlannerPageContext from "./localPlannerPageContext"
 import { datetimeLocalToString, getDaysBetweenDates } from "../../utils/dateUtilis"
+import BulkMode from "./bulkMode"
 
 const isMonthBoundary = (date) => {
     const d = new Date(date)
@@ -11,8 +12,8 @@ const isMonthBoundary = (date) => {
     return { isFirstDay: firstDay, isLastDay: lastDay }
 }
 
-export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isExpandAllDateCards, setIsExpandAllDateCards, isJustUnscheduledTask, setIsJustUnscheduledTask, isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities}) {
-    const {maxDailyWorkingHours, setMaxDailyWorkingHours, isExcludeBreakHours, setIsExcludeBreakHours } = useContext(localPlannerPageContext)
+export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodEnd, isJustUnscheduledTask, setIsJustUnscheduledTask, isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities, refetchPlannerTasks}) {
+    const {maxDailyWorkingHours, setMaxDailyWorkingHours, isExcludeBreakHours, setIsExcludeBreakHours, isExpandAllDateCards, setIsExpandAllDateCards, bulkMode, setBulkMode } = useContext(localPlannerPageContext)
     const [isSettingBoxExpanded, setIsSettingsBoxExpanded] = useState(false)
 
     const calculatePeriodDates = async ( {ps, pe, periodDuration, boundaryType, navDirection} ) => {
@@ -79,84 +80,89 @@ export function SettingsBox ({periodStart, setPeriodStart, periodEnd, setPeriodE
         }
     }
 
-    return (
-        <div className="planner-settings-box"> 
-            <div className="planner-setting-header" onDoubleClick={() => setIsSettingsBoxExpanded(!isSettingBoxExpanded)}> Settings </div>
-            {isSettingBoxExpanded? 
-                <>
-                <div className="planner-settings-period planner-settings-item"> 
-                    <span> Period:&nbsp; &nbsp;</span>
-                    <i className="fa fa-arrow-left period-navigator" aria-hidden="true" onClick={() => handlePeriodNavigation("previous-period")}></i>
-                    &nbsp; &nbsp; 
+    if (bulkMode){
+        return <BulkMode refetchPlannerTasks={refetchPlannerTasks}/>
+    } else {
+        return (
+            <div className="planner-settings-box"> 
+                <div className="planner-setting-header" onDoubleClick={() => setIsSettingsBoxExpanded(!isSettingBoxExpanded)}> 
+                    Settings  &nbsp; 
+                    <i className="fa fa-arrow-right period-navigator" aria-hidden="true" onClick={() => setBulkMode(true) }/>
+                </div>
+                {isSettingBoxExpanded? 
+                    <>
+                    <div className="planner-settings-period planner-settings-item"> 
+                        <span> Period:&nbsp; &nbsp;</span>
+                        <i className="fa fa-arrow-left period-navigator" aria-hidden="true" onClick={() => handlePeriodNavigation("previous-period")}></i>
+                        &nbsp; &nbsp; 
 
-                    <DatePicker
-                        selected={new Date(periodStart)}
-                        onSelect={(date) => setPeriodStart(datetimeLocalToString(date))} 
-                        onChange={(date) => setPeriodStart(datetimeLocalToString(date)) }
-                        dateFormat="yyyy-MM-dd"
-                    />
-                    <div>
-                        <i className="fa fa-arrows-h" aria-hidden="true" onClick={periodToCurrentMonth}></i>
+                        <DatePicker
+                            selected={new Date(periodStart)}
+                            onSelect={(date) => setPeriodStart(datetimeLocalToString(date))} 
+                            onChange={(date) => setPeriodStart(datetimeLocalToString(date)) }
+                            dateFormat="yyyy-MM-dd"
+                        />
+                        <div>
+                            <i className="fa fa-arrows-h" aria-hidden="true" onClick={periodToCurrentMonth}></i>
+                        </div>
+                        <DatePicker
+                            selected={new Date(periodEnd)}
+                            onSelect={(date) => setPeriodEnd(datetimeLocalToString(date))} 
+                            onChange={(date) => setPeriodEnd(datetimeLocalToString(date))}
+                            dateFormat="yyyy-MM-dd"
+                        />
+                        &nbsp; &nbsp;
+                        <i className="fa fa-arrow-right period-navigator" aria-hidden="true" onClick={() => handlePeriodNavigation("next-period")} ></i>
+
                     </div>
-                    <DatePicker
-                        selected={new Date(periodEnd)}
-                        onSelect={(date) => setPeriodEnd(datetimeLocalToString(date))} 
-                        onChange={(date) => setPeriodEnd(datetimeLocalToString(date))}
-                        dateFormat="yyyy-MM-dd"
-                    />
-                    &nbsp; &nbsp;
-                    <i className="fa fa-arrow-right period-navigator" aria-hidden="true" onClick={() => handlePeriodNavigation("next-period")} ></i>
+                    <div className="date-card-expander planner-settings-item">
+                        <span> Expand All Date Cards: </span>&nbsp; &nbsp;
+                        {isExpandAllDateCards?
+                            <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExpandAllDateCards(false)}></i>
+                            : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExpandAllDateCards(true)}></i>
+                        }
+                    </div>
+                    <div className="unscheduled-entities-expander planner-settings-item">
+                        <span> Expand All Unscheduled Entities: </span>&nbsp; &nbsp;
+                        {isExpandAllUnscheduledEntities?
+                            <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExpandAllUnscheduledEntities(false)}></i>
+                            : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExpandAllUnscheduledEntities(true)}></i>
+                        }
+                    </div>
 
-                </div>
-                <div className="date-card-expander planner-settings-item">
-                    <span> Expand All Date Cards: </span>&nbsp; &nbsp;
-                    {isExpandAllDateCards?
-                        <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExpandAllDateCards(false)}></i>
-                        : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExpandAllDateCards(true)}></i>
-                    }
-                </div>
-                <div className="unscheduled-entities-expander planner-settings-item">
-                    <span> Expand All Unscheduled Entities: </span>&nbsp; &nbsp;
-                    {isExpandAllUnscheduledEntities?
-                        <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExpandAllUnscheduledEntities(false)}></i>
-                        : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExpandAllUnscheduledEntities(true)}></i>
-                    }
-                </div>
+                    <div className="toggle-just-tasks planner-settings-item"> 
+                        <span>Show Just Tasks: </span>
+                        {isJustUnscheduledTask? 
+                            <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(false)}></i>
+                            : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(true)}></i>
+                        }
+                    </div>
 
-                <div className="toggle-just-tasks planner-settings-item"> 
-                    <span>Show Just Tasks: </span>
-                    {isJustUnscheduledTask? 
-                        <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(false)}></i>
-                        : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsJustUnscheduledTask(true)}></i>
-                    }
-                </div>
+                    <div className="max-daily-working-hours planner-settings-item"> 
+                        <span>Max Daily Working Hours: </span>
+                        <input 
+                            type = "number"
+                            id = "username"
+                            className="login-input"
+                            name = "username"
+                            value = {maxDailyWorkingHours}
+                            min="1"
+                            max="24"
+                            step= "1"
+                            onChange = {e => setMaxDailyWorkingHours(Math.round(e.target.value))}
+                            required/>
+                    </div>
 
-                <div className="max-daily-working-hours planner-settings-item"> 
-                    <span>Max Daily Working Hours: </span>
-                    <input 
-                        type = "number"
-                        id = "username"
-                        className="login-input"
-                        name = "username"
-                        value = {maxDailyWorkingHours}
-                        min="1"
-                        max="24"
-                        step= "1"
-                        onChange = {e => setMaxDailyWorkingHours(Math.round(e.target.value))}
-                        required/>
-                </div>
-
-                <div className="toggle-excl-break-hrs planner-settings-item"> 
-                    <span>Exclude Break Hours: </span>
-                    {isExcludeBreakHours? 
-                        <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExcludeBreakHours(false)}></i>
-                        : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExcludeBreakHours(true)}></i>
-                    }
-                </div>
-
-            </>
-            : undefined }
-        </div>
-    )
+                    <div className="toggle-excl-break-hrs planner-settings-item"> 
+                        <span>Exclude Break Hours: </span>
+                        {isExcludeBreakHours? 
+                            <i className="fa fa-check-square-o" aria-hidden="true" onClick={() => setIsExcludeBreakHours(false)}></i>
+                            : <i className="fa fa-square-o" aria-hidden="true" onClick={() => setIsExcludeBreakHours(true)}></i>
+                        }
+                    </div>
+                </>
+                : undefined }
+            </div>
+        )}
 
 }

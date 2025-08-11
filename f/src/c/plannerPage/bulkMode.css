@@ -1,0 +1,29 @@
+div.bulk-settings-header:hover{
+    color: white;
+}
+
+div.bulk-settings .bulk-shift-amount{
+    width: 25px;
+    border: 1px solid;
+    text-align: center;
+}
+div.preview-and-update-btn{
+    display: flex;
+    width: 200px;
+    /* border: 1px solid; */
+    justify-content: space-between;
+    margin: 5px
+}
+
+div.preview-and-update-btn button{
+    background-color:rgb(32, 32, 67);
+}
+
+div.preview-and-update-btn button:hover{
+    color: rgb(0, 230,0);
+    border: 1px solid rgb(48, 48, 100);
+}
+
+div.preview-and-update-btn button:focus{
+    outline: none;
+}

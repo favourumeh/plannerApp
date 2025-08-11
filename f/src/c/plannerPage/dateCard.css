@@ -11,7 +11,6 @@ div.planner-date-container{
 
 div.planner-date-container-header-row{
     display: flex;
-    justify-content: space-around;
     /* border: 1px solid; */
 }
 
@@ -20,7 +19,7 @@ div.planner-date-container-header-row div.side-btn{
 }
 
 div.planner-date-container-header-row div.add-task-entity{
-    visibility: hidden;;
+    visibility: visible;
     margin: 0 2px 0 5px;
 }
 

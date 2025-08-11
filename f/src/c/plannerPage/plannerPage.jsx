@@ -32,6 +32,11 @@ export function PlannerPage ({sitePage}) {
     const [ scrollPosition, setScrollPosition ] = useState(0) // tracks the scroll of the sidebar's unscheduled section
     const [ isDragging, setIsDragging ] = useState(false) // monitors whether user is dragging a task
     const [ activeId, setActiveId ] = useState(null)
+    const [ bulkMode, setBulkMode ] = useState(false) // tracks whether the user is in bulk mode
+    const [ idsOfTasksToUpdate, setIdsOfTasksToUpdate ] = useState([]) // stores the task ids of tasks to be updated in bulk mode
+    const [ isPreviewBulkShift, setIsPreviewBulkShift ] = useState(false) // determines whether to show preview of the final positon of a moved task in bulk mode
+    const [ updatedTasks, setUpdatedTasks ] = useState([]) // stores the task that have been updated in bulk mode
+
     const sideBar = useRef(null)
     const scheduledSection = useRef(null)
     const {handleNotification, handleLogout, isModalOpen} = useContext(globalContext)
@@ -44,7 +49,7 @@ export function PlannerPage ({sitePage}) {
         retry: 3,
     })
 
-    const tasks = isPendingScheduled?  [] :  scheduledTasksQuery.tasks
+    const tasks = isPendingScheduled?  [] : scheduledTasksQuery.tasks
     const projects = isPendingScheduled?  [] :  scheduledTasksQuery.taskProjects
     const objectives = isPendingScheduled?  [] :  scheduledTasksQuery.taskObjectives
     const unscheduledTasks = tasks.filter( (task) => !task.scheduledStart )
@@ -163,15 +168,21 @@ export function PlannerPage ({sitePage}) {
         return () => observer.disconnect() // Cleanup
     }, [])
 
-    const localPLannerPageContextValues = { // To-do move props to context
+    // const updatedTasks = tasks?.filter(task => idsOfTasksToUpdate.includes(task.id))
+
+    const localPlannerPageContextValues = { // To-do move props to context
         maxDailyWorkingHours, setMaxDailyWorkingHours,
         isExcludeBreakHours, setIsExcludeBreakHours,
         scrollPosition, setScrollPosition,
-        isDragging, activeId, setActiveId
+        isDragging, activeId, setActiveId,
+        isExpandAllDateCards, setIsExpandAllDateCards, 
+        bulkMode, setBulkMode,
+        idsOfTasksToUpdate, setIdsOfTasksToUpdate,
+        tasks, updatedTasks, setUpdatedTasks, isPreviewBulkShift, setIsPreviewBulkShift,
     }
 
     return (
-        <localPlannerPageContext.Provider value={localPLannerPageContextValues}>
+        <localPlannerPageContext.Provider value={localPlannerPageContextValues}>
             <div className="planner-page">
                 <div className="planner-page-header"> 
                     <Header/>
@@ -207,6 +218,7 @@ export function PlannerPage ({sitePage}) {
                                 setIsJustUnscheduledTask = {setIsJustUnscheduledTask}
                                 isExpandAllUnscheduledEntities={isExpandAllUnscheduledEntities}
                                 setIsExpandAllUnscheduledEntities={setIsExpandAllUnscheduledEntities}
+                                refetchPlannerTasks={refetchPlannerTasks}
                             />
                             <UnscheduledSidebar 
                                 unscheduledTasks={unscheduledTasks} 

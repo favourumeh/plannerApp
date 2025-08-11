@@ -6,12 +6,12 @@ import { createPortal } from "react-dom";
 import localPlannerPageContext from "./localPlannerPageContext";
 
 
-export function DraggableTaskCard({task, projects, objectives, refetchPlannerTasks, translate}) {
+export function DraggableTaskCard({task, projects, objectives, refetchPlannerTasks, isDateCardSelected, translate}) {
     const { activeId } = useContext(localPlannerPageContext)
     return (
         <>
             <Draggable id={task.id}>
-                <TaskCard task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate={translate}/>
+                <TaskCard task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} isDateCardSelected={isDateCardSelected} translate={translate}/>
             </Draggable>
             {createPortal( // -1 -2
                 <DragOverlay dropAnimation={null}>

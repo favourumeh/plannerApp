@@ -35,9 +35,14 @@ div.planner-task-title-row button{
     padding: 1px;
     font: 1rem;
     /* border: rgb(0,0,0,0); */
+    min-width: 18.52px;
     visibility: hidden;
-    border: 1px solid white;
     translate: 0px -5px;
+    margin: 0 2px 0 2px;
+}
+div.planner-task-title-row button.planner-task-select{
+    visibility: visible;
+
 }
 
 div.planner-task-title-row:hover button{
@@ -45,6 +50,7 @@ div.planner-task-title-row:hover button{
     visibility: visible;
 }
 
-div.kanban-card-overlay button:focus, button:focus-visible{
+div.planner-task-title-row button:focus, button:focus-visible{
     outline: none;
 }
+

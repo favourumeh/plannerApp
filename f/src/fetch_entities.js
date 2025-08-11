@@ -293,8 +293,29 @@ export async function fetchDefaultProjectObjective({projectId, handleNotificatio
         handleNotification(err.message + `. Failed to get the default project objective. Likely database connection error.`, "failure")
     }
     handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
-    const requestFn = async() => fetchPlannerTasks({periodStart, periodEnd, handleNotification, handleLogout})
+    const requestFn = async() => fetchDefaultProjectObjective({projectId, handleNotification, handleLogout})
     resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
     return resp_json
 }
+
+export async function bulkShiftTaskMutation({updatedTasks, handleNotification, handleLogout}) {
+    try{
+        const baseUrl =  `${backendBaseUrl}/bulk-update-task_schedules`
+        const options = {
+            method:"PATCH",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({tasks: updatedTasks}),
+            credentials:"include",
+        }
+        var resp = await fetch(baseUrl, options)
+        var resp_json = await resp.json()
+    } catch (err) {
+        handleNotification(err.message + `. Failed to bulk update task scheduled dates. Likely database connection error.`, "failure")
+    } 
+    handleNon401Requests({resp, resp_json, handleNotification, showSuccessNoti: false})
+    const requestFn = async() => bulkShiftTaskMutation({updatedTasks, handleNotification, handleLogout})
+    resp_json = await retryRequestOnUpdatedAT(resp, resp_json, requestFn, handleNotification, handleLogout)
+    return resp_json
+}
+
 export {fetchUserEntityPage, fetchHomepageTasks, fetchTasksObjectiveAndProject, fetchKanbanTasks}

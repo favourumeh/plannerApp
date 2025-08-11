@@ -19,6 +19,7 @@ div.planner-page-header-2 span {
 
 .planner-body{ /*set a local variable that can be use within the the children of the element that has the tag planner-body  */
     --sidebar-width: 395px;
+    --calendar-width: 1155px;
 }
 
 div.planner-body{
@@ -27,6 +28,7 @@ div.planner-body{
     border-radius: 10px;
     min-height: 700px;
     min-width: 1500px;
+    width: calc(var(--sidebar-width) + var(--calendar-width));
     background-color: rgb(30, 23, 36);
     padding: 10px 10px 10px 10px;
     user-select: none;
@@ -44,7 +46,7 @@ div.planner-side-bar{
 
 div.planner-content{
     /* border: 1px solid; */
-    width: calc(100% - var(--sidebar-width));
+    width: max(var(--calendar-width), calc(100% - var(--sidebar-width)));
     height: 100%;
     translate: calc(var(--sidebar-width) + 20px);
 

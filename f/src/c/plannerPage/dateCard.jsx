@@ -9,10 +9,11 @@ import { defaultObjective, defaultProject, defaultTask } from "../../staticVaria
 import { datetimeToString, formatTotalMins } from "../../utils/dateUtilis"
 import { DraggableTaskCard } from "./DraggableTaskCard"
 
-export function DateCard({date, isPendingScheduled, tasks, projects, objectives, isExpandAllDateCards, refetchPlannerTasks}) {
+export function DateCard({date, isPendingScheduled, tasks, projects, objectives,refetchPlannerTasks}) {
+    const { isExpandAllDateCards, maxDailyWorkingHours, isExcludeBreakHours, bulkMode, idsOfTasksToUpdate, setIdsOfTasksToUpdate, updatedTasks, isPreviewBulkShift } = useContext(localPlannerPageContext)
     const [ isExpanded, setIsExpanded ] = useState(isExpandAllDateCards)
-    const [ maxWorkloadBarWidth, setMaxWorkloadBarWidth ] = useState(309) 
-    const { maxDailyWorkingHours, isExcludeBreakHours } = useContext(localPlannerPageContext)
+    const [ maxWorkloadBarWidth, setMaxWorkloadBarWidth ] = useState(309)
+    const [ isDateCardSelected, setIsDateCardSetlected] = useState(false)
     const { setCurrentTask, setForm, setFormProject, setFormObjective, setIsModalOpen, setSitePage, setCurrentDate, handleNotification } = useContext(globalContext)
     const taskFilter = (task) => {
         if (!!task.start){
@@ -20,7 +21,9 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
         }
         return (datetimeToString(new Date(task.scheduledStart)) === date.split(" ")[1])
     }
-    const daysTasks = tasks?.filter(taskFilter)
+    const tasksAndPreview = !isPreviewBulkShift ? tasks : [...tasks, ...updatedTasks]
+    const daysTasks = tasksAndPreview?.filter(taskFilter)
+
     const calcTotalTaskDuration  = (task) => {
         if (!isExcludeBreakHours) {return (task.duration || task.durationEst)}
 
@@ -87,13 +90,47 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
         }
     }
 
+    const handleSelectDateCard = (e) => { // adds all tasks under date card to update list when datecard is ticked. Also removes all tasks when unticked. 
+        e.stopPropagation()
+        const isDateCardSelected_ = !isDateCardSelected
+        const updateTaskIds = daysTasks.reduce((acc, task) => {
+            return acc.concat(task.id)
+        },[])
+        if (isDateCardSelected_) {
+            setIdsOfTasksToUpdate(prev => [...prev, ...updateTaskIds])
+        } else {
+            setIdsOfTasksToUpdate( prev => prev.filter( taskId => !updateTaskIds.includes(taskId) ) )
+        }
+        setIsDateCardSetlected(isDateCardSelected_)
+    }
+
+    useEffect( ()=> { // unticks date card when all tasks under it are unticked and vice versa
+        if (bulkMode){
+            const idsOfdateCardsSelectedTasks = daysTasks.reduce((acc, task)=> idsOfTasksToUpdate.includes(task.id)? acc.concat(task.id) : acc , [])
+            if (idsOfdateCardsSelectedTasks.length === 0 ) {
+                setIsDateCardSetlected(false)
+            }
+
+            if ( idsOfdateCardsSelectedTasks.length === daysTasks.length && daysTasks.length !==0){
+                setIsDateCardSetlected(true)
+            }
+        }
+    }, [idsOfTasksToUpdate])
+
+    useEffect(()=> { // untick datecard when bulk mode is false
+        if (!bulkMode) {
+            setIsDateCardSetlected(false)
+        }
+    }, [bulkMode])
+
     return (
         <div ref={setNodeRef} id={date} className="planner-date-container" style={styleDateCard}>
-            
             <div className="planner-date-container-header-row">
-
                 <div className={`mutate-entity add-task-entity side-btn`}>
-                    <i className="fa fa-plus side-btn" aria-hidden="true" onClick={handleClickAddBtn} ></i> 
+                    {bulkMode? 
+                        isDateCardSelected? <i className="fa fa-check-square-o" aria-hidden="true" onClick={handleSelectDateCard} />:
+                        <i className="fa fa-square-o side-btn" aria-hidden="true" onClick={handleSelectDateCard} />: 
+                        <i className="fa fa-plus side-btn" aria-hidden="true" onClick={handleClickAddBtn} /> }
                 </div>
 
                 <div ref ={headerDiv} className="planner-date-container-header" >
@@ -105,6 +142,7 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
                     > {date} #{isPendingScheduled? "..." : daysTasks.length } ({formatTotalMins(totalTaskMins)})
                     </div>
                 </div>
+
                 <div onClick={handleExpandedDayCard} className="date-card-expand-btns side-btn">
                     {isExpanded? 
                         <i className="fa fa-caret-up side-btn" aria-hidden="true"></i>
@@ -113,11 +151,10 @@ export function DateCard({date, isPendingScheduled, tasks, projects, objectives,
                 </div>
             </div>
 
-
             {isExpanded? 
                 daysTasks?.sort((a, b) => // sort the tasks in the date card by the start time
                     new Date(a.start) - new Date(b.start)).map((task, index) =>
-                    <DraggableTaskCard key={task.id} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} translate="100% -0%"/>
+                    <DraggableTaskCard key={`${task.id}-${index}`} task={task} projects={projects} objectives={objectives} refetchPlannerTasks={refetchPlannerTasks} isDateCardSelected={isDateCardSelected} translate="100% -0%"/>
                 )
                 : undefined    
             }
