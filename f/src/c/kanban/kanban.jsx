@@ -61,6 +61,8 @@ const Kanban = ({sitePage}) => {
         const isTaskFinishedOnSelectedDay = (new Date(task.finish).toDateString() === selectedDay )
         const isTaskScheduledBeforeToday = new Date(taskScheduleDate).getTime() < new Date().getTime()
         const isTodayEqualToSelectedDay = selectedDay === new Date().toDateString()
+        const isTaskStartDateNotScheduledDate = new Date(task.start).toDateString() != new Date().toDateString()
+
         const isTaskStatusComplete = task.status === "Completed"
         var outputBool = false
         if ( isTaskScheduledForSelectedDay && isTodayEqualToSelectedDay ) {outputBool = true}
@@ -68,6 +70,7 @@ const Kanban = ({sitePage}) => {
         if ( isTaskFinishedOnSelectedDay && isTaskStatusComplete ) {outputBool = true}
         if ( !isTaskStatusComplete && isTaskScheduledForSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
         if ( !isTaskStatusComplete && isTodayEqualToSelectedDay && isTaskScheduledBeforeToday ) {outputBool = true}
+        if ( isTaskScheduledForSelectedDay && isTodayEqualToSelectedDay && isTaskStartDateNotScheduledDate && !!task.start ) {outputBool = false} // if task is completed early don't show it on its scheduled date
         if ( task.scheduledStart === null ) {outputBool = false}
         return outputBool
     }
