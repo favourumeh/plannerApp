@@ -10,7 +10,8 @@ allowed_origins= [
     "http://localhost:3000",
     "http://localhost:5173",
     "https://plannerappfrontend-daedfdg4fgg6bfgs.uksouth-01.azurewebsites.net",
-    "https://lively-meadow-088461003.6.azurestaticapps.net"
+    "https://lively-meadow-088461003.6.azurestaticapps.net",
+    "https://planner-frontend.favours-planner.xyz",
     ]
 
 access_token_dur = float(os.environ["accessTokenDurationMins"])
