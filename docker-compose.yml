@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
       args:
         backend_container_port: ${backend_container_port}
+    network_mode: "host"
     ports:
       - "${backend_host_port}:${backend_container_port}"
     env_file:

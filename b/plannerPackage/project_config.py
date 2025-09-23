@@ -20,7 +20,7 @@ refresh_token_dur =  float(os.environ["refreshTokenDurationDays"])
 #generate the config dict
 params = sys.argv[1:]
 print("sys.argv: ", params)
-default_config_dict= {"--env":"prod", "--rdbms":"az_mysql"}
+default_config_dict= {"--env":"prod", "--rdbms":"mysql"}
 config_dict = generate_config_dict(params, default_config_dict)
 
 #Get vault secrets if in prod env
