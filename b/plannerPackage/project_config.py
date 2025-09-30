@@ -23,6 +23,10 @@ print("sys.argv: ", params)
 default_config_dict= {"--env":"prod", "--rdbms":"mysql"}
 config_dict = generate_config_dict(params, default_config_dict)
 
+#Switch to rdbms az_mysql if app is deployed to Azure
+config_dict["--rdbms"] = config_dict["--rdbms"] if os.environ.get("mySQLUser", None) else "az_mysql"
+    #note: if there isn't a "mySQLuser" environment variable then the app is deployed in Azure.
+
 #Get vault secrets if in prod env
 if config_dict["--env"] != "dev" or config_dict["--rdbms"] == "az_mysql":
     #define azure key vault service principle (client/app) credentials
