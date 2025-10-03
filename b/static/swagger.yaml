@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Planner App API. 
+  title: Planner App API.
   description: |
     API documnetation for the Flask Planner App backend.<br/>
     How to test the API:
@@ -22,7 +22,9 @@ servers:
   - url: http://127.0.0.1:5000/api
     description: Testing server
   - url: https://plannerappbackendnc-dad9ghcgd6ame2cc.ukwest-01.azurewebsites.net/api
-    description:  Main (production) server
+    description:  Azure (production) server (currently down)
+  - url: https://planner-backend.favours-planner.xyz/api
+    description: Main (production) server (hosted on raspberry pi)
 
 paths:
   /sign-up:
