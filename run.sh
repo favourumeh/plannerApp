@@ -22,7 +22,7 @@ if [[ "$env" == "dev" ]]; then
     tmux split-window -h -t "$session_name":0 'cd f; npm run dev'
     tmux attach -t "$session_name"
     tmux kill-session -t "$session_name"
-    exit 1
+    exit 0
 fi
 
 if [[ "$env" == "dev-mysql" ]]; then
@@ -47,7 +47,7 @@ if [[ "$env" == "dev-mysql" ]]; then
     tmux split-window -h -t "$session_name":0 'cd f; npm run dev'
     tmux attach -t "$session_name"
     tmux kill-session -t "$session_name"
-    exit 1
+    exit 0
 fi
 
 if [[ "$env" == *"sandbox"* ]]; then
@@ -76,7 +76,7 @@ if [[ "$env" == *"sandbox"* ]]; then
         docker compose up --build
     fi
 
-    exit 1
+    exit 0
 fi
 
 if [[ "$env" == "db" ]]; then
@@ -89,7 +89,7 @@ if [[ "$env" == "db" ]]; then
     sed -i "s/mySQLPassword=.*/mySQLPassword=$mySQLPassword_sandbox/" ./b/.env
     sed -i 's/mySQLUser=.*/mySQLUser=root/' ./b/.env
     docker compose up mysql
-    exit 1
+    exit 0
 fi
 
 if [[ "$env" == "prod" ]]; then
@@ -103,6 +103,7 @@ if [[ "$env" == "prod" ]]; then
     sed -i "s/mySQLPassword=.*/mySQLPassword=$mySQLPassword_prod/" ./b/.env
     sed -i "s/mySQLUser=.*/mySQLUser=$mySQLUser_prod/" ./b/.env
     docker compose up --build -d
+    exit 1
 fi
 
 #Valid configuration not entered
