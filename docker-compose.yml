@@ -2,19 +2,19 @@ services:
   flask-backend:
     container_name: ${backend_container_name}
     image: ${backend_repo_and_image_tag}
-    build: 
+    build:
       context: ./b
       dockerfile: Dockerfile
       args:
         backend_container_port: ${backend_container_port}
-    network_mode: "host"
     ports:
       - "${backend_host_port}:${backend_container_port}"
     env_file:
       - ./b/.env
     restart: unless-stopped
     depends_on:
-      - react-frontend
+      mysql:
+        condition: service_healthy
 
   react-frontend:
     container_name: ${frontend_container_name}
@@ -28,4 +28,23 @@ services:
         frontend_container_app_service_domain: ${FRONTEND_CONTAINER_APP_SERVICE_DOMAIN}
     ports:
       - "${frontend_host_port}:${frontend_container_port}"
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: app-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${mySQLPassword_sandbox}
+      MYSQL_DATABASE: planner_app_db
+    ports:
+      - "3307:3306"  # used port 3307 in host because port 3306 is already used by mysql service running on host
+    volumes:
+      - ../pa-db/data:/var/lib/mysql
+      - ../pa-db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -proot --silent"]
+      interval: 5s      # how often to check
+      timeout: 3s       # fail the check if it takes longer
+      retries: 5        # mark as unhealthy after 5 failed attempts
+      start_period: 10s # give MySQL time to start before first check
     restart: unless-stopped
