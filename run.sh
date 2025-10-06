@@ -103,7 +103,7 @@ if [[ "$env" == "prod" ]]; then
     sed -i "s/mySQLPassword=.*/mySQLPassword=$mySQLPassword_prod/" ./b/.env
     sed -i "s/mySQLUser=.*/mySQLUser=$mySQLUser_prod/" ./b/.env
     docker compose up --build -d
-    exit 1
+    exit 0
 fi
 
 #Valid configuration not entered
