@@ -12,6 +12,9 @@ services:
     env_file:
       - ./b/.env
     restart: unless-stopped
+    networks:
+      - frontend
+      - backend
     depends_on:
       mysql:
         condition: service_healthy
@@ -28,6 +31,8 @@ services:
         frontend_container_app_service_domain: ${FRONTEND_CONTAINER_APP_SERVICE_DOMAIN}
     ports:
       - "${frontend_host_port}:${frontend_container_port}"
+    networks:
+      - frontend
     restart: unless-stopped
 
   mysql:
@@ -47,4 +52,10 @@ services:
       timeout: 3s       # fail the check if it takes longer
       retries: 5        # mark as unhealthy after 5 failed attempts
       start_period: 10s # give MySQL time to start before first check
+    networks:
+      - backend
     restart: unless-stopped
+
+networks:
+  frontend:
+  backend:
