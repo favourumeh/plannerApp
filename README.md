@@ -148,7 +148,7 @@ note: choosing the mysql backend means setting up a mysql db for the app and fil
 ## Deployment Flow
 ![deploymentFlow](static/deploymentFlow.png)
 ## API Docs
-Swagger UI API docs can be found [here](https://plannerappbackendnc-dad9ghcgd6ame2cc.ukwest-01.azurewebsites.net/api/docs): 
+Swagger UI API docs can be found [here](https://planner-backend.favours-planner.xyz/api/docs/): 
 # 5. App Visuals
 ## Guest Page
 Purpose: Facilitate User signup and login. 
