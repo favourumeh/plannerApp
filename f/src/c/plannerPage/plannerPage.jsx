@@ -24,7 +24,7 @@ export function PlannerPage ({sitePage}) {
     const [ periodStart, setPeriodStart ] = useState( () => persistState( "periodStart", datetimeToString(new Date()), "localStorage" ) )
     const [ periodEnd, setPeriodEnd ] = useState( () => persistState( "periodEnd", datetimeToString(new Date(new Date().setDate( new Date().getDate() + 1 ))), "localStorage" ) ) // end date is a week after start date
     const [ isExpandAllDateCards, setIsExpandAllDateCards ] = useState( () => persistState( "isExpandAllDateCards", true, "localStorage" ) )
-    const [ isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities ] = useState( () => persistState("isExpandAllUnscheduledEntities", true, "localStorage") )
+    const [ isExpandAllUnscheduledEntities, setIsExpandAllUnscheduledEntities ] = useState( () => persistState("isExpandAllUnscheduledEntities", false, "localStorage") )
     const [ isJustUnscheduledTask, setIsJustUnscheduledTask ] = useState(() => persistState("isJustUnscheduledTask", false, "localStorage") )
     const [ plannerBodyHeight, setPlannerBodyHeight ] = useState(minPlannerBodyHeight)
     const [ maxDailyWorkingHours, setMaxDailyWorkingHours ] = useState( () => persistState( "maxDailyWorkingHours", 7, "localStorage" ) )
@@ -36,6 +36,7 @@ export function PlannerPage ({sitePage}) {
     const [ idsOfTasksToUpdate, setIdsOfTasksToUpdate ] = useState([]) // stores the task ids of tasks to be updated in bulk mode
     const [ isPreviewBulkShift, setIsPreviewBulkShift ] = useState(false) // determines whether to show preview of the final positon of a moved task in bulk mode
     const [ updatedTasks, setUpdatedTasks ] = useState([]) // stores the task that have been updated in bulk mode
+    const [ isCtrlPressed, setIsCtrlPressed ] = useState(false)
 
     const sideBar = useRef(null)
     const scheduledSection = useRef(null)
@@ -168,6 +169,21 @@ export function PlannerPage ({sitePage}) {
         return () => observer.disconnect() // Cleanup
     }, [])
 
+    useEffect(() => { // listens for ctrl key pressed to enable quick copy of a selected task
+        const handleKeyDown = (e) => {
+            if (e.ctrlKey) setIsCtrlPressed(true)
+            }
+        const handleKeyUp = (e) => {
+            if (!e.ctrlKey) setIsCtrlPressed(false)
+        }
+        window.addEventListener("keydown", handleKeyDown)
+        window.addEventListener("keyup", handleKeyUp)
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown)
+            window.removeEventListener("keyup", handleKeyUp)
+        }
+    }, [] )
+
     // const updatedTasks = tasks?.filter(task => idsOfTasksToUpdate.includes(task.id))
 
     const localPlannerPageContextValues = { // To-do move props to context
@@ -179,6 +195,7 @@ export function PlannerPage ({sitePage}) {
         bulkMode, setBulkMode,
         idsOfTasksToUpdate, setIdsOfTasksToUpdate,
         tasks, updatedTasks, setUpdatedTasks, isPreviewBulkShift, setIsPreviewBulkShift,
+        isCtrlPressed,
     }
 
     return (

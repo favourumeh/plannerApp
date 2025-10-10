@@ -9,27 +9,27 @@ import { isDateOlder } from "../../utils/dateUtilis"
 import localPlannerPageContext from "./localPlannerPageContext"
 
 export function TaskCard({task, projects, objectives, refetchPlannerTasks, isDateCardSelected, translate}) {
-    const { bulkMode, setIdsOfTasksToUpdate } = useContext(localPlannerPageContext)
-    const { setForm, setCurrentTask, handleNotification, handleLogout, setIsModalOpen } = useContext(globalContext)
+    const { bulkMode, setIdsOfTasksToUpdate, isCtrlPressed } = useContext(localPlannerPageContext)
+    const { setForm, setCurrentTask, handleNotification, handleLogout, setIsModalOpen, formatDateFields } = useContext(globalContext)
     const [ isTaskSelected, setIsTaskSelected ] = useState(isDateCardSelected)
 
     const objective = objectives?.find(objective=> task.objectiveId===objective.id)
     const project = projects.find((project) => objective?.projectId===project.id)
-    const deleteEntityMutation = useMutation({
-        mutationFn: mutateEntityRequest,
-        onSuccess: refetchPlannerTasks,
-    })
+
     const onClickEditBtn = (e) => {
         e.stopPropagation()
         setForm(`update-task`)
         setCurrentTask(task)
         setIsModalOpen(true)
     }
-
+    const entityMutation = useMutation({
+        mutationFn: mutateEntityRequest,
+        onSuccess: refetchPlannerTasks,
+    })
     const onClickDeleteBtn = (e) => {
         if (e.ctrlKey) {
             e.stopPropagation()
-            deleteEntityMutation.mutate({
+            entityMutation.mutate({
                 action: "delete",
                 entityName: "task",
                 currentEntity: task, 
@@ -79,7 +79,6 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, isDat
             setIdsOfTasksToUpdate(prev => prev.filter(taskId => task.id != taskId ))
         }
         setIsTaskSelected(!isTaskSelected)
-
     }
 
     useEffect(() => { // when in bulk mode, ticking the date card should tick all the tasks in the date card and vice versa
@@ -99,6 +98,31 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, isDat
         }
     }, [bulkMode])
 
+    const onClickCopyBtn = (e) => {
+        e.stopPropagation()
+
+        if (e.ctrlKey && e.shiftKey) {
+            entityMutation.mutate({
+                action: "create",
+                entityName: "task",
+                currentEntity: formatDateFields({
+                    ...task, 
+                    id: null, 
+                    description: "add desc...", 
+                    duration: null, 
+                    start: "", 
+                    finish: ""
+                }), 
+                handleNotification: handleNotification, 
+                handleLogout: handleLogout,
+            })
+        } else if (e.ctrlKey) {
+            setForm(`create-task`)
+            setCurrentTask({...task, description: "", duration: null, start: "", finish: ""})
+            setIsModalOpen(true)
+        }
+    }
+
     return (
         <div className="planner-task-card-container">
             <div className="planner-task-title-row">
@@ -111,9 +135,14 @@ export function TaskCard({task, projects, objectives, refetchPlannerTasks, isDat
                             <i className="fa fa-square-o side-btn" aria-hidden="true" />
                         </button>
                     ) :
-                    <button onPointerDown={onClickEditBtn} > 
-                        <i className="fa fa-pencil" aria-hidden="true" onPointerDown={onClickEditBtn}/>
-                    </button>
+                    (isCtrlPressed?
+                        <button onPointerDown={onClickCopyBtn} > 
+                            <i className="fa fa-clone" aria-hidden="true" onPointerDown={onClickCopyBtn}/>
+                        </button> :
+                        <button onPointerDown={onClickEditBtn} > 
+                            <i className="fa fa-pencil" aria-hidden="true" onPointerDown={onClickEditBtn}/>
+                        </button> 
+                    )
                 }
                 <div 
                     style={stylePlannerTaskContent}  
