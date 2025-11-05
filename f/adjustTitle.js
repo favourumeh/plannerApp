@@ -10,5 +10,5 @@ if (app_env === "dev") {
 }else if (app_env == "prod-local-docker") {
     siteTitleTag.innerText = "PlannerApp on rasp-pi"
 }else {
-    siteTitleTag.innerText = "PlannerApp"
+    {}
 }
