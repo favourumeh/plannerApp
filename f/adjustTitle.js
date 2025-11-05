@@ -6,9 +6,9 @@ let siteTitleTag = document.getElementById("site-title")
 if (app_env === "dev") {
     siteTitleTag.innerText = "dev - PlannerApp"
 } else if (["prod-local"].includes(app_env)) {
-    siteTitleTag.innerText = "rasp-pi - PlannerApp"
+    siteTitleTag.innerText = "PlannerApp on rasp-pi"
 }else if (app_env == "prod-local-docker") {
-    siteTitleTag.innerText = "rasp-pi - plannerApp"
+    siteTitleTag.innerText = "PlannerApp on rasp-pi"
 }else {
     siteTitleTag.innerText = "PlannerApp"
 }
