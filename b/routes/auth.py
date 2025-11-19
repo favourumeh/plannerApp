@@ -219,7 +219,7 @@ def refresh() -> Tuple[Response, int]:
 @token_required(app=app, serializer=serializer)
 def delete_user(user_id: int) -> Tuple[Response, int]:
     """Allows User to delete their account and Admin to delete any account (except admin account)"""
-    resp_dict = {"message": "boo", "userId": f"{session["userId"]}"}
+    resp_dict = {"message": "boo", "userId": f"{session['userId']}"}
     session_user: User = User.query.filter_by(id=session["userId"]).first()
     user_to_delete: User = User.query.filter_by(id=user_id).first()
 

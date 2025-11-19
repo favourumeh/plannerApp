@@ -59,7 +59,7 @@ if 'test' not in ",".join(sys.argv): #1
         app.config["SQLALCHEMY_DATABASE_URI"]= f"sqlite:///{cwd}/{db_name}.db"
 
     if pp.config_dict["--rdbms"] == "mysql":
-        app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{os.environ["mySQLUser"]}:{os.environ["mySQLPassword"]}@{os.environ["mySQLHost"]}/{db_name}"
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{os.environ['mySQLUser']}:{os.environ['mySQLPassword']}@{os.environ['mySQLHost']}:{os.environ['mySQLPort']}/{db_name}"
 
     if pp.config_dict["--rdbms"] == "az_mysql":
         #download SSL Certificate from blob storage
