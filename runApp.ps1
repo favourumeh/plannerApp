@@ -32,7 +32,7 @@ $userEnv = test-spelling -userInput $userEnv -allowedInputs $allowed_env -prompt
 
 #Automatically set rdbms if the user did not specify one.
 if ($rdbms -eq "") {
-    $userRDBMS = ($userEnv -eq "dev") ? "mysql" : "az_mysql"
+    $userRDBMS = ($userEnv -eq "dev") ? "sqlite" : "az_mysql"
 } else {
     $userRDBMS = test-spelling -userInput $userRDBMS -allowedInputs $allowed_rdbms -promptMessage "[param: rdbms] Please enter one of - $allowed_rdbms_prompt_format"
 }
