@@ -19,6 +19,7 @@ import ProgressPage from './c/progressPage/progressPage.jsx'
 import { defaultTask, defaultObjective, defaultProject } from './staticVariables.js'
 import { persistState } from './utils/stateUtils.js'
 import { PlannerPage } from './c/plannerPage/plannerPage.jsx'
+import { useKeyboardShortcut } from "./customHooks/keyboardShortcuts"
 
 function App() {
     const [isModalOpen, setIsModalOpen] = useState(() => persistState("isModalOpen",false))
@@ -138,6 +139,16 @@ function App() {
                 break
         }
     }
+
+    // keyboard shortcuts 
+        const handleOpenEntityModal = (entity) => {
+            setForm(`create-${entity}`)
+            setIsModalOpen(true)
+        }
+        useKeyboardShortcut("t", () => handleOpenEntityModal("task"))
+        useKeyboardShortcut("o", () => handleOpenEntityModal("objective"))
+        useKeyboardShortcut("p", () => handleOpenEntityModal("project"))
+        useKeyboardShortcut("Escape", () => setIsModalOpen(false), false)
 
     // create global prop object
     const globalProps = {
