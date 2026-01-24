@@ -184,7 +184,8 @@ function TaskForm ({form}) {
                     value = {(isPendingTasksParents && form==="update-task")? "...": queryField}
                     autoComplete="off"
                     onChange = {handleSearchFieldChange}
-                    onClick = {(e) => toggleShowSearchResult(e, labelName)}/>
+                    onClick = {(e) => toggleShowSearchResult(e, labelName)}
+                />
                 <SearchResult searchFieldLabel={labelName} query={queryField} setQuery={setQueryField} entityArray={entityArray}/>
             </div>
         )

@@ -10,10 +10,10 @@ function SearchResult({searchFieldLabel, query, setQuery, entityArray}) {
     useEffect(()=> {
         var result = entityArray.filter((item) => 
                         item["title"]?.toLowerCase().includes(query?.toLowerCase()) || 
-                        item["title"]== (searchFieldLabel == "Project"?"No Project":"No Objective")).slice(0,5)
+                        item["title"]== (searchFieldLabel == "Project"?"No Project":"No Objective"))
 
         if (query==="" || typeof query==="undefined") {
-            result = entityArray.slice(0,5)
+            result = entityArray
         }
         setQueryResult(result)}, [query, showProjectQueryResult, showObjectiveQueryResult])
 
