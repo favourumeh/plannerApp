@@ -1,0 +1,13 @@
+# https://taskfile.dev
+version: '3'
+
+vars:
+  ROOT_DIR: .
+
+tasks:
+  run-dev:
+    desc: Runs the planner app in develop environment with (default db is mysql)
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - pwsh -Command "Write-Host 'Starting development environment...'"
+      - pwsh -File ./runApp.ps1 -env dev
