@@ -7,6 +7,7 @@ import Dropdown from "../dropdown"
 import {defaultTask} from "../../staticVariables"
 import { readProjectsQueryOption, readTasksObjectiveAndProjectQueryOption, readProjectsObjectivesQueryOption} from "../../queryOptions"
 import { mutateEntityRequest } from "../../fetch_entities"
+import { useKeyboardShortcut } from "../../customHooks/keyboardShortcuts"
 
 function TaskForm ({form}) {
     if (!["create-task", "update-task"].includes(form)) {
@@ -197,6 +198,30 @@ function TaskForm ({form}) {
         setCurrentTask({...defaultTask, id:currentTask.id, objectiveId:currentTask.objectiveId})
     }
 
+    // shortcuts 
+    // clear all fields in the task form
+    useKeyboardShortcut("c", () => handleClearAll(true))
+    
+    //increate the duration estimate by 10min
+    const increaseDurationEstBy10 = () => {
+        setCurrentTask( 
+            prev => ({
+                ...prev, 
+                durationEst:(Number.isInteger(prev.durationEst)? prev.durationEst +10 : 10) 
+            }) 
+        )
+    }
+    const reduceDurationEstBy10 = () => {
+        setCurrentTask( 
+            prev => ({
+                ...prev, 
+                durationEst:(Number.isInteger(prev.durationEst)? prev.durationEst -10 : 10) 
+            }) 
+        )
+    }
+    useKeyboardShortcut("ArrowUp", increaseDurationEstBy10)
+    useKeyboardShortcut("ArrowDown", reduceDurationEstBy10)
+    
     // Handle Form Input Validation
     const handleDisableFormSubmitBtn = () =>{ //disables the submit button when the form's input is invalid OR if form is waiting on the response from POST/PATCH request. 
         var disabled = false
