@@ -6,6 +6,7 @@ import globalContext from "../../context"
 import { fetchDefaultProjectObjective, mutateEntityRequest } from "../../fetch_entities"
 import { defaultTask, } from './../../staticVariables.js'
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query"
+import { useKeyboardShortcut } from "../../customHooks/keyboardShortcuts.jsx"
 
 export default function KanbanColumn ({columnId, columnTitle, taskArr, entityName, breakObjective, refetchKanbanContent}) {
     const {onShowHoverText, onHideHoverText, formatDateFields, handleNotification, handleLogout} = useContext(globalContext)
@@ -27,10 +28,9 @@ export default function KanbanColumn ({columnId, columnTitle, taskArr, entityNam
             refetchKanbanContent()
         }
     })
-    const handleQuickAddTask = (e) => { // add a task or a break immeadiately to the In Progress kanban column
-        e.stopPropagation()
+
+    const createQuickTask = (isBreak=false) => {
         const now = new Date( new Date().getTime() - new Date().getTimezoneOffset()*60*1000 )
-        const isBreak = e.ctrlKey? true : false
         addTaskMutation.mutate({
             action: "create",
             entityName: entityName,
@@ -47,16 +47,30 @@ export default function KanbanColumn ({columnId, columnTitle, taskArr, entityNam
         })
     }
 
+    const handleQuickAddTask = (e) => { // add a task or a break immeadiately to the In Progress kanban column
+        e.stopPropagation()
+        const isBreak = e.ctrlKey? true : false
+        createQuickTask(isBreak)
+    }
+
     const quickAddDropdown = (
             <i 
                 className="fa fa-plus quick-add-btn" 
                 aria-hidden="true"
                 onClick = {(e) => handleQuickAddTask(e)}
                 onMouseEnter={() => onShowHoverText("Click to add a quick task. CTRL + Click to add a quick break")}
-            >
-                
-            </i>
+            ></i>
     )
+
+    // keyboard shortcuts
+    const createQuickTaskShortcut = (isBreak=false) => {
+        if (columnTitle==="In Progress") {
+        createQuickTask(isBreak)
+        }
+    }
+    useKeyboardShortcut("a", () => createQuickTaskShortcut()) // add quick task
+    useKeyboardShortcut("b", () => createQuickTaskShortcut(true)) // add quick break task
+
     return (
         <>
             <div ref = {setNodeRef} id={columnId} className="kanban-column"> 
