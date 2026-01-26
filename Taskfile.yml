@@ -6,8 +6,15 @@ vars:
 
 tasks:
   run-dev:
-    desc: Runs the planner app in develop environment with (default db is mysql)
+    desc: Runs the planner app in develop environment with (default db is sqlite)
     dir: "{{.ROOT_DIR}}"
     cmds:
       - pwsh -Command "Write-Host 'Starting development environment...'"
       - pwsh -File ./runApp.ps1 -env dev
+  
+  run-dev-mysql:
+    desc: Runs the planner app in develop environment with mysql db
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - pwsh -Command "Write-Host 'Starting development environment with MySQL...'"
+      - pwsh -File ./runApp.ps1 -env dev -rdbms mysql
