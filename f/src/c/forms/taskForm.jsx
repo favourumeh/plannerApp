@@ -203,24 +203,21 @@ function TaskForm ({form}) {
     useKeyboardShortcut("c", () => handleClearAll(true))
     
     //increate the duration estimate by 10min
-    const increaseDurationEstBy10 = () => {
-        setCurrentTask( 
-            prev => ({
-                ...prev, 
-                durationEst:(Number.isInteger(prev.durationEst)? prev.durationEst +10 : 10) 
-            }) 
-        )
+    const updateDuration = (currentValue, increase) => {
+        if (!Number.isInteger(currentValue)) {
+            return currentValue
+        } 
+        if (currentValue ===  10 && increase === false ) { // lower limit of 10min
+            return currentValue
+        }
+        return  currentValue +(increase? 10 : -10)       
     }
-    const reduceDurationEstBy10 = () => {
-        setCurrentTask( 
-            prev => ({
-                ...prev, 
-                durationEst:(Number.isInteger(prev.durationEst)? prev.durationEst -10 : 10) 
-            }) 
-        )
+
+    const changeTaskDurationEstBy10 = (increase=true) => {
+        setCurrentTask( prev => ({...prev,durationEst:updateDuration(prev.durationEst, increase)}))
     }
-    useKeyboardShortcut("ArrowUp", increaseDurationEstBy10)
-    useKeyboardShortcut("ArrowDown", reduceDurationEstBy10)
+    useKeyboardShortcut("ArrowUp", () => changeTaskDurationEstBy10())
+    useKeyboardShortcut("ArrowDown", () => changeTaskDurationEstBy10(false))
     
     // Handle Form Input Validation
     const handleDisableFormSubmitBtn = () =>{ //disables the submit button when the form's input is invalid OR if form is waiting on the response from POST/PATCH request. 
