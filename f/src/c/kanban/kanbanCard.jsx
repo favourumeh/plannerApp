@@ -5,9 +5,10 @@ import "./kanbanCard.css"
 import { useContext } from "react"
 import { mutateEntityRequest } from "../../fetch_entities"
 import { readTasksObjectiveAndProjectQueryOption } from "../../queryOptions"
+import { useKeyboardShortcut } from "../../customHooks/keyboardShortcuts.jsx"
 
 export default function KanbanCard ({task, entityName, refetchKanbanContent}) {
-    const {setCurrentTask, setIsModalOpen, setForm, 
+    const {setCurrentTask, setIsModalOpen, isModalOpen, setForm, 
            currentDate, handleNotification, handleLogout} = useContext(globalContext)
 
     // get the project and objective numbers for each task 
@@ -70,6 +71,17 @@ export default function KanbanCard ({task, entityName, refetchKanbanContent}) {
         return "white"
     }   
     const kanbanContentStyle = {"color": getKanbanCardColour()}
+
+    // keyboard shortcuts
+
+    const openInProgressTask = () => {
+        if (task.status==="In-Progress" && isModalOpen === false) { // only open if not already modal is open (thus only opens the first In Progress task)
+            setForm(`update-${entityName}`)
+            setCurrentTask(task)
+            setIsModalOpen(true)
+        }
+    }
+    useKeyboardShortcut("i", () => openInProgressTask()) // open In Progress task
 
     return (
         <div 
