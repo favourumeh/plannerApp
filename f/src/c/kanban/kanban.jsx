@@ -12,6 +12,7 @@ import ViewPage from "../toolbar/viewPage"
 import RefreshEntities from "../toolbar/refreshEntities"
 import HoverText from "./hoverText"
 import { fetchKanbanTasks, fetchBreakObjective, mutateEntityRequest } from "../../fetch_entities"
+import { useKeyboardShortcut } from "../../customHooks/keyboardShortcuts"
 
 const columns = [
     {id:"To-Do", title:"To Do"}, 
@@ -165,6 +166,10 @@ const Kanban = ({sitePage}) => {
     const indicatePageLoad = () => {
         return isPending? <i className="fa fa-spinner" aria-hidden="true"></i> : undefined
     }
+
+    // keyboard shortcuts
+    useKeyboardShortcut("ArrowRight", () => handleDayNavigation("next-day"))
+    useKeyboardShortcut("ArrowLeft", () => handleDayNavigation("previous-day"))
 
     return (
         <div className="kanban-page">
