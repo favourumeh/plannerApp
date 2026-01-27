@@ -147,8 +147,15 @@ function App() {
         }
         useKeyboardShortcut("t", () => handleOpenEntityModal("task"))
         useKeyboardShortcut("o", () => handleOpenEntityModal("objective"))
-        useKeyboardShortcut("p", () => handleOpenEntityModal("project"))
+        // useKeyboardShortcut("p", () => handleOpenEntityModal("project"))
         useKeyboardShortcut("Escape", () => setIsModalOpen(false), false)
+
+
+        // open/close pages 
+    useKeyboardShortcut("h", () => setSitePage("view-homepage"))
+    useKeyboardShortcut("e", () => setSitePage("view-entity"))
+    useKeyboardShortcut("k", () => setSitePage("view-kanban"))
+    useKeyboardShortcut("p", () => setSitePage("view-planner"))
 
     // create global prop object
     const globalProps = {

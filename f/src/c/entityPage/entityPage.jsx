@@ -11,6 +11,7 @@ import ViewPage from "../toolbar/viewPage"
 import RefreshEntities from "../toolbar/refreshEntities"
 import { fetchUserEntityPage } from "../../fetch_entities"
 import Dropdown from "../dropdown"
+import { useKeyboardShortcut } from "../../customHooks/keyboardShortcuts.jsx"
 
 function EntityPage ({sitePage}) {
     if (sitePage != "view-entity") return null
@@ -59,6 +60,16 @@ function EntityPage ({sitePage}) {
     const indicatePageLoad = () => {
         return isPending? <i className="fa fa-spinner" aria-hidden="true"></i> : undefined
     }
+    // shortcuts
+        // nativigation between pages
+    useKeyboardShortcut("ArrowRight", onClickNextPage)
+    useKeyboardShortcut("ArrowLeft", onClickPrevPage)
+
+        // navigation between entity types
+    useKeyboardShortcut("1", () => {setEntityName("project")})
+    useKeyboardShortcut("2", () => {setEntityName("objective")})
+    useKeyboardShortcut("3", () => {setEntityName("task")})
+
     return (
         <div className="entity-page">
             <div className="entity-page-header"> 
