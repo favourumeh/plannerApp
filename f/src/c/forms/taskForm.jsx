@@ -42,7 +42,7 @@ function TaskForm ({form}) {
     })
 
     const onSubmitForm = (e) => {// call mutate function to create/update a task
-        e.preventDefault()
+        e?.preventDefault()
         createOrEditTaskMutation.mutate({
             action: form.split("-")[0], 
             entityName: "task", 
@@ -202,8 +202,8 @@ function TaskForm ({form}) {
     // clear all fields in the task form
     useKeyboardShortcut("c", () => handleClearAll(true))
     
-    //increate the duration estimate by 10min
-    const updateDuration = (currentValue, increase) => {
+    //increase/decrease the duration estimate by 10min
+    const updateDurationBy10 = (currentValue, increase) => {
         if (!Number.isInteger(currentValue)) {
             return currentValue
         } 
@@ -214,11 +214,21 @@ function TaskForm ({form}) {
     }
 
     const changeTaskDurationEstBy10 = (increase=true) => {
-        setCurrentTask( prev => ({...prev,durationEst:updateDuration(prev.durationEst, increase)}))
+        setCurrentTask( prev => ({...prev,durationEst:updateDurationBy10(prev.durationEst, increase)}))
     }
     useKeyboardShortcut("ArrowUp", () => changeTaskDurationEstBy10())
     useKeyboardShortcut("ArrowDown", () => changeTaskDurationEstBy10(false))
-    
+
+    // auto send form when alt+enter is pressed
+    const submitTaskShortcut = ()  => {
+        if (currentTask.status==="To-Do"){
+            onSubmitForm()
+            return
+        }
+        handleNotification("Only tasks with status 'To-Do' can be submitted via the keyboard shortcut Alt+Enter", "error")
+    }
+    useKeyboardShortcut("Enter", () => submitTaskShortcut())
+
     // Handle Form Input Validation
     const handleDisableFormSubmitBtn = () =>{ //disables the submit button when the form's input is invalid OR if form is waiting on the response from POST/PATCH request. 
         var disabled = false
