@@ -18,3 +18,9 @@ tasks:
     cmds:
       - pwsh -Command "Write-Host 'Starting development environment with MySQL...'"
       - pwsh -File ./runApp.ps1 -env dev -rdbms mysql
+
+  open-prod-mysql-db:
+    desc: Opens the dockerised MySQL database in production environment. Note you will be prompted for the db password (see ./b/.env). 
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - docker exec -it app-mysql mysql -u root -p planner_app_db
