@@ -38,7 +38,6 @@ def create_task() -> Tuple[Response, int]:
     start = content.get("start", None)
     finish = content.get("finish", None)
     is_recurring = content.get("isRecurring", False)
-    last_updated = datetime.now(tz=timezone('Europe/London'))
     was_paused = content.get("wasPaused", False)
     parent_task_id = content.get("parentTaskId", None)
     tag = content.get("tag", None)
@@ -94,7 +93,7 @@ def create_task() -> Tuple[Response, int]:
         task = Task(task_number=task_number, status=status, description=description, 
                     duration_est=duration_est, duration=duration, priority_score=priority_score, 
                     scheduled_start=scheduled_start, start=start, finish=finish,
-                    is_recurring=is_recurring, last_updated=last_updated,
+                    is_recurring=is_recurring,
                     was_paused=was_paused, parent_task_id=parent_task_id, tag=tag, objective_id=objective_id)
         db.session.add(task)
         db.session.commit()
@@ -282,7 +281,7 @@ def update_task(task_id: int) -> Tuple[Response, int]:
     task.finish = content.get("finish", task.finish)
     task.scheduled_start = content.get("scheduledStart", task.scheduled_start)
     task.is_recurring = content.get("isRecurring", task.is_recurring)
-    task.last_updated = datetime.now(tz=timezone('Europe/London'))
+    task.last_updated = datetime.now(tz=timezone('UTC'))
     task.was_paused = content.get("wasPaused", task.was_paused)
     task.tag = content.get("tag", task.tag)
     objective_id = content.get("objectiveId", task.objective_id)
@@ -366,7 +365,7 @@ def bulk_update_task_schedules():
                 resp_dict["issues"].append({"task-id": task_id, "error": f"Invalid date format for scheduledStart: {e}"})
                 continue
 
-            db_task.last_updated = datetime.now(tz=timezone('Europe/London'))
+            db_task.last_updated = datetime.now(tz=timezone('UTC'))
             updated_tasks.append(db_task)
 
         db.session.commit() 

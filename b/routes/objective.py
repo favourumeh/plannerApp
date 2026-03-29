@@ -34,7 +34,6 @@ def create_objective() -> Tuple[Response, int]:
     deadline: str|None = content.get("deadline", None)
     scheduled_start: str|None = content.get("scheduledStart", None)
     scheduled_finish: str|None = content.get("scheduledFinish", None) 
-    last_updated: datetime = datetime.now(tz=timezone('Europe/London'))
     tag: str = content.get("tag", None)
     project_id: int = content.get("projectId", None)
     user_id: int = session["userId"] 
@@ -73,7 +72,7 @@ def create_objective() -> Tuple[Response, int]:
 
     try:
         objective: Objective = Objective(objective_number=objective_number, status=status, type=type, title=title, description=description,
-                                         deadline=deadline, scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, last_updated=last_updated, 
+                                         deadline=deadline, scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, 
                                          tag=tag, project_id=project_id)
         db.session.add(objective)
         db.session.commit()
@@ -239,7 +238,7 @@ def update_objective(objective_id: int) -> Tuple[Response, int]:
     deadline = content.get("deadline", objective.deadline)
     scheduled_start: str|None = content.get("scheduledStart", objective.scheduled_start)
     scheduled_finish: str|None = content.get("scheduledFinish", objective.scheduled_finish) 
-    objective.last_updated = datetime.now(tz=timezone('Europe/London'))
+    objective.last_updated = datetime.now(tz=timezone('UTC'))
     objective.tag = content.get("tag", objective.tag)
     project_id = content.get("projectId", objective.project_id)
     

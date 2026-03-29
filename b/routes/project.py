@@ -37,7 +37,6 @@ def create_project() -> Tuple[Response, int]:
     deadline: str = content.get("deadline", None)
     scheduled_start: str|None = content.get("scheduledStart", None)
     scheduled_finish: str|None = content.get("scheduledFinish", None) 
-    last_updated: datetime = datetime.now(tz=timezone('Europe/London'))
     tag: str = content.get("tag", None)
     user_id: int = session["userId"] 
     
@@ -67,7 +66,7 @@ def create_project() -> Tuple[Response, int]:
 
     try:
         project = Project(project_number=project_number, status=status, title=title, description=description, deadline=deadline, 
-                          scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, last_updated=last_updated, tag=tag, user_id=user_id)
+                          scheduled_start=scheduled_start, scheduled_finish=scheduled_finish, tag=tag, user_id=user_id)
         db.session.add(project)
         project_id = Project.query.filter_by(title=title, user_id=user_id).first().id
         objective_desc = "Stores all project tasks that do not belong to an objective"
@@ -192,7 +191,7 @@ def update_project(project_id: int) -> Tuple[Response, int]:
     deadline: str|None = content.get("deadline", project.deadline)
     scheduled_start: str|None = content.get("scheduledStart", project.scheduled_start)
     scheduled_finish: str|None = content.get("scheduledFinish", project.scheduled_finish) 
-    project.last_updated = datetime.now(tz=timezone('Europe/London'))
+    project.last_updated = datetime.now(tz=timezone('UTC'))
     project.tag = content.get("tag", project.tag)
 
     if not project.title:
